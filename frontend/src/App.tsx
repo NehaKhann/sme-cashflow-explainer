@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import type { AnalysisData, ApiHealthStatus } from "./types/api";
-import { checkHealth, analyzeTransactions } from "./api/client";
+import type { AnalysisData, ApiHealthStatus, ReportSummary } from "./types/api";
+import { checkHealth, analyzeTransactions, fetchReports, fetchReport, deleteReportApi, clearAllReportsApi } from "./api/client";
 import type { Page } from "./components/Sidebar";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
@@ -8,6 +8,7 @@ import { IntakeSection } from "./components/IntakeSection";
 import { LoadingCard } from "./components/LoadingCard";
 import { DashboardHome } from "./components/DashboardHome";
 import { ResultsSection } from "./components/ResultsSection";
+import { ReportsSection } from "./components/ReportsSection";
 import "./App.css";
 
 const INITIAL_STATUS: ApiHealthStatus = {
@@ -28,6 +29,7 @@ export default function App() {
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<AnalysisData | null>(null);
+  const [reports, setReports] = useState<ReportSummary[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const doHealthCheck = useCallback(async () => {
@@ -37,17 +39,56 @@ export default function App() {
 
   useEffect(() => { doHealthCheck(); }, [doHealthCheck]);
 
+  async function refreshReports() {
+    try {
+      const list = await fetchReports(apiBase);
+      setReports(list);
+    } catch {
+      // silently fail
+    }
+  }
+
   async function handleAnalyze(formData: FormData) {
     setAnalyzing(true);
     try {
       const data = await analyzeTransactions(apiBase, formData);
       setResults(data);
       setPage("dashboard");
+      await refreshReports();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Could not reach the API.";
       alert(msg);
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  async function handleOpenReport(id: string) {
+    try {
+      const detail = await fetchReport(apiBase, id);
+      setResults(detail.raw_data);
+      setPage("dashboard");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not load report.";
+      alert(msg);
+    }
+  }
+
+  async function handleDeleteReport(id: string) {
+    try {
+      await deleteReportApi(apiBase, id);
+      await refreshReports();
+    } catch {
+      // silently fail
+    }
+  }
+
+  async function handleClearAll() {
+    try {
+      await clearAllReportsApi(apiBase);
+      await refreshReports();
+    } catch {
+      // silently fail
     }
   }
 
@@ -92,17 +133,12 @@ export default function App() {
           ) : page === "upload" ? (
             <IntakeSection onAnalyze={handleAnalyze} disabled={analyzing} />
           ) : (
-            <div className="card" style={{ padding: "48px 24px", textAlign: "center" }}>
-              <div className="upload-icon" style={{ margin: "0 auto 20px" }}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M12 20V10" /><path d="M18 20V4" /><path d="M6 20v-4" />
-                </svg>
-              </div>
-              <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Reports</h2>
-              <p style={{ color: "var(--text-muted)", fontSize: 13, maxWidth: 400, margin: "0 auto", lineHeight: 1.6 }}>
-                Analysis history is not yet persisted. This will show past underwriting memos once a database is connected.
-              </p>
-            </div>
+            <ReportsSection
+              reports={reports}
+              onOpen={handleOpenReport}
+              onDelete={handleDeleteReport}
+              onClearAll={handleClearAll}
+            />
           )}
         </div>
       </main>

@@ -10,6 +10,7 @@ class RiskFlagResponse(BaseModel):
 
 
 class AnalysisResponse(BaseModel):
+    report_id: str
     start_date: str
     end_date: str
     num_months: int
@@ -45,12 +46,13 @@ class AnalysisResponse(BaseModel):
     narrative: str
 
     @classmethod
-    def build(cls, features: CashFlowFeatures, risk: RiskAssessment, narrative: str) -> "AnalysisResponse":
+    def build(cls, features: CashFlowFeatures, risk: RiskAssessment, narrative: str, report_id: str) -> "AnalysisResponse":
         data = {k: getattr(features, k) for k in features.__dataclass_fields__}
         data["risk_score"] = risk.overall_score
         data["risk_band"] = risk.overall_band
         data["risk_flags"] = [RiskFlagResponse(severity=f.severity, code=f.code, message=f.message) for f in risk.flags]
         data["narrative"] = narrative
+        data["report_id"] = report_id
         return cls(**data)
 
 

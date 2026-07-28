@@ -1,9 +1,11 @@
 # Ledger — SME Cash-Flow Underwriting Platform
 
-[![Tests](https://img.shields.io/badge/tests-14%20passing-brightgreen)](#)
+[![Tests](https://img.shields.io/badge/tests-15%20passing-brightgreen)](#)
 [![Python](https://img.shields.io/badge/python-3.11+-blue)]()
 [![React](https://img.shields.io/badge/react-19-61DAFB)]()
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)]()
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)]()
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)]()
 
 **Turn a raw bank transaction export into an auditable cash-flow risk memo in seconds.**
 
@@ -24,35 +26,92 @@ The narrative layer can only explain pre-computed figures. No hallucinations, no
 ## Architecture
 
 ```
+├── docker-compose.yml     Orchestrates PostgreSQL + backend + frontend
+│
 ├── frontend/              React 19 + TypeScript + Vite
 │   ├── src/
 │   │   ├── components/    UI components (Sidebar, Intake, Results, Chart…)
-│   │   ├── api/           API client (health check, analyze)
+│   │   ├── api/           API client (health check, analyze, reports CRUD)
 │   │   ├── types/         TypeScript interfaces matching the backend schema
 │   │   └── data/          Built-in sample dataset
-│   └── dist/              Static build output (for deployment)
+│   └── Dockerfile.dev     Vite dev server container
 │
 ├── backend/               FastAPI (Python 3.11+)
+│   ├── Dockerfile         Production image
+│   ├── docker-entrypoint.sh  Waits for DB, runs migrations, starts uvicorn
 │   ├── app/
-│   │   ├── routers/       POST /api/analyze endpoint
+│   │   ├── database.py    Async SQLAlchemy engine + session
+│   │   ├── db_models.py   Report & Transaction ORM models (PostgreSQL)
+│   │   ├── routers/
+│   │   │   ├── analysis.py   POST /api/analyze — saves to DB
+│   │   │   └── reports.py    CRUD for persisted analysis reports
 │   │   ├── services/
 │   │   │   ├── feature_extraction.py   Pandas computations — every metric
 │   │   │   ├── risk_scoring.py         Deterministic rules, fully unit-tested
 │   │   │   └── narrative_generator.py  LLM (Groq) or template fallback
 │   │   ├── models.py      Shared domain models
 │   │   └── schemas.py     Pydantic API response models
-│   └── tests/             14 tests covering extraction, scoring, and API
+│   └── tests/             15+ tests covering extraction, scoring, API, and reports
 │
 ├── sample_data/           Synthetic data generator
 └── render.yaml            Render.com deploy config
 ```
 
-## Quick start
+## Quick start — Docker (recommended)
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- A free [Groq API key](https://console.groq.com) _(optional — works without one)_
+
+### 1. Start all services
+
+```bash
+docker compose up -d
+
+# Optional: pass a Groq API key for AI-generated narratives
+# GROQ_API_KEY="gsk_xxx" docker compose up -d
+```
+
+This starts three containers:
+
+| Service | URL | Description |
+|---|---|---|
+| **PostgreSQL** | `localhost:5432` | Persistent storage for transactions and reports |
+| **Backend** | `localhost:8000` | FastAPI — auto-creates tables on startup |
+| **Frontend** | `localhost:5173` | Vite dev server with live reload |
+
+### 2. Run it
+
+1. Open `http://localhost:5173`
+2. Click **"Use sample data instead"** (or drop a CSV)
+3. Click **"Analyze cash flow"**
+4. Review the metrics, risk flags, chart, and narrative
+5. Switch to the **Reports** page to see all saved analyses
+
+### 3. Run tests
+
+```bash
+cd backend
+python -m pytest tests/ -v
+```
+
+15+ tests covering feature extraction edge cases, risk scoring rules, the API, and report CRUD.
+
+### 4. Stop
+
+```bash
+docker compose down        # stops containers
+docker compose down -v     # stops + deletes the database volume
+```
+
+## Quick start — native (no Docker)
 
 ### Prerequisites
 
 - **Python 3.11+** and **Node.js 18+**
-- A free [Groq API key](https://console.groq.com) _(optional — works without one)_
+- A running **PostgreSQL 16** instance (or use [Neon](https://neon.tech) free tier)
+- A free [Groq API key](https://console.groq.com) _(optional)_
 
 ### 1. Backend
 
@@ -66,11 +125,15 @@ python -m venv .venv
 # source .venv/bin/activate
 
 pip install -r requirements.txt
+
+# Point to your PostgreSQL (adjust user/password/host)
+$env:DATABASE_URL="postgresql+asyncpg://cashflow:cashflow_dev@localhost:5432/cashflow"
+
 uvicorn app.main:app --reload --port 8000
 ```
 
-The API runs at `http://localhost:8000`.  
-_Without a `GROQ_API_KEY`, it automatically uses a deterministic template narrative — no external dependencies needed._
+The API auto-creates tables on startup.  
+_Without a `GROQ_API_KEY`, it uses a deterministic template narrative._
 
 ### 2. Frontend
 
@@ -80,22 +143,14 @@ npm install
 npm run dev
 ```
 
-Opens at `http://localhost:5173`. The frontend defaults to `http://localhost:8000` for the API — adjust via the **API Config** button in the top bar if needed.
+Opens at `http://localhost:5173` — adjust the API URL via the **API Config** button in the top bar if needed.
 
-### 3. Run it
-
-1. Click **"Use sample data instead"** (or drop a CSV)
-2. Click **"Analyze cash flow"**
-3. Review the metrics, risk flags, chart, and narrative
-
-### 4. Run tests
+### 3. Run tests
 
 ```bash
 cd backend
 python -m pytest tests/ -v
 ```
-
-14 tests covering feature extraction edge cases, risk scoring rules, and the API.
 
 ## CSV format
 
@@ -112,6 +167,12 @@ Ledger uses the [Groq](https://console.groq.com) free tier to generate natural-l
 
 ### Set your API key
 
+**Docker:**
+```bash
+GROQ_API_KEY="gsk_xxx" docker compose up -d
+```
+
+**Native:**
 ```powershell
 # Windows (PowerShell)
 $env:GROQ_API_KEY="gsk_your_api_key_here"
@@ -141,7 +202,11 @@ Then restart the backend. The key is session-scoped — set it again after closi
 
 ### Database
 
-Not required — the MVP is stateless request/response. For persistence, [Neon's free Postgres](https://neon.tech) is the natural next step.
+**Default:** PostgreSQL 16 via Docker Compose (persistent volume, auto-created tables).
+
+**Alternative:** Any PostgreSQL 16 instance — set `DATABASE_URL` env var. The backend auto-creates tables on startup using SQLAlchemy's `create_all`.
+
+_For local dev without Docker, [Neon's free Postgres](https://neon.tech) or a local `pg` install both work. Set `DATABASE_URL` to `postgresql+asyncpg://user:pass@host:5432/dbname`._
 
 ## Sample data
 
@@ -158,14 +223,15 @@ Generates a synthetic 12-month transaction CSV with an engineered customer-conce
 |---|---|
 | Frontend | React 19, TypeScript, Vite 6 |
 | Backend | Python 3.12, FastAPI, Pydantic v2 |
+| Database | PostgreSQL 16, SQLAlchemy 2.0 (async), asyncpg |
 | Data | Pandas, NumPy |
 | Narrative | Groq API (Llama 3.3 70B) or deterministic template |
-| Testing | pytest, httpx (30%+ coverage on core logic) |
-| Deploy | Docker, Render, Vercel / Netlify |
+| Testing | pytest, pytest-asyncio, httpx (30%+ coverage on core logic) |
+| Deploy | Docker Compose, Dockerfiles, Render, Vercel / Netlify |
 
 ## Roadmap
 
-- [ ] Analysis history per business (Neon Postgres)
+- [x] Analysis history with PostgreSQL persistence
 - [ ] PDF export of the memo
 - [ ] Multi-file comparison (quarter-over-quarter)
 - [ ] Additional bank export format support

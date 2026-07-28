@@ -44,3 +44,26 @@ export interface ApiHealthStatus {
   label: string;
   className: string;
 }
+
+export interface StoredReport {
+  id: string;
+  createdAt: string;
+  filename: string;
+  data: AnalysisData;
+}
+
+export interface ReportSummary {
+  id: string;
+  created_at: string;
+  filename: string;
+  start_date: string;
+  end_date: string;
+  num_months: number;
+  net_cash_flow: number;
+  risk_score: number;
+  risk_band: string;
+}
+
+export interface ReportDetail extends ReportSummary {
+  raw_data: AnalysisData;
+}
