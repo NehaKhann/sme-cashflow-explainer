@@ -3,12 +3,12 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
 from ..db_models import Report, Transaction, User
-from ..auth import get_current_user
+from ..auth import get_optional_user
 from ..services.feature_extraction import load_transactions, extract_features
 from ..services.risk_scoring import assess_risk
 from ..services.narrative_generator import generate_narrative
@@ -25,8 +25,9 @@ MAX_FILE_SIZE_MB = 5
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_transactions(
     file: UploadFile = File(...),
+    currency: str = Form("USD"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
 ):
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
@@ -49,34 +50,38 @@ async def analyze_transactions(
 
     now = datetime.now(timezone.utc)
     report_id = uuid.uuid4()
+    is_demo = current_user is None
 
-    raw_data = AnalysisResponse.build(features, risk, narrative, str(report_id)).model_dump()
+    raw_data = AnalysisResponse.build(features, risk, narrative, str(report_id), currency, is_demo).model_dump()
 
-    report = Report(
-        id=report_id,
-        user_id=current_user.id,
-        created_at=now,
-        filename=file.filename,
-        start_date=features.start_date,
-        end_date=features.end_date,
-        num_months=features.num_months,
-        net_cash_flow=features.net_cash_flow,
-        risk_score=risk.overall_score,
-        risk_band=risk.overall_band,
-        raw_data=raw_data,
-    )
-    db.add(report)
-
-    for _, row in df.iterrows():
-        txn = Transaction(
-            report_id=report_id,
-            date=row["date"].to_pydatetime().date(),
-            amount=float(row["amount"]),
-            counterparty=str(row["counterparty"]),
-            category=str(row.get("category", "uncategorized")),
+    if current_user:
+        report = Report(
+            id=report_id,
+            user_id=current_user.id,
+            created_at=now,
+            filename=file.filename,
+            start_date=features.start_date,
+            end_date=features.end_date,
+            num_months=features.num_months,
+            net_cash_flow=features.net_cash_flow,
+            risk_score=risk.overall_score,
+            risk_band=risk.overall_band,
+            raw_data=raw_data,
         )
-        db.add(txn)
+        db.add(report)
 
-    await db.commit()
+        for _, row in df.iterrows():
+            txn = Transaction(
+                report_id=report_id,
+                date=row["date"].to_pydatetime().date(),
+                amount=float(row["amount"]),
+                counterparty=str(row["counterparty"]),
+                category=str(row.get("category", "uncategorized")),
+            )
+            db.add(txn)
 
-    return AnalysisResponse.build(features, risk, narrative, str(report_id))
+        await db.commit()
+    else:
+        report_id = "demo"
+
+    return AnalysisResponse.build(features, risk, narrative, str(report_id), currency, is_demo)

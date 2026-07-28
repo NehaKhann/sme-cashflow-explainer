@@ -1,12 +1,27 @@
 import { useRef, useState, type FormEvent } from "react";
 import { SAMPLE_CSV } from "../data/sample";
 
+const CURRENCIES = [
+  { code: "USD", label: "USD ($)" },
+  { code: "EUR", label: "EUR (€)" },
+  { code: "GBP", label: "GBP (£)" },
+  { code: "JPY", label: "JPY (¥)" },
+  { code: "CAD", label: "CAD (C$)" },
+  { code: "AUD", label: "AUD (A$)" },
+  { code: "CHF", label: "CHF (Fr)" },
+  { code: "INR", label: "INR (₹)" },
+  { code: "BRL", label: "BRL (R$)" },
+  { code: "MXN", label: "MXN (MX$)" },
+];
+
 interface IntakeSectionProps {
   onAnalyze: (formData: FormData) => void;
   disabled: boolean;
+  currency: string;
+  onCurrencyChange: (currency: string) => void;
 }
 
-export function IntakeSection({ onAnalyze, disabled }: IntakeSectionProps) {
+export function IntakeSection({ onAnalyze, disabled, currency, onCurrencyChange }: IntakeSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [sampleMode, setSampleMode] = useState(false);
@@ -83,6 +98,15 @@ export function IntakeSection({ onAnalyze, disabled }: IntakeSectionProps) {
               <span className="dropzone-action">Choose a CSV file</span>
               <span className="dropzone-hint">or drag and drop here</span>
             </div>
+          </div>
+
+          <div className="currency-selector">
+            <label htmlFor="currency">Currency</label>
+            <select id="currency" value={currency} onChange={(e) => onCurrencyChange(e.target.value)}>
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.label}</option>
+              ))}
+            </select>
           </div>
 
           <div className="upload-options">

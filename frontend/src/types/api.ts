@@ -37,6 +37,9 @@ export interface AnalysisData {
   risk_band: "low" | "medium" | "high";
   risk_flags: RiskFlagData[];
   narrative: string;
+  currency: string;
+  demo: boolean;
+  report_id: string;
 }
 
 export interface ApiHealthStatus {
@@ -78,4 +81,18 @@ export interface ReportSummary {
 
 export interface ReportDetail extends ReportSummary {
   raw_data: AnalysisData;
+}
+
+export interface TransactionData {
+  id: string;
+  date: string;
+  amount: number;
+  counterparty: string;
+  category: string;
+}
+
+export interface CompareResult {
+  report_a: AnalysisData;
+  report_b: AnalysisData;
+  deltas: Record<string, number>;
 }

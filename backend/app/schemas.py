@@ -44,16 +44,38 @@ class AnalysisResponse(BaseModel):
     risk_flags: list[RiskFlagResponse]
 
     narrative: str
+    currency: str = "USD"
+    demo: bool = False
 
     @classmethod
-    def build(cls, features: CashFlowFeatures, risk: RiskAssessment, narrative: str, report_id: str) -> "AnalysisResponse":
+    def build(cls, features: CashFlowFeatures, risk: RiskAssessment, narrative: str, report_id: str, currency: str = "USD", demo: bool = False) -> "AnalysisResponse":
         data = {k: getattr(features, k) for k in features.__dataclass_fields__}
         data["risk_score"] = risk.overall_score
         data["risk_band"] = risk.overall_band
         data["risk_flags"] = [RiskFlagResponse(severity=f.severity, code=f.code, message=f.message) for f in risk.flags]
         data["narrative"] = narrative
         data["report_id"] = report_id
+        data["currency"] = currency
+        data["demo"] = demo
         return cls(**data)
+
+
+class TransactionResponse(BaseModel):
+    id: str
+    date: str
+    amount: float
+    counterparty: str
+    category: str
+
+
+class CompareRequest(BaseModel):
+    report_ids: list[str]
+
+
+class CompareResponse(BaseModel):
+    report_a: AnalysisResponse
+    report_b: AnalysisResponse
+    deltas: dict
 
 
 class ErrorResponse(BaseModel):

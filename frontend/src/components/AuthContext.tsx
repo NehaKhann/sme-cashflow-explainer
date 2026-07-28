@@ -5,9 +5,12 @@ import { getMeApi, loginApi, signupApi } from "../api/client";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isDemo: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => void;
+  enterDemo: () => void;
+  exitDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -15,6 +18,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ apiBase, children }: { apiBase: string; children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(() => localStorage.getItem("demo_mode") === "true");
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -35,6 +39,8 @@ export function AuthProvider({ apiBase, children }: { apiBase: string; children:
     const res = await loginApi(apiBase, email, password);
     localStorage.setItem("access_token", res.access_token);
     localStorage.setItem("refresh_token", res.refresh_token);
+    localStorage.removeItem("demo_mode");
+    setIsDemo(false);
     setUser(res.user);
   }, [apiBase]);
 
@@ -42,17 +48,31 @@ export function AuthProvider({ apiBase, children }: { apiBase: string; children:
     const res = await signupApi(apiBase, email, password, displayName);
     localStorage.setItem("access_token", res.access_token);
     localStorage.setItem("refresh_token", res.refresh_token);
+    localStorage.removeItem("demo_mode");
+    setIsDemo(false);
     setUser(res.user);
   }, [apiBase]);
 
   const logout = useCallback(() => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("demo_mode");
     setUser(null);
+    setIsDemo(false);
+  }, []);
+
+  const enterDemo = useCallback(() => {
+    localStorage.setItem("demo_mode", "true");
+    setIsDemo(true);
+  }, []);
+
+  const exitDemo = useCallback(() => {
+    localStorage.removeItem("demo_mode");
+    setIsDemo(false);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, isDemo, login, signup, logout, enterDemo, exitDemo }}>
       {children}
     </AuthContext.Provider>
   );

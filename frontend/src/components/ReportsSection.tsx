@@ -17,9 +17,10 @@ interface ReportsSectionProps {
   onOpen: (id: string) => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;
+  onCompare?: () => void;
 }
 
-export function ReportsSection({ reports, onOpen, onDelete, onClearAll }: ReportsSectionProps) {
+export function ReportsSection({ reports, onOpen, onDelete, onClearAll, onCompare }: ReportsSectionProps) {
   if (reports.length === 0) {
     return (
       <div className="card" style={{ padding: "48px 24px", textAlign: "center" }}>
@@ -38,9 +39,14 @@ export function ReportsSection({ reports, onOpen, onDelete, onClearAll }: Report
     <div className="reports-section">
       <div className="reports-toolbar">
         <span className="reports-count">{reports.length} report{reports.length !== 1 ? "s" : ""}</span>
-        <button className="btn-link" onClick={onClearAll} style={{ color: "var(--danger)" }}>
-          Clear all
-        </button>
+        <div className="reports-toolbar-right">
+          {onCompare && reports.length >= 2 && (
+            <button className="btn-link" onClick={onCompare}>Compare reports</button>
+          )}
+          <button className="btn-link" onClick={onClearAll} style={{ color: "var(--danger)" }}>
+            Clear all
+          </button>
+        </div>
       </div>
 
       <div className="reports-list">

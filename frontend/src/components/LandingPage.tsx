@@ -3,9 +3,10 @@ import { TrendingUpIcon, AlertIcon, BarChartIcon, UploadIcon, UsersIcon, ChartIc
 interface LandingPageProps {
   onGetStarted: () => void;
   onSignIn: () => void;
+  onTryDemo: () => void;
 }
 
-export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
+export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPageProps) {
   return (
     <div className="landing">
       <header className="landing-header">
@@ -17,6 +18,7 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
           <nav className="landing-nav">
             <a href="#features">Features</a>
             <a href="#how-it-works">How it works</a>
+            <button className="btn-ghost" onClick={onTryDemo}>Try demo</button>
             <button className="btn-ghost" onClick={onSignIn}>Sign in</button>
             <button className="btn-primary" onClick={onGetStarted}>Get started</button>
           </nav>
@@ -38,6 +40,9 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
           <div className="landing-hero-actions">
             <button className="btn-primary btn-lg" onClick={onGetStarted}>
               Start analyzing
+            </button>
+            <button className="btn-secondary btn-lg" onClick={onTryDemo}>
+              Try demo
             </button>
             <button className="btn-secondary btn-lg" onClick={onSignIn}>
               Sign in
@@ -147,6 +152,8 @@ export function LandingPage({ onGetStarted, onSignIn }: LandingPageProps) {
           </button>
           <p className="landing-cta-sub">
             Already have an account? <button className="btn-link" onClick={onSignIn}>Sign in</button>
+            {" / "}
+            <button className="btn-link" onClick={onTryDemo}>Try demo</button>
           </p>
         </div>
       </section>

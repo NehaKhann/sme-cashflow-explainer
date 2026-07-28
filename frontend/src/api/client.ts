@@ -1,4 +1,4 @@
-import type { AnalysisData, ApiHealthStatus, ReportSummary, ReportDetail, AuthResponse, User } from "../types/api";
+import type { AnalysisData, ApiHealthStatus, ReportSummary, ReportDetail, AuthResponse, User, TransactionData, CompareResult } from "../types/api";
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("access_token");
@@ -43,8 +43,10 @@ export async function checkHealth(apiBase: string): Promise<ApiHealthStatus> {
 export async function analyzeTransactions(
   apiBase: string,
   formData: FormData,
-): Promise<AnalysisData & { report_id: string }> {
-  return apiFetch(apiBase, "/api/analyze", { method: "POST", body: formData }) as Promise<AnalysisData & { report_id: string }>;
+  currency: string = "USD",
+): Promise<AnalysisData> {
+  formData.append("currency", currency);
+  return apiFetch(apiBase, "/api/analyze", { method: "POST", body: formData }) as Promise<AnalysisData>;
 }
 
 export async function fetchReports(apiBase: string): Promise<ReportSummary[]> {
@@ -79,4 +81,15 @@ export async function loginApi(apiBase: string, email: string, password: string)
 
 export async function getMeApi(apiBase: string): Promise<User> {
   return apiFetch(apiBase, "/api/auth/me") as Promise<User>;
+}
+
+export async function fetchTransactions(apiBase: string, reportId: string): Promise<TransactionData[]> {
+  return apiFetch(apiBase, `/api/reports/${reportId}/transactions`) as Promise<TransactionData[]>;
+}
+
+export async function compareReportsApi(apiBase: string, reportIds: [string, string]): Promise<CompareResult> {
+  return apiFetch(apiBase, "/api/reports/compare", {
+    method: "POST",
+    body: JSON.stringify({ report_ids: reportIds }),
+  }) as Promise<CompareResult>;
 }

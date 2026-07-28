@@ -30,8 +30,8 @@ The narrative layer can only explain pre-computed figures. No hallucinations, no
 │
 ├── frontend/              React 19 + TypeScript + Vite
 │   ├── src/
-│   │   ├── components/    UI components (Sidebar, Intake, Results, Chart…)
-│   │   ├── api/           API client (health check, analyze, reports CRUD)
+│   │   ├── components/    UI components (Sidebar, Intake, Results, Chart, Compare…)
+│   │   ├── api/           API client (health, analyze, auth, reports, compare)
 │   │   ├── types/         TypeScript interfaces matching the backend schema
 │   │   └── data/          Built-in sample dataset
 │   └── Dockerfile.dev     Vite dev server container
@@ -41,17 +41,19 @@ The narrative layer can only explain pre-computed figures. No hallucinations, no
 │   ├── docker-entrypoint.sh  Waits for DB, runs migrations, starts uvicorn
 │   ├── app/
 │   │   ├── database.py    Async SQLAlchemy engine + session
-│   │   ├── db_models.py   Report & Transaction ORM models (PostgreSQL)
+│   │   ├── db_models.py   User, Report & Transaction ORM models (PostgreSQL)
+│   │   ├── auth.py        JWT creation/verification, password hashing, user deps
 │   │   ├── routers/
-│   │   │   ├── analysis.py   POST /api/analyze — saves to DB
-│   │   │   └── reports.py    CRUD for persisted analysis reports
+│   │   │   ├── auth.py       POST /signup, /login, GET /me
+│   │   │   ├── analysis.py   POST /api/analyze — saves to DB (or returns demo)
+│   │   │   └── reports.py    CRUD for reports + compare + transactions endpoints
 │   │   ├── services/
 │   │   │   ├── feature_extraction.py   Pandas computations — every metric
 │   │   │   ├── risk_scoring.py         Deterministic rules, fully unit-tested
 │   │   │   └── narrative_generator.py  LLM (Groq) or template fallback
 │   │   ├── models.py      Shared domain models
 │   │   └── schemas.py     Pydantic API response models
-│   └── tests/             15+ tests covering extraction, scoring, API, and reports
+│   └── tests/             pytest-asyncio tests with in-memory SQLite
 │
 ├── sample_data/           Synthetic data generator
 └── render.yaml            Render.com deploy config
@@ -101,13 +103,12 @@ This starts three containers:
 ### 3. Run it
 
 1. Open `http://localhost:5173` — you'll see the **landing page** describing the platform
-2. Click **"Get started"** or **"Sign in"** to reach the login form
-3. **First time?** Click "Create one" to sign up — you'll be signed in automatically
-4. Returning users just **sign in** to see their history
-4. Click **"Use sample data instead"** (or drop a CSV)
-5. Click **"Analyze cash flow"**
-6. Review the metrics, risk flags, chart, and narrative
-7. Switch to the **Reports** page to see all saved analyses — data is scoped to your account
+2. **New user?** Click **"Get started"** to create an account, or **"Try demo"** to explore without signing up
+3. Returning users click **"Sign in"** to access their history
+4. Click **"Use sample data instead"** (or drop a CSV), optionally select a **currency**, then click **"Analyze cash flow"**
+5. Review the metrics, risk flags, chart, narrative, and **transaction table**
+6. **Export as PDF** using the button in the results header or footer
+7. Switch to the **Reports** page to see all saved analyses or click **"Compare reports"** to diff two periods side-by-side
 
 ### 4. Run tests
 
@@ -233,9 +234,10 @@ Set these in your `.env` (both Docker and native):
 
 ### Frontend flow
 
-- Unauthenticated users see a full-page sign-in / sign-up form
+- Unauthenticated users see the **landing page** with options to sign in, sign up, or **try a demo** (no account needed)
+- **Demo mode** runs analysis in-memory without saving to the database — results show a banner prompting sign-up
 - Tokens are stored in `localStorage` and attached to every API request via `Authorization: Bearer <token>`
-- The sidebar shows the user's email and a **Sign out** button
+- The sidebar shows the user's email, a **Sign out** button, and a **dark mode toggle** (persisted across sessions)
 - On page reload, the stored token is validated against `GET /api/auth/me`
 
 ## Deploying
@@ -262,6 +264,26 @@ Set these in your `.env` (both Docker and native):
 **Alternative:** Any PostgreSQL 16 instance — set `DATABASE_URL` env var. The backend auto-creates tables on startup using SQLAlchemy's `create_all`.
 
 _For local dev without Docker, [Neon's free Postgres](https://neon.tech) or a local `pg` install both work. Set `DATABASE_URL` to `postgresql+asyncpg://user:pass@host:5432/dbname`._
+
+## Features
+
+### Dark mode
+Toggle dark mode from the sidebar. Preference is persisted in `localStorage` and applied immediately via a `.dark-mode` class on `<html>`.
+
+### Demo mode
+Click **"Try demo"** on the landing page to explore the platform without creating an account. Demo analyses are processed in-memory (no database writes) and results show a banner prompting sign-up to save.
+
+### Transaction table
+After analysis, click **"Show transactions"** in the results section to view all parsed transactions in a sortable table. Columns: date, amount, counterparty, category.
+
+### Multi-currency
+Select a currency from the dropdown on the upload page (USD, EUR, GBP, JPY, CAD, AUD, CHF, INR, BRL, MXN). All monetary values in the memo use the selected currency formatting.
+
+### PDF export
+Click the **PDF** button in the results header or **Export PDF** in the footer to generate an A4 PDF of the full underwriting memo via `jsPDF` + `html2canvas`.
+
+### Compare reports
+From the **Reports** page, click **"Compare reports"** (visible when you have two or more saved reports). Select two reports to see a side-by-side comparison of key metrics with deltas.
 
 ## Sample data
 
@@ -290,9 +312,15 @@ Generates a synthetic 12-month transaction CSV with an engineered customer-conce
 - [x] Analysis history with PostgreSQL persistence
 - [x] User authentication (signup / login / JWT)
 - [x] Per-user data isolation
-- [ ] PDF export of the memo
-- [ ] Multi-file comparison (quarter-over-quarter)
+- [x] PDF export of the memo
+- [x] Multi-file comparison (quarter-over-quarter)
+- [x] Dark mode
+- [x] Transaction table view
+- [x] Demo / sandbox mode (no account required)
+- [x] Multi-currency support
 - [ ] Additional bank export format support
+- [ ] Recurring transaction detection
+- [ ] Cohort trend view (3+ periods on a single chart)
 
 ---
 
