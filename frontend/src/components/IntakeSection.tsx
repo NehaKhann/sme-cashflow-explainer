@@ -97,7 +97,7 @@ export function IntakeSection({ onAnalyze, disabled }: IntakeSectionProps) {
 
           <button
             type="submit"
-            className="btn btn-primary"
+            className="btn btn-primary btn-block"
             disabled={!ready || disabled}
             onClick={handleSubmit}
           >

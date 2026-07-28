@@ -40,7 +40,7 @@ export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
           </label>
           {error && <div className="auth-error">{error}</div>}
-          <button type="submit" className="btn-primary" disabled={busy} style={{ width: "100%" }}>
+          <button type="submit" className="btn-primary btn-block" disabled={busy}>
             {busy ? "Signing in\u2026" : "Sign in"}
           </button>
         </form>
@@ -98,7 +98,7 @@ export function SignupPage({ onSwitch }: { onSwitch: () => void }) {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
           </label>
           {error && <div className="auth-error">{error}</div>}
-          <button type="submit" className="btn-primary" disabled={busy} style={{ width: "100%" }}>
+          <button type="submit" className="btn-primary btn-block" disabled={busy}>
             {busy ? "Creating account\u2026" : "Create account"}
           </button>
         </form>

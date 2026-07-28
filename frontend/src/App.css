@@ -430,14 +430,26 @@ body {
 .btn svg { flex-shrink: 0; }
 
 .btn-primary {
-  width: 100%;
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-  padding: 12px;
+  padding: 10px 20px;
 }
 .btn-primary:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
 .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-block { width: 100%; }
+
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  transition: color var(--transition);
+}
+.btn-ghost:hover { color: #fff; }
 
 .btn-secondary {
   background: var(--card-bg);
@@ -1144,7 +1156,7 @@ body {
   font-weight: 600;
 }
 
-.btn-secondary {
+.landing .btn-secondary {
   background: rgba(255,255,255,0.06);
   color: #fff;
   border: 1px solid rgba(255,255,255,0.1);
@@ -1155,7 +1167,7 @@ body {
   cursor: pointer;
   transition: all var(--transition);
 }
-.btn-secondary:hover {
+.landing .btn-secondary:hover {
   background: rgba(255,255,255,0.1);
   border-color: rgba(255,255,255,0.2);
 }
@@ -1216,14 +1228,14 @@ body {
   gap: 20px;
 }
 
-.feature-card {
+.landing .feature-card {
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: var(--radius);
   padding: 28px;
   transition: all var(--transition);
 }
-.feature-card:hover {
+.landing .feature-card:hover {
   background: rgba(255,255,255,0.05);
   border-color: rgba(255,255,255,0.1);
   transform: translateY(-2px);
@@ -1239,13 +1251,13 @@ body {
   margin-bottom: 16px;
 }
 
-.feature-card h3 {
+.landing .feature-card h3 {
   font-size: 15px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
-.feature-card p {
+.landing .feature-card p {
   font-size: 13px;
   line-height: 1.6;
   color: var(--text-light);

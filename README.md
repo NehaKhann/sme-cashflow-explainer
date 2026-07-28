@@ -88,6 +88,8 @@ Docker Compose auto-loads `.env` from the project root — no extra flags needed
 docker compose up -d
 ```
 
+> **After pulling new code:** run `docker compose build frontend` to rebuild the frontend image, then `docker compose up -d` to restart with the latest changes.
+
 This starts three containers:
 
 | Service | URL | Description |
@@ -98,9 +100,10 @@ This starts three containers:
 
 ### 3. Run it
 
-1. Open `http://localhost:5173`
-2. **First time?** Create an account (email + password) — you'll be signed in automatically
-3. Returning users just **sign in** to see their history
+1. Open `http://localhost:5173` — you'll see the **landing page** describing the platform
+2. Click **"Get started"** or **"Sign in"** to reach the login form
+3. **First time?** Click "Create one" to sign up — you'll be signed in automatically
+4. Returning users just **sign in** to see their history
 4. Click **"Use sample data instead"** (or drop a CSV)
 5. Click **"Analyze cash flow"**
 6. Review the metrics, risk flags, chart, and narrative
