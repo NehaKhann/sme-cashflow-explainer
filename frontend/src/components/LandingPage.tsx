@@ -14,11 +14,14 @@ function scrollTo(id: string) {
 
 export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPageProps) {
   const [dark, setDark] = useState(() => localStorage.getItem("dark_mode") === "true");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark-mode", dark);
     localStorage.setItem("dark_mode", String(dark));
   }, [dark]);
+
+  function closeMenu() { setMenuOpen(false); }
 
   return (
     <div className="landing">
@@ -52,7 +55,26 @@ export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPagePr
             <button className="btn-ghost" onClick={onSignIn}>Sign in</button>
             <button className="btn-primary" onClick={onGetStarted}>Get started</button>
           </nav>
+          <button className="landing-menu-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {menuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              )}
+            </svg>
+          </button>
         </div>
+        {menuOpen && (
+          <div className="landing-mobile-menu">
+            <button className="btn-link-nav" onClick={() => { scrollTo("features"); closeMenu(); }}>Features</button>
+            <button className="btn-link-nav" onClick={() => { scrollTo("how-it-works"); closeMenu(); }}>How it works</button>
+            <div className="landing-mobile-divider" />
+            <button className="btn-ghost" onClick={() => { onTryDemo(); closeMenu(); }}>Try demo</button>
+            <button className="btn-ghost" onClick={() => { onSignIn(); closeMenu(); }}>Sign in</button>
+            <button className="btn-primary" onClick={() => { onGetStarted(); closeMenu(); }}>Get started</button>
+          </div>
+        )}
       </header>
 
       <section className="landing-hero">
