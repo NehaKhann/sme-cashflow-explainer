@@ -28,9 +28,7 @@ export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPagePr
             <TrendingUpIcon size={22} />
             <span>Ledger</span>
           </div>
-          <nav className="landing-nav">
-            <button className="btn-link-nav" onClick={() => scrollTo("features")}>Features</button>
-            <button className="btn-link-nav" onClick={() => scrollTo("how-it-works")}>How it works</button>
+          <div className="landing-header-center">
             <button className="btn-dark-toggle-nav" onClick={() => setDark(!dark)} title="Toggle dark mode">
               {dark ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -46,6 +44,10 @@ export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPagePr
                 </svg>
               )}
             </button>
+          </div>
+          <nav className="landing-nav">
+            <button className="btn-link-nav" onClick={() => scrollTo("features")}>Features</button>
+            <button className="btn-link-nav" onClick={() => scrollTo("how-it-works")}>How it works</button>
             <button className="btn-ghost" onClick={onTryDemo}>Try demo</button>
             <button className="btn-ghost" onClick={onSignIn}>Sign in</button>
             <button className="btn-primary" onClick={onGetStarted}>Get started</button>
