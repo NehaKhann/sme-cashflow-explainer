@@ -32,10 +32,11 @@ export function LoginPage({ onSwitch, onBack }: { onSwitch: () => void; onBack: 
           Back to home
         </button>
         <div className="auth-header">
-          <TrendingUpIcon size={32} />
+          <TrendingUpIcon size={36} />
           <h1>Sign in to Ledger</h1>
           <p>View your cash-flow analysis history and run new reports.</p>
         </div>
+        <div className="auth-divider" />
         <form onSubmit={handleSubmit}>
           <label>
             Email
@@ -46,7 +47,7 @@ export function LoginPage({ onSwitch, onBack }: { onSwitch: () => void; onBack: 
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
           </label>
           {error && <div className="auth-error">{error}</div>}
-          <button type="submit" className="btn-primary btn-block" disabled={busy}>
+          <button type="submit" className="auth-submit" disabled={busy}>
             {busy ? "Signing in\u2026" : "Sign in"}
           </button>
         </form>
@@ -92,10 +93,11 @@ export function SignupPage({ onSwitch, onBack }: { onSwitch: () => void; onBack:
           Back to home
         </button>
         <div className="auth-header">
-          <TrendingUpIcon size={32} />
+          <TrendingUpIcon size={36} />
           <h1>Create your account</h1>
           <p>Start analyzing cash flow and generating underwriting memos.</p>
         </div>
+        <div className="auth-divider" />
         <form onSubmit={handleSubmit}>
           <label>
             Display name
@@ -110,7 +112,7 @@ export function SignupPage({ onSwitch, onBack }: { onSwitch: () => void; onBack:
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
           </label>
           {error && <div className="auth-error">{error}</div>}
-          <button type="submit" className="btn-primary btn-block" disabled={busy}>
+          <button type="submit" className="auth-submit" disabled={busy}>
             {busy ? "Creating account\u2026" : "Create account"}
           </button>
         </form>
