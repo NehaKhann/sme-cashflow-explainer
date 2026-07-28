@@ -59,8 +59,9 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   useEffect(() => { doHealthCheck(); }, [doHealthCheck]);
 
   useEffect(() => {
+    if (user || isDemo) doHealthCheck();
     if (user) refreshReports();
-  }, [user]);
+  }, [user, isDemo]);
 
   async function refreshReports() {
     try {
