@@ -61,6 +61,10 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   useEffect(() => {
     if (user || isDemo) doHealthCheck();
     if (user) refreshReports();
+    if (!user) {
+      setReports([]);
+      setResults(null);
+    }
   }, [user, isDemo]);
 
   async function refreshReports() {
