@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: cashflow-explainer-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false  # set manually in the Render dashboard -- never commit real keys
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
