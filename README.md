@@ -253,7 +253,7 @@ Generates a synthetic 12-month transaction CSV with an engineered customer-conce
 | Backend | Python 3.12, FastAPI, Pydantic v2 |
 | Database | PostgreSQL 16, SQLAlchemy 2.0 (async), asyncpg |
 | Data | Pandas, NumPy |
-| Auth | JWT (python-jose), bcrypt (passlib), HTTPBearer |
+| Auth | JWT (python-jose), bcrypt (passlib), HTTPBearer, per-user data isolation |
 | Narrative | Groq API (Llama 3.3 70B) or deterministic template |
 | Testing | pytest, pytest-asyncio, httpx (30%+ coverage on core logic) |
 | Deploy | Docker Compose, Dockerfiles, Render, Vercel / Netlify |
