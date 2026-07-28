@@ -64,13 +64,23 @@ The narrative layer can only explain pre-computed figures. No hallucinations, no
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - A free [Groq API key](https://console.groq.com) _(optional — works without one)_
 
-### 1. Start all services
+### 1. Set your API key (optional)
+
+```bash
+# Copy the example .env file at the project root
+cp .env.example .env
+
+# Edit .env and paste your Groq key
+GROQ_API_KEY=gsk_your_key_here
+```
+
+Docker Compose auto-loads `.env` from the project root — no extra flags needed.  
+Skip this step to use the deterministic template narrative instead.
+
+### 2. Start all services
 
 ```bash
 docker compose up -d
-
-# Optional: pass a Groq API key for AI-generated narratives
-# GROQ_API_KEY="gsk_xxx" docker compose up -d
 ```
 
 This starts three containers:
@@ -81,7 +91,7 @@ This starts three containers:
 | **Backend** | `localhost:8000` | FastAPI — auto-creates tables on startup |
 | **Frontend** | `localhost:5173` | Vite dev server with live reload |
 
-### 2. Run it
+### 3. Run it
 
 1. Open `http://localhost:5173`
 2. Click **"Use sample data instead"** (or drop a CSV)
@@ -89,7 +99,7 @@ This starts three containers:
 4. Review the metrics, risk flags, chart, and narrative
 5. Switch to the **Reports** page to see all saved analyses
 
-### 3. Run tests
+### 4. Run tests
 
 ```bash
 cd backend
@@ -98,7 +108,7 @@ python -m pytest tests/ -v
 
 15+ tests covering feature extraction edge cases, risk scoring rules, the API, and report CRUD.
 
-### 4. Stop
+### 5. Stop
 
 ```bash
 docker compose down        # stops containers
@@ -167,21 +177,27 @@ Ledger uses the [Groq](https://console.groq.com) free tier to generate natural-l
 
 ### Set your API key
 
-**Native (recommended):**
+**Docker (recommended):**
 ```bash
-# Copy the example file
+# Create .env at the project root — Docker Compose loads it automatically
+cp .env.example .env
+
+# Edit .env and paste your key
+GROQ_API_KEY=gsk_your_key_here
+
+# Then start normally — no extra flags
+docker compose up -d
+```
+
+**Native:**
+```bash
 cp backend/.env.example backend/.env
 
 # Edit backend/.env and paste your key
 GROQ_API_KEY=gsk_your_key_here
 ```
 
-The `.env` file is gitignored and loaded automatically by `python-dotenv` on startup. No need to set it per terminal session.
-
-**Docker:**
-```bash
-GROQ_API_KEY="gsk_xxx" docker compose up -d
-```
+Both `.env` files are gitignored and loaded automatically (`python-dotenv` for native, Docker Compose's built-in `.env` support for Docker).
 
 ## Deploying
 
