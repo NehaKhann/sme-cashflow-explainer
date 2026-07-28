@@ -32,8 +32,10 @@ async def test_analyze_happy_path(client):
         b"date,amount,counterparty,category\n"
         b"2025-01-05,9000,BigCo,revenue\n"
         b"2025-01-06,-500,vendor,rent\n"
+        b"2025-01-10,500,SmallCo,revenue\n"
         b"2025-02-05,9200,BigCo,revenue\n"
         b"2025-02-06,-500,vendor,rent\n"
+        b"2025-02-10,600,SmallCo,revenue\n"
     )
     resp = await client.post(
         "/api/analyze",
@@ -51,7 +53,11 @@ async def test_reports_list_and_delete(client):
     good_csv = (
         b"date,amount,counterparty,category\n"
         b"2025-01-05,9000,BigCo,revenue\n"
+        b"2025-01-06,-500,vendor,rent\n"
+        b"2025-01-10,1000,SmallCo,revenue\n"
         b"2025-02-05,9200,BigCo,revenue\n"
+        b"2025-02-06,-500,vendor,rent\n"
+        b"2025-02-10,800,SmallCo,revenue\n"
     )
     resp = await client.post(
         "/api/analyze",

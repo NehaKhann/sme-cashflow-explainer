@@ -36,6 +36,10 @@ def test_top_customer_concentration_detected():
     rows = [
         {"date": "2025-01-05", "amount": 9000, "counterparty": "BigCo", "category": "revenue"},
         {"date": "2025-01-06", "amount": 1000, "counterparty": "SmallCo", "category": "revenue"},
+        {"date": "2025-01-07", "amount": -200, "counterparty": "VendorX", "category": "rent"},
+        {"date": "2025-02-05", "amount": 9000, "counterparty": "BigCo", "category": "revenue"},
+        {"date": "2025-02-06", "amount": 1000, "counterparty": "SmallCo", "category": "revenue"},
+        {"date": "2025-02-07", "amount": -200, "counterparty": "VendorX", "category": "rent"},
     ]
     df = load_transactions(make_csv(rows))
     features = extract_features(df)
@@ -62,6 +66,7 @@ def test_revenue_volatility_zero_when_flat():
         {"date": f"2025-0{m}-05", "amount": 1000, "counterparty": "A", "category": "revenue"}
         for m in range(1, 5)
     ]
+    rows.append({"date": "2025-01-10", "amount": -200, "counterparty": "Vendor", "category": "rent"})
     df = load_transactions(make_csv(rows))
     features = extract_features(df)
     assert features.revenue_volatility_pct == 0.0

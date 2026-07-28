@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import String, Float, Integer, Date, DateTime, ForeignKey, Text
+from sqlalchemy import String, Float, Integer, Date, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,7 +45,10 @@ class Report(Base):
     risk_score: Mapped[int] = mapped_column(Integer, nullable=False)
     risk_band: Mapped[str] = mapped_column(String(16), nullable=False)
 
-    raw_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    raw_data: Mapped[dict] = mapped_column(
+        JSON().with_variant(JSONB(), "postgresql"),
+        nullable=False,
+    )
 
     user: Mapped["User"] = relationship(back_populates="reports")
     transactions: Mapped[list["Transaction"]] = relationship(

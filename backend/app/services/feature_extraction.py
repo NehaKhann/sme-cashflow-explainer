@@ -1,11 +1,34 @@
 from __future__ import annotations
 
+import io
+import csv
+import re
+
 import pandas as pd
 
 from ..models import CashFlowFeatures, InvalidTransactionData
 
 
 REQUIRED_COLUMNS = {"date", "amount", "counterparty"}
+MIN_TRANSACTIONS = 5
+MAX_TRANSACTIONS = 100_000
+MIN_MONTHS = 2
+KNOWN_DELIMITERS = [",", ";", "\t", "|"]
+
+
+def _is_binary(content: bytes) -> bool:
+    """Detect if content looks like a binary file rather than text."""
+    null_bytes = content.count(b"\x00")
+    if len(content) == 0:
+        return True
+    ratio = null_bytes / len(content)
+    return ratio > 0.05
+
+
+def _detect_delimiter(head: str) -> str:
+    """Heuristic: count each delimiter in the header row, pick the most common."""
+    scores = {d: head.count(d) for d in KNOWN_DELIMITERS}
+    return max(scores, key=scores.get) if max(scores.values()) > 0 else ","
 
 
 def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -24,23 +47,96 @@ def _validate(df: pd.DataFrame) -> None:
     if df.empty:
         raise InvalidTransactionData("CSV contains no transaction rows.")
 
+    if len(df) < MIN_TRANSACTIONS:
+        raise InvalidTransactionData(
+            f"CSV has only {len(df)} transaction(s); at least {MIN_TRANSACTIONS} are required for a meaningful analysis."
+        )
+
+    if len(df) > MAX_TRANSACTIONS:
+        raise InvalidTransactionData(
+            f"CSV has {len(df)} rows, which exceeds the maximum of {MAX_TRANSACTIONS:,}."
+        )
+
+
+def _validate_semantic(df: pd.DataFrame) -> None:
+    has_positive = (df["amount"] > 0).any()
+    has_negative = (df["amount"] < 0).any()
+    if not has_positive and not has_negative:
+        raise InvalidTransactionData("All transaction amounts are zero. No financial data to analyze.")
+    if not has_positive:
+        raise InvalidTransactionData(
+            "All amounts are negative (outflows only). At least one positive (inflow) transaction is required."
+        )
+    if not has_negative:
+        raise InvalidTransactionData(
+            "All amounts are positive (inflows only). At least one negative (outflow) transaction is required."
+        )
+
+    months = df["date"].dt.to_period("M").nunique()
+    if months < MIN_MONTHS:
+        raise InvalidTransactionData(
+            f"Data spans only {months} month(s); at least {MIN_MONTHS} months are required for trend analysis."
+        )
+
 
 def load_transactions(csv_path_or_buffer) -> pd.DataFrame:
-    df = pd.read_csv(csv_path_or_buffer)
+    raw = csv_path_or_buffer.read()
+    if isinstance(raw, bytes):
+        if _is_binary(raw):
+            sniff_sample = raw[:200]
+            decoded = sniff_sample.decode("utf-8", errors="replace")
+            if not re.search(r"[a-zA-Z0-9]", decoded):
+                raise InvalidTransactionData(
+                    "The uploaded file does not appear to be a CSV. "
+                    "It contains binary content. Please upload a valid CSV file."
+                )
+
+        try:
+            text = raw.decode("utf-8-sig")
+        except UnicodeDecodeError:
+            try:
+                text = raw.decode("latin-1")
+            except UnicodeDecodeError:
+                raise InvalidTransactionData(
+                    "Could not decode the file. Please ensure it is a UTF-8 encoded CSV."
+                )
+    else:
+        text = raw
+
+    delimiter = _detect_delimiter(text.split("\n", 1)[0])
+
+    try:
+        df = pd.read_csv(
+            io.StringIO(text),
+            delimiter=delimiter,
+            engine="python",
+            skipinitialspace=True,
+        )
+    except Exception as e:
+        raise InvalidTransactionData(f"Could not parse CSV: {e}")
+
     df = _normalize_columns(df)
     _validate(df)
 
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
-    if df["date"].isna().any():
-        bad_rows = df[df["date"].isna()].index.tolist()
+    bad_dates = df["date"].isna()
+    if bad_dates.any():
+        bad_rows = df[bad_dates].index.tolist()
         raise InvalidTransactionData(
-            f"Could not parse 'date' for row(s): {bad_rows[:5]}"
+            f"Could not parse 'date' in row(s): {bad_rows[:5]}"
             + (" (and more)" if len(bad_rows) > 5 else "")
         )
 
     df["amount"] = pd.to_numeric(df["amount"], errors="coerce")
-    if df["amount"].isna().any():
-        raise InvalidTransactionData("Column 'amount' contains non-numeric values.")
+    bad_amounts = df["amount"].isna()
+    if bad_amounts.any():
+        bad_rows = df[bad_amounts].index.tolist()
+        raise InvalidTransactionData(
+            f"Column 'amount' contains non-numeric values in row(s): {bad_rows[:5]}"
+            + (" (and more)" if len(bad_rows) > 5 else "")
+        )
+
+    _validate_semantic(df)
 
     if "category" not in df.columns:
         df["category"] = "uncategorized"
