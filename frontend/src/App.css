@@ -1019,16 +1019,35 @@ body {
   }
 
   .main { margin-left: 0; }
-  .topbar { padding: 16px 16px 0; flex-direction: row; flex-wrap: wrap; }
+  .topbar { padding: 14px 14px 0; flex-direction: row; flex-wrap: wrap; }
   .topbar-left { width: 100%; }
   .topbar-right { margin-left: auto; }
-  .content { padding: 16px; }
+  .content { padding: 14px; }
   .intake-section { grid-template-columns: 1fr; }
   .metrics-grid { grid-template-columns: 1fr; }
   .results-header { flex-direction: column; gap: 12px; }
   .results-footer { flex-direction: column; gap: 12px; align-items: flex-start; }
   .feature-grid { grid-template-columns: 1fr; }
   .config-popover { width: calc(100vw - 32px); right: -8px; }
+  .page-title { font-size: 18px; }
+  .stat-value { font-size: 18px; }
+  .report-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .report-card-right { width: 100%; justify-content: space-between; }
+  .reports-toolbar { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .report-meta { gap: 8px; }
+  .upload-options { flex-direction: column; }
+  .card-body { padding: 16px; }
+  .card-header { padding: 12px 16px; }
+  .chart-body { padding: 12px 16px; }
+  .auth-card { padding: 24px; }
+  .landing-hero { padding: 110px 16px 48px; }
+  .landing-section { padding: 48px 16px; }
+  .landing-cta { padding: 48px 16px; }
+  .landing-header-inner { padding: 0 16px; }
+  .landing-hero-stats { flex-wrap: wrap; }
+  .upload-icon { width: 56px; height: 56px; }
+  .welcome-card { padding: 32px 16px; }
+  .welcome-icon { width: 56px; height: 56px; }
 }
 
 /* Small tablets */
@@ -1395,6 +1414,11 @@ body {
 
 /* Landing responsive */
 
+@media (max-width: 900px) {
+  .landing-section { padding: 56px 20px; }
+  .landing-cta { padding: 56px 20px; }
+}
+
 @media (max-width: 768px) {
   .landing-hero h1 { font-size: 28px; }
   .landing-nav a:not(.btn-primary):not(.btn-ghost) { display: none; }
@@ -1402,11 +1426,25 @@ body {
   .steps-row { flex-direction: column; gap: 16px; }
   .step-arrow { display: none; }
   .landing-hero-actions { flex-direction: column; align-items: center; }
+  .landing-hero-content { max-width: 100%; }
+  .landing-hero-desc { max-width: 100%; }
+  .landing-section { padding: 40px 20px; }
+  .landing-cta { padding: 40px 20px; }
+  .landing-footer { padding: 20px; }
 }
 
 @media (max-width: 480px) {
   .landing-nav .btn-ghost { display: none; }
   .landing-nav button.btn-link-nav { display: none; }
+  .landing-hero { padding: 100px 16px 36px; }
+  .landing-hero h1 { font-size: 24px; }
+  .landing-hero-desc { font-size: 14px; }
+  .landing-section { padding: 32px 16px; }
+  .landing-cta { padding: 32px 16px; }
+  .landing-section-title { font-size: 22px; }
+  .landing-cta h2 { font-size: 22px; }
+  .landing-header-inner { padding: 0 12px; }
+  .landing-hero-actions .btn-lg { width: 100%; }
 }
 
 /* Auth layout & pages */
@@ -2026,4 +2064,11 @@ body {
 @media (max-width: 640px) {
   .deltas-grid { grid-template-columns: 1fr; }
   .results-header-right { flex-direction: column; align-items: flex-end; }
+}
+
+@media (max-width: 480px) {
+  .auth-card { padding: 20px 16px; }
+  .auth-header h1 { font-size: 18px; }
+  .auth-header svg { width: 30px; height: 30px; }
+  .auth-back { margin-bottom: 16px; }
 }
