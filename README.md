@@ -167,21 +167,21 @@ Ledger uses the [Groq](https://console.groq.com) free tier to generate natural-l
 
 ### Set your API key
 
+**Native (recommended):**
+```bash
+# Copy the example file
+cp backend/.env.example backend/.env
+
+# Edit backend/.env and paste your key
+GROQ_API_KEY=gsk_your_key_here
+```
+
+The `.env` file is gitignored and loaded automatically by `python-dotenv` on startup. No need to set it per terminal session.
+
 **Docker:**
 ```bash
 GROQ_API_KEY="gsk_xxx" docker compose up -d
 ```
-
-**Native:**
-```powershell
-# Windows (PowerShell)
-$env:GROQ_API_KEY="gsk_your_api_key_here"
-
-# macOS / Linux
-# export GROQ_API_KEY="gsk_your_api_key_here"
-```
-
-Then restart the backend. The key is session-scoped — set it again after closing the terminal, or add it to your shell profile.
 
 ## Deploying
 
