@@ -64,32 +64,25 @@ The narrative layer can only explain pre-computed figures. No hallucinations, no
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - A free [Groq API key](https://console.groq.com) _(optional — works without one)_
 
-### 1. Set your API key (optional)
+### 1. Configure environment
 
 ```bash
-# Copy the example .env file at the project root
 cp .env.example .env
+```
 
-# Edit .env and paste your Groq key
+Edit `.env` and fill in your keys:
+
+```env
+# Optional — skip for deterministic template narratives
 GROQ_API_KEY=gsk_your_key_here
+
+# Required — generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
+JWT_SECRET=<your-generated-secret>
 ```
 
-Docker Compose auto-loads `.env` from the project root — no extra flags needed.  
-Skip this step to use the deterministic template narrative instead.
+Docker Compose auto-loads `.env` from the project root — no extra flags needed.
 
-### 2. Set JWT secret
-
-```bash
-# Generate a secure random secret
-python -c "import secrets; print(secrets.token_urlsafe(32))"
-
-# Copy the example file
-cp .env.example .env
-
-# Edit .env and paste your Groq key and JWT secret
-```
-
-### 3. Start all services
+### 2. Start all services
 
 ```bash
 docker compose up -d
@@ -103,15 +96,17 @@ This starts three containers:
 | **Backend** | `localhost:8000` | FastAPI — auto-creates tables on startup |
 | **Frontend** | `localhost:5173` | Vite dev server with live reload |
 
-### 4. Run it
+### 3. Run it
 
 1. Open `http://localhost:5173`
-2. Click **"Use sample data instead"** (or drop a CSV)
-3. Click **"Analyze cash flow"**
-4. Review the metrics, risk flags, chart, and narrative
-5. Switch to the **Reports** page to see all saved analyses
+2. **First time?** Create an account (email + password) — you'll be signed in automatically
+3. Returning users just **sign in** to see their history
+4. Click **"Use sample data instead"** (or drop a CSV)
+5. Click **"Analyze cash flow"**
+6. Review the metrics, risk flags, chart, and narrative
+7. Switch to the **Reports** page to see all saved analyses — data is scoped to your account
 
-### 5. Run tests
+### 4. Run tests
 
 ```bash
 cd backend
@@ -120,7 +115,7 @@ python -m pytest tests/ -v
 
 15+ tests covering feature extraction edge cases, risk scoring rules, the API, and report CRUD.
 
-### 6. Stop
+### 5. Stop
 
 ```bash
 docker compose down        # stops containers
@@ -139,6 +134,8 @@ docker compose down -v     # stops + deletes the database volume
 
 ```bash
 cd backend
+cp .env.example .env   # edit .env with your keys (DB, JWT, Groq)
+
 python -m venv .venv
 
 # Windows
@@ -147,15 +144,10 @@ python -m venv .venv
 # source .venv/bin/activate
 
 pip install -r requirements.txt
-
-# Point to your PostgreSQL (adjust user/password/host)
-$env:DATABASE_URL="postgresql+asyncpg://cashflow:cashflow_dev@localhost:5432/cashflow"
-
 uvicorn app.main:app --reload --port 8000
 ```
 
-The API auto-creates tables on startup.  
-_Without a `GROQ_API_KEY`, it uses a deterministic template narrative._
+The API reads `.env` via `python-dotenv` and auto-creates tables (users, reports, transactions) on startup.
 
 ### 2. Frontend
 
@@ -165,7 +157,7 @@ npm install
 npm run dev
 ```
 
-Opens at `http://localhost:5173` — adjust the API URL via the **API Config** button in the top bar if needed.
+Opens at `http://localhost:5173` — sign up on first visit, then log in normally.
 
 ### 3. Run tests
 
@@ -210,6 +202,38 @@ GROQ_API_KEY=gsk_your_key_here
 ```
 
 Both `.env` files are gitignored and loaded automatically (`python-dotenv` for native, Docker Compose's built-in `.env` support for Docker).
+
+## Authentication
+
+Ledger requires a user account to access the dashboard, upload, and reports pages.
+
+### Sign up / Sign in
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/auth/signup` | POST | Create an account with `email`, `password` (min 8 chars), optional `display_name` |
+| `/api/auth/login` | POST | Returns JWT access + refresh tokens |
+| `/api/auth/me` | GET | Returns the current user (requires Bearer token) |
+
+All analysis and report endpoints are protected — users can only see their own data.
+
+### JWT configuration
+
+Set these in your `.env` (both Docker and native):
+
+| Variable | Default | Notes |
+|---|---|---|
+| `JWT_SECRET` | — | **Required.** Generate with `python -c "import secrets; print(secrets.token_urlsafe(32))"` |
+| `JWT_ALGORITHM` | `HS256` | |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `30` | Short-lived access token |
+| `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | Long-lived refresh token |
+
+### Frontend flow
+
+- Unauthenticated users see a full-page sign-in / sign-up form
+- Tokens are stored in `localStorage` and attached to every API request via `Authorization: Bearer <token>`
+- The sidebar shows the user's email and a **Sign out** button
+- On page reload, the stored token is validated against `GET /api/auth/me`
 
 ## Deploying
 
@@ -262,10 +286,10 @@ Generates a synthetic 12-month transaction CSV with an engineered customer-conce
 
 - [x] Analysis history with PostgreSQL persistence
 - [x] User authentication (signup / login / JWT)
+- [x] Per-user data isolation
 - [ ] PDF export of the memo
 - [ ] Multi-file comparison (quarter-over-quarter)
 - [ ] Additional bank export format support
-- [ ] Auth and multi-tenant isolation
 
 ---
 
