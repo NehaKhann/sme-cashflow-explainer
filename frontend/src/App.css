@@ -1085,14 +1085,38 @@ body {
   gap: 24px;
 }
 
-.landing-nav a {
+.landing-nav a, .landing-nav button.btn-link-nav {
   color: var(--text-light);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
   transition: color var(--transition);
 }
-.landing-nav a:hover { color: #fff; }
+.landing-nav a:hover, .landing-nav button.btn-link-nav:hover { color: #fff; }
+
+.btn-link-nav {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.btn-dark-toggle-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 6px;
+  transition: all var(--transition);
+}
+.btn-dark-toggle-nav:hover {
+  border-color: var(--warning);
+  color: var(--warning);
+}
 
 .landing-nav .btn-primary,
 .landing-nav .btn-ghost {
@@ -1376,6 +1400,7 @@ body {
 
 @media (max-width: 480px) {
   .landing-nav .btn-ghost { display: none; }
+  .landing-nav button.btn-link-nav { display: none; }
 }
 
 /* Auth layout & pages */
