@@ -129,7 +129,7 @@ fabricated — safe to commit and to point recruiters at.
 
 ```bash
 cd sample_data
-python3 generate_sample.py
+python generate_sample.py
 ```
 
 ## CSV format
