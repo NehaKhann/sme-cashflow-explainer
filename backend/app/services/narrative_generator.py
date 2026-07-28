@@ -1,27 +1,9 @@
-"""
-Narrative generation layer.
-
-Hard rule: the LLM is only ever given already-computed numbers (from
-feature_extraction.py and risk_scoring.py) and asked to explain them in
-prose. It is explicitly instructed not to introduce any figure that
-isn't in the provided data, and the prompt says so directly. This is
-what makes the output auditable -- every number in the final narrative
-traces back to a pandas computation, never to a hallucination.
-
-Uses Groq's free-tier API (OpenAI-compatible chat completions) so this
-runs at zero cost. Falls back to a deterministic template-based
-narrative if no GROQ_API_KEY is set, so the app still works with zero
-external dependencies for local dev / demoing.
-"""
-
 import os
 import json
 from groq import Groq
-from .feature_extraction import CashFlowFeatures
-from .risk_scoring import RiskAssessment
+from ..models import CashFlowFeatures, RiskAssessment
 
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
-
 
 SYSTEM_PROMPT = """You are a credit underwriting assistant. You will be given
 pre-computed cash-flow statistics for a small business, already calculated by
@@ -69,7 +51,6 @@ def _build_user_prompt(features: CashFlowFeatures, risk: RiskAssessment) -> str:
 
 
 def _fallback_narrative(features: CashFlowFeatures, risk: RiskAssessment) -> str:
-    """Deterministic, no-API-key-required narrative. Used when GROQ_API_KEY is unset."""
     lines = [
         f"Over {features.start_date} to {features.end_date} ({features.num_months} months), "
         f"total inflows were {features.total_inflow:,.2f} against outflows of "

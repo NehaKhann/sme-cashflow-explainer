@@ -1,71 +1,11 @@
-"""
-Feature extraction engine for SME cash-flow analysis.
-
-Design principle: this module computes every number that will ever appear
-in a narrative. The LLM layer (narrative_generator.py) is only allowed to
-explain these pre-computed numbers in prose -- it never calculates anything
-itself. This keeps the system auditable: any claim in the final report can
-be traced back to a specific pandas computation here.
-
-Expected input schema (a CSV with these columns, case-insensitive):
-    date        - transaction date (parseable by pandas)
-    amount      - signed amount; positive = inflow, negative = outflow
-    counterparty - name of the payer/payee (used for concentration risk)
-    category    - optional; e.g. "revenue", "payroll", "rent", "supplies"
-"""
-
 from __future__ import annotations
 
 import pandas as pd
-import numpy as np
-from dataclasses import dataclass, field
-from typing import Optional
+
+from ..models import CashFlowFeatures, InvalidTransactionData
 
 
 REQUIRED_COLUMNS = {"date", "amount", "counterparty"}
-
-
-class InvalidTransactionData(ValueError):
-    """Raised when the uploaded CSV doesn't match the expected schema."""
-
-
-@dataclass
-class CashFlowFeatures:
-    # -- period covered --
-    start_date: str
-    end_date: str
-    num_months: int
-
-    # -- top-line --
-    total_inflow: float
-    total_outflow: float
-    net_cash_flow: float
-
-    # -- volatility --
-    monthly_revenue: dict  # {"2026-01": 12000.0, ...}
-    revenue_volatility_pct: float  # coefficient of variation, as %
-    largest_mom_drop_pct: float  # biggest single month-over-month revenue drop
-    largest_mom_drop_month: Optional[str]
-
-    # -- concentration risk --
-    top_customer_share_pct: float
-    top_customer_name: Optional[str]
-    top_3_customer_share_pct: float
-    num_unique_customers: int
-
-    # -- seasonality --
-    seasonality_detected: bool
-    seasonal_low_months: list = field(default_factory=list)
-    seasonal_high_months: list = field(default_factory=list)
-
-    # -- expense structure --
-    monthly_expenses: dict = field(default_factory=dict)
-    expense_by_category: dict = field(default_factory=dict)
-    avg_monthly_burn: float = 0.0
-
-    # -- runway --
-    months_of_negative_flow: int = 0
-    longest_negative_streak_months: int = 0
 
 
 def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -86,7 +26,6 @@ def _validate(df: pd.DataFrame) -> None:
 
 
 def load_transactions(csv_path_or_buffer) -> pd.DataFrame:
-    """Load and validate a transaction CSV. Raises InvalidTransactionData on bad input."""
     df = pd.read_csv(csv_path_or_buffer)
     df = _normalize_columns(df)
     _validate(df)
@@ -112,8 +51,78 @@ def load_transactions(csv_path_or_buffer) -> pd.DataFrame:
     return df
 
 
+def _compute_monthly_revenue(inflows: pd.DataFrame) -> pd.Series:
+    return inflows.groupby("month")["amount"].sum().sort_index()
+
+
+def _compute_revenue_volatility(monthly_rev: pd.Series) -> tuple[float, float, str | None]:
+    if len(monthly_rev) < 2 or monthly_rev.mean() == 0:
+        return 0.0, 0.0, None
+
+    volatility = round(float(monthly_rev.std() / monthly_rev.mean() * 100), 1)
+
+    pct_change = monthly_rev.pct_change() * 100
+    if pct_change.dropna().empty:
+        return volatility, 0.0, None
+
+    largest_drop_idx = pct_change.idxmin()
+    largest_drop_pct = round(float(pct_change.min()), 1)
+    return volatility, largest_drop_pct, str(largest_drop_idx)
+
+
+def _compute_customer_concentration(inflows: pd.DataFrame, total_inflow: float) -> tuple[str | None, float, float, int]:
+    by_customer = inflows.groupby("counterparty")["amount"].sum().sort_values(ascending=False)
+    num_unique = int(by_customer.shape[0])
+
+    if total_inflow <= 0 or by_customer.empty:
+        return None, 0.0, 0.0, num_unique
+
+    top_name = str(by_customer.index[0])
+    top_share = round(float(by_customer.iloc[0] / total_inflow * 100), 1)
+    top3_share = round(float(by_customer.iloc[:3].sum() / total_inflow * 100), 1)
+    return top_name, top_share, top3_share, num_unique
+
+
+def _compute_seasonality(monthly_rev: pd.Series) -> tuple[bool, list, list]:
+    low, high = [], []
+    if len(monthly_rev) < 4:
+        return False, low, high
+
+    mean_rev = monthly_rev.mean()
+    low_months = monthly_rev[monthly_rev < mean_rev * 0.8].index.tolist()
+    high_months = monthly_rev[monthly_rev > mean_rev * 1.2].index.tolist()
+    return bool(low_months or high_months), low_months, high_months
+
+
+def _compute_expenses(outflows: pd.DataFrame) -> tuple[dict, dict, float]:
+    monthly = outflows.groupby("month")["amount"].sum().abs().sort_index()
+    monthly_expenses = {k: round(float(v), 2) for k, v in monthly.items()}
+    avg_burn = round(float(monthly.mean()), 2) if not monthly.empty else 0.0
+
+    by_cat = outflows.groupby("category")["amount"].sum().abs().sort_values(ascending=False)
+    expense_by_category = {k: round(float(v), 2) for k, v in by_cat.items()}
+
+    return monthly_expenses, expense_by_category, avg_burn
+
+
+def _compute_negative_flow_streaks(df: pd.DataFrame) -> tuple[int, int]:
+    monthly_net = df.groupby("month")["amount"].sum().sort_index()
+    negative_flags = monthly_net < 0
+    months_negative = int(negative_flags.sum())
+
+    longest = 0
+    current = 0
+    for is_neg in negative_flags:
+        if is_neg:
+            current += 1
+            longest = max(longest, current)
+        else:
+            current = 0
+
+    return months_negative, longest
+
+
 def extract_features(df: pd.DataFrame) -> CashFlowFeatures:
-    """Compute every cash-flow risk metric the narrative layer is allowed to reference."""
     df = df.copy()
     df["month"] = df["date"].dt.to_period("M").astype(str)
 
@@ -121,76 +130,31 @@ def extract_features(df: pd.DataFrame) -> CashFlowFeatures:
     outflows = df[df["amount"] < 0]
 
     total_inflow = float(inflows["amount"].sum())
-    total_outflow = float(outflows["amount"].sum())  # negative number
+    total_outflow = float(outflows["amount"].sum())
     net_cash_flow = float(df["amount"].sum())
 
-    # ---- monthly revenue series ----
-    monthly_rev_series = inflows.groupby("month")["amount"].sum().sort_index()
+    monthly_rev_series = _compute_monthly_revenue(inflows)
     monthly_revenue = {k: round(float(v), 2) for k, v in monthly_rev_series.items()}
 
-    if len(monthly_rev_series) >= 2 and monthly_rev_series.mean() != 0:
-        revenue_volatility_pct = round(
-            float(monthly_rev_series.std() / monthly_rev_series.mean() * 100), 1
-        )
-    else:
-        revenue_volatility_pct = 0.0
-
-    mom_pct_change = monthly_rev_series.pct_change() * 100
-    if not mom_pct_change.dropna().empty:
-        largest_drop_idx = mom_pct_change.idxmin()
-        largest_mom_drop_pct = round(float(mom_pct_change.min()), 1)
-        largest_mom_drop_month = str(largest_drop_idx)
-    else:
-        largest_mom_drop_pct = 0.0
-        largest_mom_drop_month = None
-
-    # ---- customer concentration (based on inflows only) ----
-    by_customer = inflows.groupby("counterparty")["amount"].sum().sort_values(ascending=False)
-    num_unique_customers = int(by_customer.shape[0])
-    if total_inflow > 0 and not by_customer.empty:
-        top_customer_name = str(by_customer.index[0])
-        top_customer_share_pct = round(float(by_customer.iloc[0] / total_inflow * 100), 1)
-        top_3_share = float(by_customer.iloc[:3].sum() / total_inflow * 100)
-        top_3_customer_share_pct = round(top_3_share, 1)
-    else:
-        top_customer_name = None
-        top_customer_share_pct = 0.0
-        top_3_customer_share_pct = 0.0
-
-    # ---- seasonality (simple heuristic: months >20% below/above the mean) ----
-    seasonal_low_months, seasonal_high_months = [], []
-    seasonality_detected = False
-    if len(monthly_rev_series) >= 4:
-        mean_rev = monthly_rev_series.mean()
-        low_threshold = mean_rev * 0.8
-        high_threshold = mean_rev * 1.2
-        seasonal_low_months = monthly_rev_series[monthly_rev_series < low_threshold].index.tolist()
-        seasonal_high_months = monthly_rev_series[monthly_rev_series > high_threshold].index.tolist()
-        seasonality_detected = bool(seasonal_low_months or seasonal_high_months)
-
-    # ---- expenses ----
-    monthly_exp_series = outflows.groupby("month")["amount"].sum().abs().sort_index()
-    monthly_expenses = {k: round(float(v), 2) for k, v in monthly_exp_series.items()}
-    avg_monthly_burn = round(float(monthly_exp_series.mean()), 2) if not monthly_exp_series.empty else 0.0
-
-    expense_by_category = (
-        outflows.groupby("category")["amount"].sum().abs().sort_values(ascending=False)
+    revenue_volatility_pct, largest_mom_drop_pct, largest_mom_drop_month = (
+        _compute_revenue_volatility(monthly_rev_series)
     )
-    expense_by_category = {k: round(float(v), 2) for k, v in expense_by_category.items()}
 
-    # ---- negative flow streaks ----
-    monthly_net = df.groupby("month")["amount"].sum().sort_index()
-    negative_flags = monthly_net < 0
-    months_of_negative_flow = int(negative_flags.sum())
+    top_customer_name, top_customer_share_pct, top_3_customer_share_pct, num_unique_customers = (
+        _compute_customer_concentration(inflows, total_inflow)
+    )
 
-    longest_streak = 0
-    current_streak = 0
-    for is_neg in negative_flags:
-        if is_neg:
-            current_streak += 1
-            longest_streak = max(longest_streak, current_streak)
-        else:
-            current_streak = 0
+    seasonality_detected, seasonal_low_months, seasonal_high_months = (
+        _compute_seasonality(monthly_rev_series)
+    )
+
+    monthly_expenses, expense_by_category, avg_monthly_burn = (
+        _compute_expenses(outflows)
+    )
+
+    months_of_negative_flow, longest_negative_streak_months = (
+        _compute_negative_flow_streaks(df)
+    )
 
     return CashFlowFeatures(
         start_date=str(df["date"].min().date()),
@@ -214,5 +178,5 @@ def extract_features(df: pd.DataFrame) -> CashFlowFeatures:
         expense_by_category=expense_by_category,
         avg_monthly_burn=avg_monthly_burn,
         months_of_negative_flow=months_of_negative_flow,
-        longest_negative_streak_months=longest_streak,
+        longest_negative_streak_months=longest_negative_streak_months,
     )

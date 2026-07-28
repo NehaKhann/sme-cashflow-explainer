@@ -2,7 +2,8 @@ import io
 import pytest
 import pandas as pd
 
-from app.services.feature_extraction import load_transactions, extract_features, InvalidTransactionData
+from app.services.feature_extraction import load_transactions, extract_features
+from app.models import InvalidTransactionData
 
 
 def make_csv(rows: list[dict]) -> io.BytesIO:
@@ -14,7 +15,7 @@ def make_csv(rows: list[dict]) -> io.BytesIO:
 
 
 def test_missing_required_column_raises():
-    buf = make_csv([{"date": "2025-01-01", "amount": 100}])  # no counterparty
+    buf = make_csv([{"date": "2025-01-01", "amount": 100}])
     with pytest.raises(InvalidTransactionData, match="counterparty"):
         load_transactions(buf)
 

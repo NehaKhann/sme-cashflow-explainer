@@ -1,4 +1,4 @@
-from app.services.feature_extraction import CashFlowFeatures
+from app.models import CashFlowFeatures
 from app.services.risk_scoring import assess_risk
 
 
