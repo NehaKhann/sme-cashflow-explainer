@@ -28,6 +28,7 @@ export default function App() {
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<AnalysisData | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const doHealthCheck = useCallback(async () => {
     const s = await checkHealth(apiBase);
@@ -66,13 +67,20 @@ export default function App() {
 
   return (
     <div className="layout">
-      <Sidebar status={apiStatus} active={page} onNavigate={setPage} />
+      <Sidebar
+        status={apiStatus}
+        active={page}
+        onNavigate={setPage}
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
       <main className="main">
         <Topbar
           apiBase={apiBase}
           onApiBaseChange={setApiBase}
           title={title}
           description={desc}
+          onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
         <div className="content">
           {analyzing ? (
@@ -80,7 +88,7 @@ export default function App() {
           ) : page === "dashboard" && results ? (
             <ResultsSection data={results} onReset={handleReset} />
           ) : page === "dashboard" ? (
-            <DashboardHome />
+            <DashboardHome onNavigate={setPage} />
           ) : page === "upload" ? (
             <IntakeSection onAnalyze={handleAnalyze} disabled={analyzing} />
           ) : (

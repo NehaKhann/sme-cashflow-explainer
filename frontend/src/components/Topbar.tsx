@@ -1,16 +1,24 @@
+import { MenuIcon } from "./Icons";
+
 interface TopbarProps {
   apiBase: string;
   onApiBaseChange: (value: string) => void;
   title: string;
   description: string;
+  onMenuToggle: () => void;
 }
 
-export function Topbar({ apiBase, onApiBaseChange, title, description }: TopbarProps) {
+export function Topbar({ apiBase, onApiBaseChange, title, description, onMenuToggle }: TopbarProps) {
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <h1 className="page-title">{title}</h1>
-        <p className="page-desc">{description}</p>
+        <button className="menu-btn" onClick={onMenuToggle} aria-label="Open menu">
+          <MenuIcon />
+        </button>
+        <div>
+          <h1 className="page-title">{title}</h1>
+          <p className="page-desc">{description}</p>
+        </div>
       </div>
       <div className="topbar-right">
         <details className="api-config">
