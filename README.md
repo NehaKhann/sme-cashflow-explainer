@@ -28,7 +28,8 @@ docker compose up -d          # start PostgreSQL, backend, frontend
 
 Open **http://localhost:5173** — click "Try demo" or sign up.
 
-> After pulling new code: `docker compose build frontend && docker compose up -d`
+> After pulling new code: `docker compose build backend frontend && docker compose up -d`
+> To reset (delete database): `docker compose down -v`
 
 | Service | URL |
 |---|---|
