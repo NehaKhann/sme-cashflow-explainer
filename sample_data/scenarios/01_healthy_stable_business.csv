@@ -1,0 +1,121 @@
+date,amount,counterparty,category
+2025-01-02,-138.25,vendor,software
+2025-01-05,1582.76,Oakview Supplies,revenue
+2025-01-05,1979.27,Union Hardware,revenue
+2025-01-10,-227.85,vendor,utilities
+2025-01-14,1806.33,Sterling Retail,revenue
+2025-01-16,1819.0,Maple & Co,revenue
+2025-01-17,-4191.5,vendor,payroll
+2025-01-21,-347.54,vendor,supplies
+2025-01-26,2011.35,Riverbend Cafe,revenue
+2025-01-28,-1400.0,vendor,rent
+2025-02-02,1577.97,Oakview Supplies,revenue
+2025-02-02,1919.0,Maple & Co,revenue
+2025-02-09,-1400.0,vendor,rent
+2025-02-09,-223.91,vendor,utilities
+2025-02-12,2081.94,Riverbend Cafe,revenue
+2025-02-13,-166.15,vendor,software
+2025-02-14,2078.56,Sterling Retail,revenue
+2025-02-15,1939.35,Union Hardware,revenue
+2025-02-17,-389.43,vendor,supplies
+2025-02-25,-4191.29,vendor,payroll
+2025-03-05,2199.64,Maple & Co,revenue
+2025-03-05,2163.18,Union Hardware,revenue
+2025-03-15,2202.17,Riverbend Cafe,revenue
+2025-03-15,-149.54,vendor,software
+2025-03-18,-312.71,vendor,supplies
+2025-03-19,2150.08,Oakview Supplies,revenue
+2025-03-23,-281.02,vendor,utilities
+2025-03-25,1768.39,Sterling Retail,revenue
+2025-03-25,-4100.19,vendor,payroll
+2025-03-25,-1400.0,vendor,rent
+2025-04-03,1786.42,Maple & Co,revenue
+2025-04-13,-174.81,vendor,software
+2025-04-15,2010.12,Union Hardware,revenue
+2025-04-17,2107.59,Riverbend Cafe,revenue
+2025-04-18,2037.13,Oakview Supplies,revenue
+2025-04-19,-1400.0,vendor,rent
+2025-04-23,-4148.1,vendor,payroll
+2025-04-23,-249.16,vendor,utilities
+2025-04-25,1834.52,Sterling Retail,revenue
+2025-04-26,-365.1,vendor,supplies
+2025-05-02,-345.9,vendor,supplies
+2025-05-03,1652.94,Maple & Co,revenue
+2025-05-14,1936.64,Riverbend Cafe,revenue
+2025-05-14,1978.35,Union Hardware,revenue
+2025-05-18,-1400.0,vendor,rent
+2025-05-19,-124.79,vendor,software
+2025-05-19,-276.78,vendor,utilities
+2025-05-21,1814.0,Sterling Retail,revenue
+2025-05-22,-4148.9,vendor,payroll
+2025-05-25,1849.8,Oakview Supplies,revenue
+2025-06-02,2140.32,Sterling Retail,revenue
+2025-06-03,-151.13,vendor,software
+2025-06-06,-1400.0,vendor,rent
+2025-06-10,1799.35,Oakview Supplies,revenue
+2025-06-13,-243.0,vendor,utilities
+2025-06-19,-458.9,vendor,supplies
+2025-06-20,2137.69,Riverbend Cafe,revenue
+2025-06-21,1972.11,Maple & Co,revenue
+2025-06-25,-4046.25,vendor,payroll
+2025-06-28,1816.53,Union Hardware,revenue
+2025-07-04,-132.09,vendor,software
+2025-07-09,-1400.0,vendor,rent
+2025-07-15,2004.19,Oakview Supplies,revenue
+2025-07-16,1893.78,Union Hardware,revenue
+2025-07-17,1834.57,Riverbend Cafe,revenue
+2025-07-19,1747.38,Maple & Co,revenue
+2025-07-19,-383.11,vendor,supplies
+2025-07-21,-4191.61,vendor,payroll
+2025-07-27,1854.02,Sterling Retail,revenue
+2025-07-27,-214.87,vendor,utilities
+2025-08-02,1697.8,Oakview Supplies,revenue
+2025-08-07,-448.96,vendor,supplies
+2025-08-07,-140.6,vendor,software
+2025-08-09,2098.39,Sterling Retail,revenue
+2025-08-11,-1400.0,vendor,rent
+2025-08-21,-4144.62,vendor,payroll
+2025-08-22,-228.84,vendor,utilities
+2025-08-23,1675.59,Riverbend Cafe,revenue
+2025-08-26,1921.47,Maple & Co,revenue
+2025-08-27,1813.68,Union Hardware,revenue
+2025-09-02,-454.93,vendor,supplies
+2025-09-10,2039.17,Sterling Retail,revenue
+2025-09-11,1655.99,Oakview Supplies,revenue
+2025-09-14,-171.21,vendor,software
+2025-09-15,1809.02,Maple & Co,revenue
+2025-09-17,1772.75,Riverbend Cafe,revenue
+2025-09-18,-3906.98,vendor,payroll
+2025-09-21,-1400.0,vendor,rent
+2025-09-25,1652.94,Union Hardware,revenue
+2025-09-25,-204.01,vendor,utilities
+2025-10-09,1896.4,Oakview Supplies,revenue
+2025-10-11,-287.43,vendor,utilities
+2025-10-12,-368.04,vendor,supplies
+2025-10-15,1874.85,Riverbend Cafe,revenue
+2025-10-15,-176.47,vendor,software
+2025-10-18,2038.5,Sterling Retail,revenue
+2025-10-18,1843.71,Union Hardware,revenue
+2025-10-22,2139.08,Maple & Co,revenue
+2025-10-22,-4190.79,vendor,payroll
+2025-10-23,-1400.0,vendor,rent
+2025-11-02,-4031.78,vendor,payroll
+2025-11-03,-1400.0,vendor,rent
+2025-11-04,1584.95,Riverbend Cafe,revenue
+2025-11-06,1869.67,Union Hardware,revenue
+2025-11-08,-307.56,vendor,supplies
+2025-11-11,2031.19,Oakview Supplies,revenue
+2025-11-11,2063.46,Maple & Co,revenue
+2025-11-15,1968.1,Sterling Retail,revenue
+2025-11-20,-152.35,vendor,software
+2025-11-28,-213.22,vendor,utilities
+2025-12-05,-3918.61,vendor,payroll
+2025-12-08,1684.39,Oakview Supplies,revenue
+2025-12-08,1865.99,Maple & Co,revenue
+2025-12-11,-298.19,vendor,utilities
+2025-12-14,-1400.0,vendor,rent
+2025-12-15,1998.86,Sterling Retail,revenue
+2025-12-17,2009.44,Union Hardware,revenue
+2025-12-17,-496.56,vendor,supplies
+2025-12-18,2075.51,Riverbend Cafe,revenue
+2025-12-21,-127.7,vendor,software

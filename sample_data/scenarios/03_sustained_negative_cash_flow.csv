@@ -1,0 +1,73 @@
+date,amount,counterparty,category
+2025-01-02,-4927.35,vendor,payroll
+2025-01-09,-561.65,vendor,supplies
+2025-01-17,-1600.0,vendor,rent
+2025-01-19,2482.07,Downtown Retail,revenue
+2025-01-20,2406.47,Bright Goods,revenue
+2025-01-21,2882.43,Corner Shop LLC,revenue
+2025-02-02,-465.72,vendor,supplies
+2025-02-06,2742.93,Bright Goods,revenue
+2025-02-06,-4939.59,vendor,payroll
+2025-02-17,2945.97,Corner Shop LLC,revenue
+2025-02-18,-1600.0,vendor,rent
+2025-02-19,3485.88,Downtown Retail,revenue
+2025-03-02,3224.15,Bright Goods,revenue
+2025-03-03,2627.75,Corner Shop LLC,revenue
+2025-03-10,-5058.18,vendor,payroll
+2025-03-14,-457.17,vendor,supplies
+2025-03-25,-1600.0,vendor,rent
+2025-03-26,3377.08,Downtown Retail,revenue
+2025-04-05,-5189.23,vendor,payroll
+2025-04-06,3616.28,Bright Goods,revenue
+2025-04-14,3426.93,Downtown Retail,revenue
+2025-04-17,-1600.0,vendor,rent
+2025-04-20,3070.8,Corner Shop LLC,revenue
+2025-04-23,-512.77,vendor,supplies
+2025-05-02,-428.72,vendor,supplies
+2025-05-11,1493.57,Downtown Retail,revenue
+2025-05-12,-1600.0,vendor,rent
+2025-05-13,1563.25,Bright Goods,revenue
+2025-05-15,-5024.72,vendor,payroll
+2025-05-28,1471.81,Corner Shop LLC,revenue
+2025-06-19,1932.97,Bright Goods,revenue
+2025-06-20,-5168.78,vendor,payroll
+2025-06-22,-1600.0,vendor,rent
+2025-06-23,1793.81,Downtown Retail,revenue
+2025-06-24,1903.65,Corner Shop LLC,revenue
+2025-06-28,-402.39,vendor,supplies
+2025-07-04,1333.65,Bright Goods,revenue
+2025-07-04,-5076.86,vendor,payroll
+2025-07-05,1173.99,Downtown Retail,revenue
+2025-07-06,-1600.0,vendor,rent
+2025-07-15,-446.24,vendor,supplies
+2025-07-22,1701.03,Corner Shop LLC,revenue
+2025-08-03,1692.47,Downtown Retail,revenue
+2025-08-03,-538.07,vendor,supplies
+2025-08-10,-1600.0,vendor,rent
+2025-08-19,-4935.73,vendor,payroll
+2025-08-24,1680.37,Bright Goods,revenue
+2025-08-26,1328.6,Corner Shop LLC,revenue
+2025-09-06,-4993.08,vendor,payroll
+2025-09-06,-420.67,vendor,supplies
+2025-09-08,1615.26,Corner Shop LLC,revenue
+2025-09-11,1419.04,Bright Goods,revenue
+2025-09-12,-1600.0,vendor,rent
+2025-09-21,1378.33,Downtown Retail,revenue
+2025-10-05,-5013.96,vendor,payroll
+2025-10-14,3129.58,Corner Shop LLC,revenue
+2025-10-15,-473.14,vendor,supplies
+2025-10-16,3397.11,Downtown Retail,revenue
+2025-10-21,3173.48,Bright Goods,revenue
+2025-10-27,-1600.0,vendor,rent
+2025-11-10,3097.83,Corner Shop LLC,revenue
+2025-11-11,2995.01,Downtown Retail,revenue
+2025-11-14,-476.84,vendor,supplies
+2025-11-19,2873.93,Bright Goods,revenue
+2025-11-20,-1600.0,vendor,rent
+2025-11-27,-5075.44,vendor,payroll
+2025-12-03,3206.65,Downtown Retail,revenue
+2025-12-12,3002.97,Corner Shop LLC,revenue
+2025-12-20,-587.88,vendor,supplies
+2025-12-21,-4987.91,vendor,payroll
+2025-12-23,3552.22,Bright Goods,revenue
+2025-12-25,-1600.0,vendor,rent

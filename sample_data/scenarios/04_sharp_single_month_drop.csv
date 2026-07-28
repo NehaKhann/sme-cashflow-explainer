@@ -1,0 +1,73 @@
+date,amount,counterparty,category
+2025-01-03,-405.61,vendor,supplies
+2025-01-04,2777.84,Regular Co,revenue
+2025-01-05,3460.73,Anchor Client Inc,revenue
+2025-01-17,2909.43,Steady Buyer,revenue
+2025-01-19,-4224.61,vendor,payroll
+2025-01-27,-1500.0,vendor,rent
+2025-02-02,-4251.32,vendor,payroll
+2025-02-08,3790.14,Regular Co,revenue
+2025-02-10,3626.33,Anchor Client Inc,revenue
+2025-02-10,-411.31,vendor,supplies
+2025-02-27,-1500.0,vendor,rent
+2025-02-28,2950.3,Steady Buyer,revenue
+2025-03-07,-1500.0,vendor,rent
+2025-03-10,-432.13,vendor,supplies
+2025-03-13,2864.53,Steady Buyer,revenue
+2025-03-14,-4348.21,vendor,payroll
+2025-03-21,3110.44,Regular Co,revenue
+2025-03-22,3630.29,Anchor Client Inc,revenue
+2025-04-02,3904.84,Steady Buyer,revenue
+2025-04-11,-4245.59,vendor,payroll
+2025-04-15,-330.22,vendor,supplies
+2025-04-18,-1500.0,vendor,rent
+2025-04-19,3833.45,Anchor Client Inc,revenue
+2025-04-20,3692.01,Regular Co,revenue
+2025-05-03,2894.31,Regular Co,revenue
+2025-05-07,3045.41,Anchor Client Inc,revenue
+2025-05-10,3620.78,Steady Buyer,revenue
+2025-05-10,-1500.0,vendor,rent
+2025-05-16,-4312.09,vendor,payroll
+2025-05-22,-355.75,vendor,supplies
+2025-06-10,-4444.89,vendor,payroll
+2025-06-12,-323.11,vendor,supplies
+2025-06-15,3687.98,Steady Buyer,revenue
+2025-06-15,-1500.0,vendor,rent
+2025-06-22,3411.53,Regular Co,revenue
+2025-06-23,2981.31,Anchor Client Inc,revenue
+2025-07-03,3434.79,Steady Buyer,revenue
+2025-07-05,-1500.0,vendor,rent
+2025-07-07,-391.82,vendor,supplies
+2025-07-10,3490.08,Regular Co,revenue
+2025-07-12,2845.91,Anchor Client Inc,revenue
+2025-07-21,-4241.37,vendor,payroll
+2025-08-06,-1500.0,vendor,rent
+2025-08-11,1145.49,Steady Buyer,revenue
+2025-08-11,-4403.5,vendor,payroll
+2025-08-12,915.42,Regular Co,revenue
+2025-08-13,1133.43,Anchor Client Inc,revenue
+2025-08-15,-277.73,vendor,supplies
+2025-09-02,-377.34,vendor,supplies
+2025-09-07,-1500.0,vendor,rent
+2025-09-10,-4385.51,vendor,payroll
+2025-09-11,3578.58,Steady Buyer,revenue
+2025-09-16,3240.81,Regular Co,revenue
+2025-09-23,3786.18,Anchor Client Inc,revenue
+2025-10-03,-438.95,vendor,supplies
+2025-10-08,-4372.81,vendor,payroll
+2025-10-08,-1500.0,vendor,rent
+2025-10-13,3600.72,Anchor Client Inc,revenue
+2025-10-13,3813.2,Steady Buyer,revenue
+2025-10-20,2917.19,Regular Co,revenue
+2025-11-05,-1500.0,vendor,rent
+2025-11-11,-295.24,vendor,supplies
+2025-11-12,-4200.71,vendor,payroll
+2025-11-17,3302.82,Regular Co,revenue
+2025-11-21,2778.99,Steady Buyer,revenue
+2025-11-23,3677.92,Anchor Client Inc,revenue
+2025-12-08,3281.07,Anchor Client Inc,revenue
+2025-12-09,3242.48,Steady Buyer,revenue
+2025-12-15,-4366.95,vendor,payroll
+2025-12-17,2844.18,Regular Co,revenue
+2025-12-22,-1500.0,vendor,rent
+2025-12-28,-406.86,vendor,supplies

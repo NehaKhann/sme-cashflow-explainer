@@ -1,0 +1,85 @@
+date,amount,counterparty,category
+2025-01-07,-466.04,vendor,supplies
+2025-01-09,-1200.0,vendor,rent
+2025-01-16,-3767.21,vendor,payroll
+2025-01-18,1534.94,Uneven Supply Co,revenue
+2025-01-24,3334.78,Irregular Imports,revenue
+2025-01-25,2184.24,Variable Ventures,revenue
+2025-01-25,2762.54,Patchy Retail,revenue
+2025-02-02,2417.22,Patchy Retail,revenue
+2025-02-05,2160.61,Irregular Imports,revenue
+2025-02-06,-314.62,vendor,supplies
+2025-02-09,1845.34,Variable Ventures,revenue
+2025-02-15,1680.07,Uneven Supply Co,revenue
+2025-02-26,-3883.17,vendor,payroll
+2025-02-26,-1200.0,vendor,rent
+2025-03-02,1514.63,Irregular Imports,revenue
+2025-03-06,1186.78,Variable Ventures,revenue
+2025-03-07,2561.2,Uneven Supply Co,revenue
+2025-03-08,2699.67,Patchy Retail,revenue
+2025-03-08,-1200.0,vendor,rent
+2025-03-11,-3905.9,vendor,payroll
+2025-03-23,-312.28,vendor,supplies
+2025-04-06,1013.48,Uneven Supply Co,revenue
+2025-04-12,-3909.59,vendor,payroll
+2025-04-13,1164.52,Patchy Retail,revenue
+2025-04-14,1048.44,Irregular Imports,revenue
+2025-04-21,-1200.0,vendor,rent
+2025-04-21,-296.62,vendor,supplies
+2025-04-24,946.57,Variable Ventures,revenue
+2025-05-02,-1200.0,vendor,rent
+2025-05-03,-3923.15,vendor,payroll
+2025-05-11,1484.9,Variable Ventures,revenue
+2025-05-11,1653.35,Irregular Imports,revenue
+2025-05-12,1255.75,Patchy Retail,revenue
+2025-05-13,-246.54,vendor,supplies
+2025-05-17,1954.16,Uneven Supply Co,revenue
+2025-06-02,769.5,Patchy Retail,revenue
+2025-06-08,-3964.29,vendor,payroll
+2025-06-09,-1200.0,vendor,rent
+2025-06-14,849.92,Irregular Imports,revenue
+2025-06-16,-396.69,vendor,supplies
+2025-06-24,595.55,Uneven Supply Co,revenue
+2025-06-27,747.76,Variable Ventures,revenue
+2025-07-03,-3870.11,vendor,payroll
+2025-07-04,-1200.0,vendor,rent
+2025-07-13,2222.26,Uneven Supply Co,revenue
+2025-07-16,1184.58,Irregular Imports,revenue
+2025-07-18,1381.78,Variable Ventures,revenue
+2025-07-18,-316.75,vendor,supplies
+2025-07-25,2113.6,Patchy Retail,revenue
+2025-08-04,-3811.96,vendor,payroll
+2025-08-11,3761.93,Patchy Retail,revenue
+2025-08-11,2429.8,Uneven Supply Co,revenue
+2025-08-12,2687.06,Variable Ventures,revenue
+2025-08-17,-451.54,vendor,supplies
+2025-08-24,3393.01,Irregular Imports,revenue
+2025-08-25,-1200.0,vendor,rent
+2025-09-03,-1200.0,vendor,rent
+2025-09-14,552.61,Irregular Imports,revenue
+2025-09-21,907.22,Variable Ventures,revenue
+2025-09-22,-3873.47,vendor,payroll
+2025-09-22,-490.18,vendor,supplies
+2025-09-25,949.93,Patchy Retail,revenue
+2025-09-28,706.96,Uneven Supply Co,revenue
+2025-10-06,2327.13,Patchy Retail,revenue
+2025-10-06,-1200.0,vendor,rent
+2025-10-07,-3869.63,vendor,payroll
+2025-10-15,-411.56,vendor,supplies
+2025-10-25,2215.28,Irregular Imports,revenue
+2025-10-27,1962.02,Uneven Supply Co,revenue
+2025-10-28,1613.45,Variable Ventures,revenue
+2025-11-06,-1200.0,vendor,rent
+2025-11-11,-3858.98,vendor,payroll
+2025-11-12,1962.71,Uneven Supply Co,revenue
+2025-11-17,2297.74,Patchy Retail,revenue
+2025-11-18,1921.98,Irregular Imports,revenue
+2025-11-21,2558.7,Variable Ventures,revenue
+2025-11-28,-203.48,vendor,supplies
+2025-12-12,2522.11,Irregular Imports,revenue
+2025-12-13,-291.62,vendor,supplies
+2025-12-17,2772.09,Patchy Retail,revenue
+2025-12-18,-3891.6,vendor,payroll
+2025-12-22,4574.85,Variable Ventures,revenue
+2025-12-27,3519.92,Uneven Supply Co,revenue
+2025-12-27,-1200.0,vendor,rent

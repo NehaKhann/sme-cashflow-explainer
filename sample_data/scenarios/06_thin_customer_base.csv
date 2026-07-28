@@ -1,0 +1,61 @@
+date,amount,counterparty,category
+2025-01-02,-3756.33,vendor,payroll
+2025-01-20,-1400.0,vendor,rent
+2025-01-26,4375.93,Client Beta,revenue
+2025-01-26,-253.03,vendor,supplies
+2025-01-28,4209.55,Client Alpha,revenue
+2025-02-02,4046.81,Client Alpha,revenue
+2025-02-08,-287.32,vendor,supplies
+2025-02-15,-3526.83,vendor,payroll
+2025-02-19,-1400.0,vendor,rent
+2025-02-27,3983.56,Client Beta,revenue
+2025-03-04,-3546.72,vendor,payroll
+2025-03-12,-1400.0,vendor,rent
+2025-03-13,-239.94,vendor,supplies
+2025-03-25,4312.46,Client Alpha,revenue
+2025-03-27,4624.23,Client Beta,revenue
+2025-04-05,-1400.0,vendor,rent
+2025-04-16,4787.38,Client Alpha,revenue
+2025-04-20,-219.45,vendor,supplies
+2025-04-22,-3561.08,vendor,payroll
+2025-04-26,4324.76,Client Beta,revenue
+2025-05-13,4608.64,Client Alpha,revenue
+2025-05-18,-3627.24,vendor,payroll
+2025-05-18,-204.72,vendor,supplies
+2025-05-24,-1400.0,vendor,rent
+2025-05-28,4999.39,Client Beta,revenue
+2025-06-13,3816.15,Client Alpha,revenue
+2025-06-15,3863.94,Client Beta,revenue
+2025-06-18,-1400.0,vendor,rent
+2025-06-18,-360.17,vendor,supplies
+2025-06-20,-3764.12,vendor,payroll
+2025-07-08,4349.04,Client Beta,revenue
+2025-07-08,-1400.0,vendor,rent
+2025-07-09,-3758.57,vendor,payroll
+2025-07-10,4288.85,Client Alpha,revenue
+2025-07-24,-295.57,vendor,supplies
+2025-08-07,3741.53,Client Alpha,revenue
+2025-08-11,-1400.0,vendor,rent
+2025-08-12,4189.39,Client Beta,revenue
+2025-08-18,-322.17,vendor,supplies
+2025-08-23,-3613.92,vendor,payroll
+2025-09-04,-221.55,vendor,supplies
+2025-09-14,-3771.21,vendor,payroll
+2025-09-15,4172.06,Client Beta,revenue
+2025-09-16,-1400.0,vendor,rent
+2025-09-17,3729.7,Client Alpha,revenue
+2025-10-04,-3644.99,vendor,payroll
+2025-10-16,4455.11,Client Alpha,revenue
+2025-10-17,-1400.0,vendor,rent
+2025-10-28,4394.62,Client Beta,revenue
+2025-10-28,-318.19,vendor,supplies
+2025-11-02,-1400.0,vendor,rent
+2025-11-05,-349.77,vendor,supplies
+2025-11-16,4054.42,Client Beta,revenue
+2025-11-25,4210.91,Client Alpha,revenue
+2025-11-27,-3510.48,vendor,payroll
+2025-12-08,4377.08,Client Alpha,revenue
+2025-12-15,-1400.0,vendor,rent
+2025-12-15,-277.56,vendor,supplies
+2025-12-16,4444.37,Client Beta,revenue
+2025-12-18,-3723.57,vendor,payroll
