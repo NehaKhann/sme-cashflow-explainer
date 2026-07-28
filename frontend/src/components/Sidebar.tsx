@@ -1,5 +1,6 @@
 import type { ApiHealthStatus } from "../types/api";
-import { GridIcon, UploadIcon, BarChartIcon, CloseIcon } from "./Icons";
+import { GridIcon, UploadIcon, BarChartIcon, CloseIcon, LogOutIcon } from "./Icons";
+import { useAuth } from "./AuthContext";
 
 export type Page = "dashboard" | "upload" | "reports";
 
@@ -18,6 +19,8 @@ const NAV_ITEMS: { page: Page; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function Sidebar({ status, active, onNavigate, open, onClose }: SidebarProps) {
+  const { user, logout } = useAuth();
+
   function handleNav(page: Page) {
     onNavigate(page);
     onClose();
@@ -58,6 +61,15 @@ export function Sidebar({ status, active, onNavigate, open, onClose }: SidebarPr
         </nav>
 
         <div className="sidebar-footer">
+          {user && (
+            <div className="sidebar-user">
+              <span className="sidebar-user-name">{user.display_name || user.email}</span>
+              <button className="btn-logout" onClick={logout} title="Sign out">
+                <LogOutIcon size={14} />
+                Sign out
+              </button>
+            </div>
+          )}
           <span className={`status-badge ${status.className}`}>
             <span className="status-dot" />
             <span className="status-label">{status.label}</span>

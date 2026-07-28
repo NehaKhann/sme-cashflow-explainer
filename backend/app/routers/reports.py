@@ -5,7 +5,8 @@ from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..db_models import Report, Transaction
+from ..db_models import Report, Transaction, User
+from ..auth import get_current_user
 
 logger = logging.getLogger("cashflow_explainer")
 
@@ -13,9 +14,14 @@ router = APIRouter(prefix="/api/reports", tags=["reports"])
 
 
 @router.get("")
-async def list_reports(db: AsyncSession = Depends(get_db)):
+async def list_reports(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     result = await db.execute(
-        select(Report).order_by(Report.created_at.desc())
+        select(Report)
+        .where(Report.user_id == current_user.id)
+        .order_by(Report.created_at.desc())
     )
     reports = result.scalars().all()
     return [
@@ -35,9 +41,13 @@ async def list_reports(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{report_id}")
-async def get_report(report_id: str, db: AsyncSession = Depends(get_db)):
+async def get_report(
+    report_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     result = await db.execute(
-        select(Report).where(Report.id == report_id)
+        select(Report).where(Report.id == report_id, Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -57,9 +67,13 @@ async def get_report(report_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.delete("/{report_id}", status_code=204)
-async def delete_report(report_id: str, db: AsyncSession = Depends(get_db)):
+async def delete_report(
+    report_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     result = await db.execute(
-        select(Report).where(Report.id == report_id)
+        select(Report).where(Report.id == report_id, Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -69,7 +83,18 @@ async def delete_report(report_id: str, db: AsyncSession = Depends(get_db)):
 
 
 @router.delete("", status_code=204)
-async def clear_all_reports(db: AsyncSession = Depends(get_db)):
-    await db.execute(delete(Transaction))
-    await db.execute(delete(Report))
+async def clear_all_reports(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    await db.execute(
+        delete(Transaction).where(
+            Transaction.report_id.in_(
+                select(Report.id).where(Report.user_id == current_user.id)
+            )
+        )
+    )
+    await db.execute(
+        delete(Report).where(Report.user_id == current_user.id)
+    )
     await db.commit()

@@ -1,9 +1,37 @@
-import type { AnalysisData, ApiHealthStatus, ReportSummary, ReportDetail } from "../types/api";
+import type { AnalysisData, ApiHealthStatus, ReportSummary, ReportDetail, AuthResponse, User } from "../types/api";
+
+function authHeaders(): Record<string, string> {
+  const token = localStorage.getItem("access_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function apiFetch(apiBase: string, path: string, options: RequestInit = {}) {
+  const headers: Record<string, string> = {
+    ...authHeaders(),
+    ...(options.headers as Record<string, string> || {}),
+  };
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+  const res = await fetch(`${apiBase}${path}`, { ...options, headers });
+  let data: unknown = null;
+  const ct = res.headers.get("content-type") || "";
+  if (ct.includes("application/json")) {
+    data = await res.json().catch(() => null);
+  }
+  if (!res.ok) {
+    const detail = data && typeof data === "object" && "detail" in data
+      ? (data as Record<string, unknown>).detail
+      : `Request failed: ${res.status}`;
+    throw new Error(String(detail));
+  }
+  return data;
+}
 
 export async function checkHealth(apiBase: string): Promise<ApiHealthStatus> {
   try {
-    const res = await fetch(`${apiBase}/health`, { method: "GET" });
-    if (res.ok) {
+    const data = await apiFetch(apiBase, "/health");
+    if (data && typeof data === "object" && "status" in data) {
       return { ok: true, label: "API connected", className: "status-ok" };
     }
     throw new Error("bad status");
@@ -14,37 +42,41 @@ export async function checkHealth(apiBase: string): Promise<ApiHealthStatus> {
 
 export async function analyzeTransactions(
   apiBase: string,
-  formData: FormData
+  formData: FormData,
 ): Promise<AnalysisData & { report_id: string }> {
-  const res = await fetch(`${apiBase}/api/analyze`, {
-    method: "POST",
-    body: formData,
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.detail || "Analysis failed.");
-  }
-  return data as AnalysisData & { report_id: string };
+  return apiFetch(apiBase, "/api/analyze", { method: "POST", body: formData }) as Promise<AnalysisData & { report_id: string }>;
 }
 
 export async function fetchReports(apiBase: string): Promise<ReportSummary[]> {
-  const res = await fetch(`${apiBase}/api/reports`);
-  if (!res.ok) throw new Error("Failed to fetch reports.");
-  return res.json();
+  return apiFetch(apiBase, "/api/reports") as Promise<ReportSummary[]>;
 }
 
 export async function fetchReport(apiBase: string, id: string): Promise<ReportDetail> {
-  const res = await fetch(`${apiBase}/api/reports/${id}`);
-  if (!res.ok) throw new Error("Report not found.");
-  return res.json();
+  return apiFetch(apiBase, `/api/reports/${id}`) as Promise<ReportDetail>;
 }
 
 export async function deleteReportApi(apiBase: string, id: string): Promise<void> {
-  const res = await fetch(`${apiBase}/api/reports/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Failed to delete report.");
+  await apiFetch(apiBase, `/api/reports/${id}`, { method: "DELETE" });
 }
 
 export async function clearAllReportsApi(apiBase: string): Promise<void> {
-  const res = await fetch(`${apiBase}/api/reports`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Failed to clear reports.");
+  await apiFetch(apiBase, "/api/reports", { method: "DELETE" });
+}
+
+export async function signupApi(apiBase: string, email: string, password: string, displayName: string): Promise<AuthResponse> {
+  return apiFetch(apiBase, "/api/auth/signup", {
+    method: "POST",
+    body: JSON.stringify({ email, password, display_name: displayName }),
+  }) as Promise<AuthResponse>;
+}
+
+export async function loginApi(apiBase: string, email: string, password: string): Promise<AuthResponse> {
+  return apiFetch(apiBase, "/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  }) as Promise<AuthResponse>;
+}
+
+export async function getMeApi(apiBase: string): Promise<User> {
+  return apiFetch(apiBase, "/api/auth/me") as Promise<User>;
 }

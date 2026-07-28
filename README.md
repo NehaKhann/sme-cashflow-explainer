@@ -77,7 +77,19 @@ GROQ_API_KEY=gsk_your_key_here
 Docker Compose auto-loads `.env` from the project root — no extra flags needed.  
 Skip this step to use the deterministic template narrative instead.
 
-### 2. Start all services
+### 2. Set JWT secret
+
+```bash
+# Generate a secure random secret
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+
+# Copy the example file
+cp .env.example .env
+
+# Edit .env and paste your Groq key and JWT secret
+```
+
+### 3. Start all services
 
 ```bash
 docker compose up -d
@@ -91,7 +103,7 @@ This starts three containers:
 | **Backend** | `localhost:8000` | FastAPI — auto-creates tables on startup |
 | **Frontend** | `localhost:5173` | Vite dev server with live reload |
 
-### 3. Run it
+### 4. Run it
 
 1. Open `http://localhost:5173`
 2. Click **"Use sample data instead"** (or drop a CSV)
@@ -99,7 +111,7 @@ This starts three containers:
 4. Review the metrics, risk flags, chart, and narrative
 5. Switch to the **Reports** page to see all saved analyses
 
-### 4. Run tests
+### 5. Run tests
 
 ```bash
 cd backend
@@ -108,7 +120,7 @@ python -m pytest tests/ -v
 
 15+ tests covering feature extraction edge cases, risk scoring rules, the API, and report CRUD.
 
-### 5. Stop
+### 6. Stop
 
 ```bash
 docker compose down        # stops containers
@@ -241,6 +253,7 @@ Generates a synthetic 12-month transaction CSV with an engineered customer-conce
 | Backend | Python 3.12, FastAPI, Pydantic v2 |
 | Database | PostgreSQL 16, SQLAlchemy 2.0 (async), asyncpg |
 | Data | Pandas, NumPy |
+| Auth | JWT (python-jose), bcrypt (passlib), HTTPBearer |
 | Narrative | Groq API (Llama 3.3 70B) or deterministic template |
 | Testing | pytest, pytest-asyncio, httpx (30%+ coverage on core logic) |
 | Deploy | Docker Compose, Dockerfiles, Render, Vercel / Netlify |
@@ -248,6 +261,7 @@ Generates a synthetic 12-month transaction CSV with an engineered customer-conce
 ## Roadmap
 
 - [x] Analysis history with PostgreSQL persistence
+- [x] User authentication (signup / login / JWT)
 - [ ] PDF export of the memo
 - [ ] Multi-file comparison (quarter-over-quarter)
 - [ ] Additional bank export format support

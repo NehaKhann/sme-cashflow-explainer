@@ -7,7 +7,8 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
-from ..db_models import Report, Transaction
+from ..db_models import Report, Transaction, User
+from ..auth import get_current_user
 from ..services.feature_extraction import load_transactions, extract_features
 from ..services.risk_scoring import assess_risk
 from ..services.narrative_generator import generate_narrative
@@ -25,6 +26,7 @@ MAX_FILE_SIZE_MB = 5
 async def analyze_transactions(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     if not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
@@ -52,6 +54,7 @@ async def analyze_transactions(
 
     report = Report(
         id=report_id,
+        user_id=current_user.id,
         created_at=now,
         filename=file.filename,
         start_date=features.start_date,

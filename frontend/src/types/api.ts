@@ -45,6 +45,18 @@ export interface ApiHealthStatus {
   className: string;
 }
 
+export interface User {
+  id: string;
+  email: string;
+  display_name: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  user: User;
+}
+
 export interface StoredReport {
   id: string;
   createdAt: string;

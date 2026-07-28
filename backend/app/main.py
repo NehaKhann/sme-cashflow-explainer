@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import init_db, dispose_db
-from .routers import analysis, reports
+from .routers import analysis, reports, auth
 
 logging.basicConfig(level=logging.INFO)
 
@@ -39,6 +39,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(analysis.router)
 app.include_router(reports.router)
 

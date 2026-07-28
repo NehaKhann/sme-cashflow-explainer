@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import type { AnalysisData, ApiHealthStatus, ReportSummary } from "./types/api";
 import { checkHealth, analyzeTransactions, fetchReports, fetchReport, deleteReportApi, clearAllReportsApi } from "./api/client";
+import { AuthProvider, useAuth } from "./components/AuthContext";
+import { LoginPage, SignupPage } from "./components/AuthPage";
 import type { Page } from "./components/Sidebar";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
@@ -24,8 +26,21 @@ const TOPBAR_META: Record<Page, { title: string; desc: string }> = {
 };
 
 export default function App() {
-  const [page, setPage] = useState<Page>("dashboard");
   const [apiBase, setApiBase] = useState("http://localhost:8000");
+
+  return (
+    <AuthProvider apiBase={apiBase}>
+      <AppInner apiBase={apiBase} onApiBaseChange={setApiBase} />
+    </AuthProvider>
+  );
+}
+
+type AuthPage = "login" | "signup";
+
+function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChange: (v: string) => void }) {
+  const { user, loading } = useAuth();
+  const [page, setPage] = useState<Page>("dashboard");
+  const [authPage, setAuthPage] = useState<AuthPage>("login");
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<AnalysisData | null>(null);
@@ -38,6 +53,10 @@ export default function App() {
   }, [apiBase]);
 
   useEffect(() => { doHealthCheck(); }, [doHealthCheck]);
+
+  useEffect(() => {
+    if (user) refreshReports();
+  }, [user]);
 
   async function refreshReports() {
     try {
@@ -97,6 +116,26 @@ export default function App() {
     setPage("upload");
   }
 
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="auth-layout">
+        {authPage === "signup" ? (
+          <SignupPage onSwitch={() => setAuthPage("login")} />
+        ) : (
+          <LoginPage onSwitch={() => setAuthPage("signup")} />
+        )}
+      </div>
+    );
+  }
+
   const meta = TOPBAR_META[page];
   let title = meta.title;
   let desc = meta.desc;
@@ -118,7 +157,7 @@ export default function App() {
       <main className="main">
         <Topbar
           apiBase={apiBase}
-          onApiBaseChange={setApiBase}
+          onApiBaseChange={onApiBaseChange}
           title={title}
           description={desc}
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
