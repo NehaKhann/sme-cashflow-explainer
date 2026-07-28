@@ -3,6 +3,7 @@ import type { AnalysisData, ApiHealthStatus, ReportSummary } from "./types/api";
 import { checkHealth, analyzeTransactions, fetchReports, fetchReport, deleteReportApi, clearAllReportsApi } from "./api/client";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import { LoginPage, SignupPage } from "./components/AuthPage";
+import { LandingPage } from "./components/LandingPage";
 import type { Page } from "./components/Sidebar";
 import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
@@ -35,12 +36,12 @@ export default function App() {
   );
 }
 
-type AuthPage = "login" | "signup";
+type AuthPage = "landing" | "login" | "signup";
 
 function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChange: (v: string) => void }) {
   const { user, loading } = useAuth();
   const [page, setPage] = useState<Page>("dashboard");
-  const [authPage, setAuthPage] = useState<AuthPage>("login");
+  const [authPage, setAuthPage] = useState<AuthPage>("landing");
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<AnalysisData | null>(null);
@@ -125,6 +126,14 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   }
 
   if (!user) {
+    if (authPage === "landing") {
+      return (
+        <LandingPage
+          onGetStarted={() => setAuthPage("login")}
+          onSignIn={() => setAuthPage("login")}
+        />
+      );
+    }
     return (
       <div className="auth-layout">
         {authPage === "signup" ? (
