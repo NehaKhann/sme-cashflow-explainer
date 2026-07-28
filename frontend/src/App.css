@@ -1474,6 +1474,10 @@ body {
 
 /* Landing responsive */
 
+@media (min-width: 901px) {
+  .landing-mobile-menu { display: none !important; }
+}
+
 @media (max-width: 900px) {
   .landing-section { padding: 56px 20px; }
   .landing-cta { padding: 56px 20px; }
