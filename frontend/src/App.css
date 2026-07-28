@@ -1559,7 +1559,60 @@ body {
 }
 
 .dark-mode .landing {
-  background: #0a0e12;
+  background: #070a0d;
+}
+
+.dark-mode .landing-header {
+  background: rgba(7,10,13,0.92);
+  border-bottom-color: rgba(255,255,255,0.03);
+}
+
+.dark-mode .landing-section-alt {
+  background: rgba(255,255,255,0.01);
+  border-top-color: rgba(255,255,255,0.03);
+  border-bottom-color: rgba(255,255,255,0.03);
+}
+
+.dark-mode .landing .feature-card {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.04);
+}
+.dark-mode .landing .feature-card:hover {
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.06);
+}
+
+.dark-mode .landing .btn-secondary {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.06);
+}
+.dark-mode .landing .btn-secondary:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.dark-mode .btn-dark-toggle-nav {
+  border-color: rgba(255,255,255,0.06);
+}
+
+.dark-mode .landing-hero-bg {
+  background:
+    radial-gradient(ellipse 600px 400px at 50% 20%, rgba(59,130,246,0.05), transparent),
+    radial-gradient(ellipse 400px 300px at 30% 60%, rgba(99,102,241,0.03), transparent),
+    radial-gradient(ellipse 400px 300px at 70% 60%, rgba(16,185,129,0.02), transparent);
+}
+
+.dark-mode .step-item code {
+  background: rgba(255,255,255,0.03);
+}
+
+.dark-mode .landing-cta {
+  background: rgba(255,255,255,0.01);
+  border-top-color: rgba(255,255,255,0.03);
+}
+
+.dark-mode .landing-footer {
+  border-top-color: rgba(255,255,255,0.03);
 }
 
 .dark-mode .chart-card svg text {
