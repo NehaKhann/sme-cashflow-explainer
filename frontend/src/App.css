@@ -449,7 +449,7 @@ body {
   font-weight: 500;
   transition: color var(--transition);
 }
-.btn-ghost:hover { color: #fff; }
+.btn-ghost:hover { color: var(--text); }
 
 .btn-secondary {
   background: var(--card-bg);
