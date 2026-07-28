@@ -11,6 +11,7 @@ interface SidebarProps {
   onNavigate: (page: Page) => void;
   open: boolean;
   onClose: () => void;
+  onAuthAction?: (action: "login" | "signup") => void;
 }
 
 const NAV_ITEMS: { page: Page | "compare"; label: string; icon: React.ReactNode }[] = [
@@ -19,8 +20,8 @@ const NAV_ITEMS: { page: Page | "compare"; label: string; icon: React.ReactNode 
   { page: "reports", label: "Reports", icon: <BarChartIcon /> },
 ];
 
-export function Sidebar({ status, active, onNavigate, open, onClose }: SidebarProps) {
-  const { user, logout } = useAuth();
+export function Sidebar({ status, active, onNavigate, open, onClose, onAuthAction }: SidebarProps) {
+  const { user, isDemo, logout } = useAuth();
   const [dark, setDark] = useState(() => localStorage.getItem("dark_mode") === "true");
 
   useEffect(() => {
@@ -74,6 +75,17 @@ export function Sidebar({ status, active, onNavigate, open, onClose }: SidebarPr
               <button className="btn-logout" onClick={logout} title="Sign out">
                 <LogOutIcon size={14} />
                 Sign out
+              </button>
+            </div>
+          )}
+          {isDemo && onAuthAction && (
+            <div className="sidebar-demo-actions">
+              <span className="sidebar-demo-label">Demo mode</span>
+              <button className="btn-logout" onClick={() => onAuthAction("signup")} title="Create account">
+                Create account
+              </button>
+              <button className="btn-logout" onClick={() => onAuthAction("login")} title="Sign in">
+                Sign in
               </button>
             </div>
           )}

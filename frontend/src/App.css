@@ -1444,6 +1444,42 @@ body {
   border-radius: var(--radius-sm);
 }
 
+.auth-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  transition: color var(--transition);
+}
+.auth-back:hover {
+  color: var(--primary);
+}
+
+.sidebar-demo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 8px;
+}
+
+.sidebar-demo-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warning);
+  margin-bottom: 4px;
+}
+
 .auth-footer {
   text-align: center;
   font-size: 13px;

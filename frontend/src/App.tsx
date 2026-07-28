@@ -29,7 +29,7 @@ const TOPBAR_META: Record<Page | "compare", { title: string; desc: string }> = {
 };
 
 export default function App() {
-  const [apiBase, setApiBase] = useState("http://localhost:8000");
+  const [apiBase, setApiBase] = useState(import.meta.env.VITE_API_BASE || "http://localhost:8000");
 
   return (
     <AuthProvider apiBase={apiBase}>
@@ -41,7 +41,7 @@ export default function App() {
 type AuthPage = "landing" | "login" | "signup";
 
 function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChange: (v: string) => void }) {
-  const { user, loading, isDemo, enterDemo, exitDemo } = useAuth();
+  const { user, loading, isDemo, enterDemo, exitDemo, logout } = useAuth();
   const [page, setPage] = useState<Page>("dashboard");
   const [authPage, setAuthPage] = useState<AuthPage>("landing");
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
@@ -141,9 +141,9 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     return (
       <div className="auth-layout">
         {authPage === "signup" ? (
-          <SignupPage onSwitch={() => setAuthPage("login")} />
+          <SignupPage onSwitch={() => setAuthPage("login")} onBack={() => setAuthPage("landing")} />
         ) : (
-          <LoginPage onSwitch={() => setAuthPage("signup")} />
+          <LoginPage onSwitch={() => setAuthPage("signup")} onBack={() => setAuthPage("landing")} />
         )}
       </div>
     );
@@ -167,6 +167,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
         onNavigate={setPage}
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
+        onAuthAction={(action) => { logout(); setAuthPage(action); }}
       />
       <main className="main">
         <Topbar

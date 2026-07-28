@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { TrendingUpIcon } from "./Icons";
 
-export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
+export function LoginPage({ onSwitch, onBack }: { onSwitch: () => void; onBack: () => void }) {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +25,12 @@ export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <button className="auth-back" onClick={onBack} type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back to home
+        </button>
         <div className="auth-header">
           <TrendingUpIcon size={32} />
           <h1>Sign in to Ledger</h1>
@@ -55,7 +61,7 @@ export function LoginPage({ onSwitch }: { onSwitch: () => void }) {
   );
 }
 
-export function SignupPage({ onSwitch }: { onSwitch: () => void }) {
+export function SignupPage({ onSwitch, onBack }: { onSwitch: () => void; onBack: () => void }) {
   const { signup } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -79,6 +85,12 @@ export function SignupPage({ onSwitch }: { onSwitch: () => void }) {
   return (
     <div className="auth-page">
       <div className="auth-card">
+        <button className="auth-back" onClick={onBack} type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back to home
+        </button>
         <div className="auth-header">
           <TrendingUpIcon size={32} />
           <h1>Create your account</h1>
