@@ -15,3 +15,8 @@ ml/output/
 *.gguf
 *.safetensors
 *.bin
+ml/data/train.jsonl
+ml/data/eval.jsonl
+ml/data/data_checksum.json
+ml/llama.cpp-temp/
+ml/convert_hf_to_gguf.py
