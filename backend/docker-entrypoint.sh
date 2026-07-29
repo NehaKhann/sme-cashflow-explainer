@@ -3,7 +3,7 @@ set -e
 
 # Parse connection details from DATABASE_URL once
 # Expected format: postgresql+asyncpg://user:pass@host:port/db
-_HOST="${DATABASE_URL#*@}" && _HOST="${_HOST%%:*}"
+_HOST="${DATABASE_URL#*@}" && _HOST="${_HOST%%:*}" && _HOST="${_HOST%%/*}"
 _USER="${DATABASE_URL#*://}" && _USER="${_USER%%:*}"
 _DB="${DATABASE_URL##*/}"
 
@@ -20,5 +20,6 @@ from app.database import init_db
 asyncio.run(init_db())
 "
 
-echo "Starting uvicorn..."
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+_PORT="${PORT:-8000}"
+echo "Starting uvicorn on port ${_PORT}..."
+exec uvicorn app.main:app --host 0.0.0.0 --port "${_PORT}"
