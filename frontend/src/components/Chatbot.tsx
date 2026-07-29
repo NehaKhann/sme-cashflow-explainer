@@ -6,6 +6,11 @@ interface ChatbotProps {
   apiBase: string;
 }
 
+function formatTime(): string {
+  const d = new Date();
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 export function Chatbot({ apiBase }: ChatbotProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: "Hi! I'm the Ledger assistant. Ask me anything about cash-flow underwriting or how to use the platform." },
@@ -20,6 +25,17 @@ export function Chatbot({ apiBase }: ChatbotProps) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (expanded) inputRef.current?.focus();
+  }, [expanded]);
+
+  function handleClear() {
+    setMessages([
+      { role: "assistant", content: "Hi! I'm the Ledger assistant. Ask me anything about cash-flow underwriting or how to use the platform." },
+    ]);
+    setError("");
+  }
 
   async function handleSend() {
     const text = input.trim();
@@ -104,27 +120,44 @@ export function Chatbot({ apiBase }: ChatbotProps) {
     );
   }
 
+  const time = formatTime();
+
   return (
     <div className="chatbot-overlay">
       <div className="chatbot-panel">
         <div className="chatbot-header">
           <div className="chatbot-header-left">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
+            <div className="chatbot-header-avatar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
             <span>Ledger Assistant</span>
           </div>
-          <button className="chatbot-close" onClick={() => setExpanded(false)} aria-label="Close chat">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="chatbot-header-actions">
+            <button className="chatbot-clear" onClick={handleClear} title="Clear chat">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            </button>
+            <button className="chatbot-close" onClick={() => setExpanded(false)} aria-label="Close chat">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div className="chatbot-messages">
           {messages.map((msg, i) => (
             <div key={i} className={`chatbot-msg chatbot-msg-${msg.role}`}>
-              <div className="chatbot-msg-content">{msg.content}</div>
+              {msg.role === "assistant" && (
+                <div className="chatbot-msg-avatar">L</div>
+              )}
+              <div className="chatbot-msg-body">
+                <div className="chatbot-msg-content">{msg.content}</div>
+                <span className="chatbot-msg-time">{time}</span>
+              </div>
             </div>
           ))}
           {streaming && (
