@@ -3,10 +3,15 @@ import type { AnalysisData, StoredReport } from "../types/api";
 const STORAGE_KEY = "ledger_reports";
 const MAX_REPORTS = 50;
 
+function generateId(): string {
+  try { return crypto.randomUUID(); } catch { /* fallback for HTTP */ }
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+}
+
 export function saveReport(data: AnalysisData, filename: string): StoredReport {
   const reports = loadReports();
   const report: StoredReport = {
-    id: crypto.randomUUID(),
+    id: generateId(),
     createdAt: new Date().toISOString(),
     filename,
     data,

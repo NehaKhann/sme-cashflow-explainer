@@ -1,0 +1,14 @@
+{
+    "model": "unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
+    "epochs": 2,
+    "lr": 0.0002,
+    "rank": 16,
+    "alpha": 32,
+    "batch_size": 4,
+    "grad_accum": 2,
+    "max_seq_len": 1024,
+    "seed": 42,
+    "eval_split": 0.1,
+    "samples_per_dataset": 300,
+    "quant": "q4_k_m"
+}

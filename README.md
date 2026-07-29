@@ -82,7 +82,7 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narra
 | Auth | JWT (python-jose), bcrypt (passlib), per-user data isolation |
 | LLM | Groq API (Llama 3.3 70B) or deterministic template |
 | Chatbot | Fine-tuned Llama 3.2 3B via QLoRA, served via Ollama |
-| ML Pipeline | PyTorch, Hugging Face Transformers, PEFT, bitsandbytes, TRL |
+| ML Pipeline | PyTorch, Hugging Face Transformers, PEFT, bitsandbytes, TRL, Ollama |
 | Data | Pandas, NumPy |
 | Testing | pytest, pytest-asyncio, httpx |
 | Infra | Docker Compose, Render |
@@ -163,15 +163,32 @@ The chatbot is a small language model fine-tuned on cash-flow underwriting knowl
 
 ### Training
 
+Requires a GPU with ≥8 GB VRAM for reasonable speed. The script auto-detects your GPU (NVIDIA CUDA or Apple Metal).
+
 ```bash
 cd ml
 pip install -r requirements.txt
-python prepare_dataset.py --with-hf       # build dataset
-python train.py                            # QLoRA fine-tune (GPU req.)
-python quantize.py --adapters ./output/... # merge + GGUF
+python prepare_dataset.py --with-hf              # build dataset + writes checksum
+python train.py                                  # QLoRA fine-tune (validates checksum)
+python train.py --config my_config.json          # use a custom config file
+python quantize.py --adapters ./output/...       # merge + GGUF
 ollama create ledger-chatbot -f ./output/.../Modelfile
-ollama serve                               # backend proxies here
+ollama serve                                     # backend proxies here
 ```
+
+**Config priority:** CLI arg > `training_config.json` > built-in default. All four scripts (`prepare_dataset.py`, `train.py`, `quantize.py`, `evaluate.py`) accept `--config` and share the same config file.
+
+**Data integrity:** `train.py` validates SHA-256 hashes of the dataset against checksums written by `prepare_dataset.py`, preventing silent training on stale or corrupted data.
+
+**GPU vs CPU:**
+
+| Mode | Setup | Speed |
+|---|---|---|
+| **GPU (CUDA)** | NVIDIA GPU, CUDA 12.x, `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124` | ~15-30 min training |
+| **GPU (Metal)** | Apple Silicon Mac (M1+), PyTorch MPS backend | ~30-60 min training |
+| **CPU** | No GPU, `pip install torch torchvision torchaudio` | Several hours (not recommended for training) |
+
+Ollama also uses the GPU automatically when available — verify with `ollama run ledger-chatbot` and check GPU usage in Task Manager (Windows) or `nvidia-smi`.
 
 ### What it learns
 
@@ -188,16 +205,18 @@ ollama serve                               # backend proxies here
 | **QLoRA** | 4-bit NF4 quantization + low-rank adapters — fine-tune a 3B model on a single GPU |
 | **PEFT** | Only ~0.1% of parameters are trainable; base model stays frozen |
 | **GGUF** | Converts the merged model to a CPU-efficient format for Ollama |
-| **Ollama** | Serves the quantized model locally with a REST API |
+| **Ollama** | Serves the quantized model locally with a REST API, GPU-accelerated |
+| **Config** | Shared `training_config.json` + CLI overrides; all scripts accept `--config` |
+| **Checksums** | Dataset SHA-256 hashes validated across prepare/train stages |
 
 ### Dataset
 
 | Source | Description | Size |
 |---|---|---|
 | `ml/data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 50 examples |
-| Hugging Face (optional) | `financial_phrasebank`, `AdaptLLM/finance-tasks` | ~600 examples |
+| Hugging Face (optional) | [`financial_phrasebank`](https://huggingface.co/datasets/financial_phrasebank), [`AdaptLLM/finance-tasks`](https://huggingface.co/datasets/AdaptLLM/finance-tasks) | ~600 examples |
 
-See `ml/README.md` for full documentation.
+See `ml/README.md` for full documentation including config reference, data integrity checks, hyperparameter tuning, GGUF quantization options, and evaluation.
 
 ---
 

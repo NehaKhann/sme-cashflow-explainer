@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
 import type { ApiHealthStatus } from "../types/api";
 import { GridIcon, UploadIcon, BarChartIcon, CloseIcon, LogOutIcon } from "./Icons";
 import { useAuth } from "./AuthContext";
+import { useDarkMode } from "../hooks/useDarkMode";
 
 export type Page = "dashboard" | "upload" | "reports";
 
@@ -22,12 +22,7 @@ const NAV_ITEMS: { page: Page | "compare"; label: string; icon: React.ReactNode 
 
 export function Sidebar({ status, active, onNavigate, open, onClose, onAuthAction }: SidebarProps) {
   const { user, isDemo, logout } = useAuth();
-  const [dark, setDark] = useState(() => localStorage.getItem("dark_mode") === "true");
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark-mode", dark);
-    localStorage.setItem("dark_mode", String(dark));
-  }, [dark]);
+  const [dark, toggleDark] = useDarkMode();
 
   function handleNav(page: Page) {
     onNavigate(page);
@@ -90,7 +85,7 @@ export function Sidebar({ status, active, onNavigate, open, onClose, onAuthActio
             </div>
           )}
           <div className="sidebar-actions">
-            <button className="btn-dark-toggle" onClick={() => setDark(!dark)} title="Toggle dark mode">
+            <button className="btn-dark-toggle" onClick={toggleDark} title="Toggle dark mode">
               {dark ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />

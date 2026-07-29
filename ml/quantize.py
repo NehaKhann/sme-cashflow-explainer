@@ -34,6 +34,8 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
+from ml_utils import load_config, merge_config_cli
+
 # ---------------------------------------------------------------------------
 # Supported quantization levels (llama.cpp)
 # ---------------------------------------------------------------------------
@@ -47,7 +49,9 @@ DEFAULT_QUANT = "q4_k_m"
 
 
 def parse_args():
+    builtin = {"quant": DEFAULT_QUANT, "skip_llamacpp": False, "llama_cpp_repo": None, "config": None}
     parser = argparse.ArgumentParser(description="Merge LoRA adapters and quantize to GGUF")
+    parser.add_argument("--config", default=None, help="Path to training_config.json")
     parser.add_argument("--adapters", required=True, help="Path to LoRA adapter directory from train.py")
     parser.add_argument("--quant", default=DEFAULT_QUANT, choices=list(QUANT_TYPES.keys()) + ["all"],
                         help="Quantization level(s). 'all' generates every level.")
@@ -55,7 +59,10 @@ def parse_args():
                         help="Skip GGUF conversion (merge + save safetensors only)")
     parser.add_argument("--llama-cpp-repo", default=None,
                         help="Path to local llama.cpp repo (if convert.py not in PATH)")
-    return parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config)
+    args = merge_config_cli(config, args, builtin)
+    return args
 
 
 def merge_and_save(adapter_path: str) -> str:
@@ -121,14 +128,19 @@ def convert_to_gguf(merged_dir: str, adapter_path: str, quant: str, llama_cpp_re
     if llama_cpp_repo:
         convert_script = os.path.join(llama_cpp_repo, convert_script)
     else:
-        # Try finding it in environment
-        import importlib.util
-        try:
-            spec = importlib.util.find_spec("llama_cpp")
-            if spec:
-                convert_script = os.path.join(os.path.dirname(spec.origin), convert_script)
-        except ImportError:
-            pass
+        # Check if `llama.cpp` (C++ repo) cloned locally exposes it via PATH
+        which = shutil.which(convert_script)
+        if which:
+            convert_script = which
+        else:
+            # Common install locations
+            for candidate in (
+                os.path.expanduser("~/llama.cpp/convert_hf_to_gguf.py"),
+                os.path.expanduser("~/llama.cpp/convert/convert_hf_to_gguf.py"),
+            ):
+                if os.path.exists(candidate):
+                    convert_script = candidate
+                    break
 
     print(f"[GGUF] Converting {merged_dir} → {fp16_path}")
     print(f"       Using script: {convert_script}")
@@ -156,9 +168,18 @@ def convert_to_gguf(merged_dir: str, adapter_path: str, quant: str, llama_cpp_re
         q_path = os.path.join(gguf_dir, f"ledger-chatbot-{q}.gguf")
         print(f"[GGUF] Quantizing to {q}: {fp16_path} → {q_path}")
 
-        quantize_bin = "llama-quantize"
-        if llama_cpp_repo:
-            quantize_bin = os.path.join(llama_cpp_repo, quantize_bin)
+        quantize_bin = shutil.which("llama-quantize")
+        if not quantize_bin and llama_cpp_repo:
+            candidate = os.path.join(llama_cpp_repo, "llama-quantize")
+            if os.name == "nt":
+                candidate += ".exe"
+            if os.path.exists(candidate):
+                quantize_bin = candidate
+
+        if not quantize_bin:
+            print("[!] llama-quantize not found in PATH or --llama-cpp-repo")
+            print("    Skipping quantization. Install llama.cpp or use --skip-llamacpp")
+            continue
 
         try:
             subprocess.run([quantize_bin, fp16_path, q_path, q.upper()], check=True)

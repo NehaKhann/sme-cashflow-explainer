@@ -88,15 +88,17 @@ FLAG_RULES = [
 def assess_risk(features: CashFlowFeatures) -> RiskAssessment:
     score = 0
     flags: list[RiskFlag] = []
+    seen_codes: set[str] = set()
 
     for rule in FLAG_RULES:
-        if rule["condition"](features):
+        if rule["condition"](features) and rule["code"] not in seen_codes:
             score += rule["score"]
             flags.append(RiskFlag(
                 severity=rule["severity"],
                 code=rule["code"],
                 message=rule["message"](features),
             ))
+            seen_codes.add(rule["code"])
 
     score = min(score, 100)
 

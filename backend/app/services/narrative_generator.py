@@ -1,6 +1,5 @@
 import os
 import json
-from groq import Groq
 from ..models import CashFlowFeatures, RiskAssessment
 
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
@@ -76,6 +75,11 @@ def _fallback_narrative(features: CashFlowFeatures, risk: RiskAssessment) -> str
 def generate_narrative(features: CashFlowFeatures, risk: RiskAssessment) -> str:
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
+        return _fallback_narrative(features, risk)
+
+    try:
+        from groq import Groq
+    except ImportError:
         return _fallback_narrative(features, risk)
 
     client = Groq(api_key=api_key)

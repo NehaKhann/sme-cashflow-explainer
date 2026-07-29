@@ -12,8 +12,8 @@ function formatTime(): string {
 }
 
 export function Chatbot({ apiBase }: ChatbotProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "Hi! I'm the Ledger assistant. Ask me anything about cash-flow underwriting or how to use the platform." },
+  const [messages, setMessages] = useState<(ChatMessage & { ts: string })[]>([
+    { role: "assistant", content: "Hi! I'm the Ledger assistant. Ask me anything about cash-flow underwriting or how to use the platform.", ts: formatTime() },
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -32,7 +32,7 @@ export function Chatbot({ apiBase }: ChatbotProps) {
 
   function handleClear() {
     setMessages([
-      { role: "assistant", content: "Hi! I'm the Ledger assistant. Ask me anything about cash-flow underwriting or how to use the platform." },
+      { role: "assistant", content: "Hi! I'm the Ledger assistant. Ask me anything about cash-flow underwriting or how to use the platform.", ts: formatTime() },
     ]);
     setError("");
   }
@@ -43,11 +43,12 @@ export function Chatbot({ apiBase }: ChatbotProps) {
 
     setInput("");
     setError("");
-    const userMsg: ChatMessage = { role: "user", content: text };
+    const now = formatTime();
+    const userMsg = { role: "user" as const, content: text, ts: now };
     setMessages((prev) => [...prev, userMsg]);
     setStreaming(true);
 
-    const assistantMsg: ChatMessage = { role: "assistant", content: "" };
+    const assistantMsg = { role: "assistant" as const, content: "", ts: now };
     setMessages((prev) => [...prev, assistantMsg]);
 
     const history = messages.concat(userMsg).map((m) => ({ role: m.role, content: m.content }));
@@ -86,7 +87,7 @@ export function Chatbot({ apiBase }: ChatbotProps) {
               full += parsed.text;
               setMessages((prev) => {
                 const next = [...prev];
-                next[next.length - 1] = { role: "assistant", content: full };
+                next[next.length - 1] = { ...next[next.length - 1], content: full };
                 return next;
               });
             }
@@ -119,8 +120,6 @@ export function Chatbot({ apiBase }: ChatbotProps) {
       </button>
     );
   }
-
-  const time = formatTime();
 
   return (
     <div className="chatbot-overlay">
@@ -156,7 +155,7 @@ export function Chatbot({ apiBase }: ChatbotProps) {
               )}
               <div className="chatbot-msg-body">
                 <div className="chatbot-msg-content">{msg.content}</div>
-                <span className="chatbot-msg-time">{time}</span>
+                <span className="chatbot-msg-time">{msg.ts}</span>
               </div>
             </div>
           ))}

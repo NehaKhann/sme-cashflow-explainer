@@ -1,0 +1,23 @@
+# Output directories from training / quantization
+output/
+merged/
+gguf/
+
+# Large binary files
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Hugging Face cache
+.cache/
+
+# OS junk
+.DS_Store
+Thumbs.db

@@ -52,7 +52,7 @@ async def analyze_transactions(
     report_id = uuid.uuid4()
     is_demo = current_user is None
 
-    raw_data = AnalysisResponse.build(features, risk, narrative, str(report_id), currency, is_demo).model_dump()
+    response = AnalysisResponse.build(features, risk, narrative, str(report_id), currency, is_demo)
 
     if current_user:
         report = Report(
@@ -66,7 +66,7 @@ async def analyze_transactions(
             net_cash_flow=features.net_cash_flow,
             risk_score=risk.overall_score,
             risk_band=risk.overall_band,
-            raw_data=raw_data,
+            raw_data=response.model_dump(),
         )
         db.add(report)
 
@@ -82,6 +82,6 @@ async def analyze_transactions(
 
         await db.commit()
     else:
-        report_id = "demo"
+        response = response.model_copy(update={"report_id": "demo"})
 
-    return AnalysisResponse.build(features, risk, narrative, str(report_id), currency, is_demo)
+    return response

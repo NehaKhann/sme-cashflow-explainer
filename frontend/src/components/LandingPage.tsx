@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TrendingUpIcon, AlertIcon, BarChartIcon, UploadIcon, UsersIcon, ChartIcon } from "./Icons";
+import { useDarkMode } from "../hooks/useDarkMode";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -13,13 +14,8 @@ function scrollTo(id: string) {
 }
 
 export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPageProps) {
-  const [dark, setDark] = useState(() => localStorage.getItem("dark_mode") === "true");
+  const [dark, toggleDark] = useDarkMode();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark-mode", dark);
-    localStorage.setItem("dark_mode", String(dark));
-  }, [dark]);
 
   function closeMenu() { setMenuOpen(false); }
 
@@ -32,7 +28,7 @@ export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPagePr
             <span>Ledger</span>
           </div>
           <div className="landing-header-center">
-            <button className="btn-dark-toggle-nav" onClick={() => setDark(!dark)} title="Toggle dark mode">
+            <button className="btn-dark-toggle-nav" onClick={toggleDark} title="Toggle dark mode">
               {dark ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />

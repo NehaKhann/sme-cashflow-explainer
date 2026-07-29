@@ -51,22 +51,31 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   const [reports, setReports] = useState<ReportSummary[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currency, setCurrency] = useState("USD");
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const doHealthCheck = useCallback(async () => {
     const s = await checkHealth(apiBase);
     setApiStatus(s);
   }, [apiBase]);
 
-  useEffect(() => { doHealthCheck(); }, [doHealthCheck]);
+  useEffect(() => {
+    const t = setTimeout(() => doHealthCheck(), 500);
+    return () => clearTimeout(t);
+  }, [doHealthCheck]);
 
   useEffect(() => {
-    if (user || isDemo) doHealthCheck();
     if (user) refreshReports();
     if (!user) {
       setReports([]);
       setResults(null);
     }
-  }, [user, isDemo]);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user && !isDemo) return;
+    const t = setTimeout(() => doHealthCheck(), 1000);
+    return () => clearTimeout(t);
+  }, [isDemo]);
 
   async function refreshReports() {
     try {
@@ -79,14 +88,14 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
 
   async function handleAnalyze(formData: FormData) {
     setAnalyzing(true);
+    setUploadError(null);
     try {
       const data = await analyzeTransactions(apiBase, formData, currency);
       setResults(data);
       setPage("dashboard");
       await refreshReports();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Could not reach the API.";
-      alert(msg);
+      setUploadError(err instanceof Error ? err.message : "Could not reach the API.");
     } finally {
       setAnalyzing(false);
     }
@@ -193,7 +202,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
           ) : page === "dashboard" ? (
             <DashboardHome onNavigate={setPage} />
           ) : page === "upload" ? (
-            <IntakeSection onAnalyze={handleAnalyze} disabled={analyzing} currency={currency} onCurrencyChange={setCurrency} />
+            <IntakeSection onAnalyze={handleAnalyze} disabled={analyzing} currency={currency} onCurrencyChange={setCurrency} error={uploadError} onErrorClear={() => setUploadError(null)} />
           ) : (
             <ReportsSection
               reports={reports}

@@ -1,11 +1,14 @@
 #!/bin/sh
 set -e
 
-echo "Waiting for PostgreSQL..."
-until pg_isready -h "$POSTGRES_HOST" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -q 2>/dev/null; do
-  POSTGRES_HOST="${DATABASE_URL#*@}" && POSTGRES_HOST="${POSTGRES_HOST%%:*}"
-  POSTGRES_USER="${DATABASE_URL#*://}" && POSTGRES_USER="${POSTGRES_USER%%:*}" && POSTGRES_USER="${POSTGRES_USER#*:}"
-  POSTGRES_DB="${DATABASE_URL##*/}"
+# Parse connection details from DATABASE_URL once
+# Expected format: postgresql+asyncpg://user:pass@host:port/db
+_HOST="${DATABASE_URL#*@}" && _HOST="${_HOST%%:*}"
+_USER="${DATABASE_URL#*://}" && _USER="${_USER%%:*}"
+_DB="${DATABASE_URL##*/}"
+
+echo "Waiting for PostgreSQL at ${_HOST}..."
+until pg_isready -h "$_HOST" -U "$_USER" -d "$_DB" -q 2>/dev/null; do
   sleep 1
 done
 echo "PostgreSQL is ready."

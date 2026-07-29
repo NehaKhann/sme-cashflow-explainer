@@ -19,21 +19,23 @@ interface IntakeSectionProps {
   disabled: boolean;
   currency: string;
   onCurrencyChange: (currency: string) => void;
+  error?: string | null;
+  onErrorClear?: () => void;
 }
 
-export function IntakeSection({ onAnalyze, disabled, currency, onCurrencyChange }: IntakeSectionProps) {
+export function IntakeSection({ onAnalyze, disabled, currency, onCurrencyChange, error: apiError, onErrorClear }: IntakeSectionProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [sampleMode, setSampleMode] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const ready = file !== null || sampleMode;
 
   function useFile(f: File) {
     setFile(f);
     setSampleMode(false);
-    setError(null);
+    setLocalError(null);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -50,12 +52,13 @@ export function IntakeSection({ onAnalyze, disabled, currency, onCurrencyChange 
   function handleUseSample() {
     setSampleMode(true);
     setFile(null);
-    setError(null);
+    setLocalError(null);
   }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setError(null);
+    setLocalError(null);
+    onErrorClear?.();
 
     const fd = new FormData();
     if (sampleMode) {
@@ -117,7 +120,9 @@ export function IntakeSection({ onAnalyze, disabled, currency, onCurrencyChange 
             {sampleMode && <span className="file-chosen">Using built-in sample dataset</span>}
           </div>
 
-          {error && <div className="error-banner">{error}</div>}
+          {(localError || apiError) && (
+            <div className="error-banner">{apiError || localError}</div>
+          )}
 
           <button
             type="submit"

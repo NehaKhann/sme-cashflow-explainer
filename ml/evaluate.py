@@ -8,7 +8,7 @@ Metrics:
 
 Usage:
   python evaluate.py --model ./output/<run_name>/merged
-  python evaluate.py --model ./output/<run_name>/merged --gguf ./output/<run_name>/gguf/ledger-chatbot-q4_k_m.gguf
+  python evaluate.py --adapters ./output/<run_name> --base-model unsloth/Llama-3.2-3B-Instruct-bnb-4bit
 """
 
 import argparse
@@ -17,10 +17,14 @@ import math
 import os
 import random
 
+import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
+from ml_utils import BASE_DIR, load_config, merge_config_cli
+
+DEFAULT_EVAL_FILE = os.path.join(BASE_DIR, "data", "eval.jsonl")
 
 SAMPLE_QUESTIONS = [
     "What is Ledger?",
@@ -37,13 +41,23 @@ SYSTEM_PROMPT = "You are a helpful assistant specialized in cash-flow underwriti
 
 
 def parse_args():
+    builtin = {
+        "model": None, "adapters": None,
+        "base_model": "unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
+        "eval_file": DEFAULT_EVAL_FILE, "seed": 42, "config": None,
+    }
     parser = argparse.ArgumentParser(description="Evaluate fine-tuned chatbot")
+    parser.add_argument("--config", default=None, help="Path to training_config.json")
     parser.add_argument("--model", help="Path to merged model directory")
     parser.add_argument("--adapters", help="Path to LoRA adapters (for non-merged evaluation)")
     parser.add_argument("--base-model", default="unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
                         help="Base model name (required if --adapters is used)")
-    parser.add_argument("--eval-file", default="data/eval.jsonl", help="Evaluation dataset")
-    return parser.parse_args()
+    parser.add_argument("--eval-file", default=DEFAULT_EVAL_FILE, help="Evaluation dataset")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for sampling")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    args = merge_config_cli(config, args, builtin)
+    return args
 
 
 def load_model(model_path: str, adapters: str | None, base_model: str):
@@ -76,7 +90,7 @@ def load_model(model_path: str, adapters: str | None, base_model: str):
 
 
 @torch.no_grad()
-def compute_perplexity(model, tokenizer, eval_file: str, max_samples: int = 50):
+def compute_perplexity(model, tokenizer, eval_file: str, seed: int, max_samples: int = 50):
     """Compute perplexity on a sample of the evaluation set."""
     if not os.path.exists(eval_file):
         print(f"[!] Eval file not found: {eval_file}")
@@ -91,24 +105,31 @@ def compute_perplexity(model, tokenizer, eval_file: str, max_samples: int = 50):
         for line in f:
             records.append(json.loads(line))
 
-    random.shuffle(records)
+    random.Random(seed).shuffle(records)
     records = records[:max_samples]
 
     losses = []
     for i, r in enumerate(records):
         messages = r.get("messages", [])
-        text = ""
-        for m in messages:
-            text += f"{m['role']}: {m['content']}\n"
+        # Use same chat template as training for consistent formatting
+        text = tokenizer.apply_chat_template(messages, tokenize=False)
 
         inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
         outputs = model(**inputs, labels=inputs["input_ids"])
-        losses.append(outputs.loss.item())
+        loss_val = outputs.loss.item()
+        if not math.isfinite(loss_val):
+            print(f"  [!] Sample {i+1}: non-finite loss ({loss_val}), skipping")
+            continue
+        losses.append(loss_val)
 
-        if (i + 1) % 10 == 0:
+        if (i + 1) % 10 == 0 and losses:
             print(f"  [{i+1}/{len(records)}] avg loss so far: {sum(losses)/len(losses):.4f}")
+
+    if not losses:
+        print("[!] No valid losses computed")
+        return None
 
     avg_loss = sum(losses) / len(losses)
     perplexity = math.exp(avg_loss)
@@ -163,7 +184,7 @@ def main():
     model, tokenizer = load_model(args.model, args.adapters, args.base_model)
 
     # Perplexity
-    perplexity = compute_perplexity(model, tokenizer, args.eval_file)
+    perplexity = compute_perplexity(model, tokenizer, args.eval_file, args.seed)
 
     # Sample responses
     sample_responses(model, tokenizer)
