@@ -218,6 +218,7 @@ pip install -r requirements.txt
 python prepare_dataset.py --with-hf              # build dataset + writes checksum
 python train.py                                  # QLoRA fine-tune (validates checksum)
 python train.py --disable-wandb                  # skip W&B logging (no API key needed)
+python train.py --disable-wandb --batch-size 2 --max-seq-len 512  # lower VRAM usage for 6 GB GPUs
 python train.py --config my_config.json          # use a custom config file
 python quantize.py --adapters ./output/...       # merge + GGUF
 ollama create ledger-chatbot -f ./output/.../Modelfile
