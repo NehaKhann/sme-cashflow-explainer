@@ -49,12 +49,14 @@ export function Sidebar({ status, active, onNavigate, open, onClose, onAuthActio
           </button>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" role="menubar">
           {NAV_ITEMS.map((item) => (
             <a
               key={item.page}
               href="#"
+              role="menuitem"
               className={`nav-item${active === item.page ? " active" : ""}`}
+              aria-current={active === item.page ? "page" : undefined}
               onClick={(e) => { e.preventDefault(); handleNav(item.page); }}
             >
               {item.icon}

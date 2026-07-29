@@ -20,10 +20,12 @@ async function apiFetch(apiBase: string, path: string, options: RequestInit = {}
     data = await res.json().catch(() => null);
   }
   if (!res.ok) {
-    const detail = data && typeof data === "object" && "detail" in data
+    const msg = data && typeof data === "object" && "detail" in data
       ? (data as Record<string, unknown>).detail
-      : `Request failed: ${res.status}`;
-    throw new Error(String(detail));
+      : `Request failed`;
+    const err = new Error(String(msg));
+    (err as any).status = res.status;
+    throw err;
   }
   return data;
 }

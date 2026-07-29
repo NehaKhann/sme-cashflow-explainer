@@ -65,6 +65,13 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     return () => clearTimeout(t);
   }, [doHealthCheck]);
 
+  useEffect(() => {
+    if ((user || isDemo) && apiStatus.ok === false) {
+      const t = setTimeout(() => doHealthCheck(), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [isDemo, user, doHealthCheck, apiStatus.ok]);
+
   const refreshReports = useCallback(async (): Promise<ReportSummary[]> => {
     try {
       const list = await fetchReports(apiBase);
@@ -83,13 +90,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     }
   }, [user, refreshReports]);
 
-  useEffect(() => {
-    if (!user && !isDemo) return;
-    const t = setTimeout(() => doHealthCheck(), 1000);
-    return () => clearTimeout(t);
-  }, [isDemo, user, doHealthCheck]);
-
-  async function handleAnalyze(formData: FormData) {
+  const handleAnalyze = useCallback(async (formData: FormData) => {
     setAnalyzing(true);
     setUploadError(null);
     try {
@@ -111,9 +112,9 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     } finally {
       setAnalyzing(false);
     }
-  }
+  }, [apiBase, currency, refreshReports]);
 
-  async function handleOpenReport(id: string) {
+  const handleOpenReport = useCallback(async (id: string) => {
     try {
       const detail = await fetchReport(apiBase, id);
       setResults(detail.raw_data);
@@ -122,30 +123,30 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : "Could not load report.");
     }
-  }
+  }, [apiBase]);
 
-  async function handleDeleteReport(id: string) {
+  const handleDeleteReport = useCallback(async (id: string) => {
     try {
       await deleteReportApi(apiBase, id);
       await refreshReports();
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : "Failed to delete report.");
     }
-  }
+  }, [apiBase, refreshReports]);
 
-  async function handleClearAll() {
+  const handleClearAll = useCallback(async () => {
     try {
       await clearAllReportsApi(apiBase);
       await refreshReports();
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : "Failed to clear reports.");
     }
-  }
+  }, [apiBase, refreshReports]);
 
-  function handleReset() {
+  const handleReset = useCallback(() => {
     setResults(null);
     setPage("upload");
-  }
+  }, []);
 
   if (loading) {
     return (
@@ -176,7 +177,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     );
   }
 
-  const currentPage = page as Page | "compare";
+  const currentPage: Page = page;
   const meta = TOPBAR_META[currentPage] || TOPBAR_META.dashboard;
   let title = meta.title;
   let desc = meta.desc;

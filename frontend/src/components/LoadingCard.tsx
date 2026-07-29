@@ -28,7 +28,7 @@ export function LoadingCard() {
   );
 }
 
-export function SkeletonCard() {
+function SkeletonCard() {
   return (
     <section className="loading-section" id="skeleton">
       <div className="card loading-card" style={{ padding: "24px", gap: "12px", alignItems: "stretch" }}>

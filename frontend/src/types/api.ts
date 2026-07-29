@@ -77,6 +77,7 @@ export interface ReportSummary {
   net_cash_flow: number;
   risk_score: number;
   risk_band: string;
+  currency: string;
 }
 
 export interface ReportDetail extends ReportSummary {

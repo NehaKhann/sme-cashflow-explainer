@@ -92,11 +92,15 @@ export function IntakeSection({ onAnalyze, disabled, currency, onCurrencyChange,
             id="dropzone"
             className={`dropzone${dragOver ? " drag-over" : ""}`}
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInputRef.current?.click(); } }}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
+            tabIndex={0}
+            role="button"
+            aria-label="Upload a CSV file"
           >
-            <input ref={fileInputRef} type="file" accept=".csv" hidden onChange={handleFileChange} />
+            <input ref={fileInputRef} type="file" accept=".csv" hidden onChange={handleFileChange} aria-label="Upload a CSV file" />
             <div className="dropzone-content">
               <span className="dropzone-action">Choose a CSV file</span>
               <span className="dropzone-hint">or drag and drop here</span>

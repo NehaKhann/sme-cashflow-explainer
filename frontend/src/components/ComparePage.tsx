@@ -15,6 +15,7 @@ interface ComparePageProps {
 
 export function ComparePage({ apiBase }: ComparePageProps) {
   const [reports, setReports] = useState<ReportSummary[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedA, setSelectedA] = useState("");
   const [selectedB, setSelectedB] = useState("");
   const [result, setResult] = useState<CompareResult | null>(null);
@@ -22,7 +23,9 @@ export function ComparePage({ apiBase }: ComparePageProps) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    fetchReports(apiBase).then(setReports).catch(() => {});
+    let ignore = false;
+    fetchReports(apiBase).then((list) => { if (!ignore) setReports(list); }).catch(() => {}).finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, [apiBase]);
 
   async function handleCompare() {
@@ -51,14 +54,14 @@ export function ComparePage({ apiBase }: ComparePageProps) {
   return (
     <div className="compare-page">
       <div className="compare-controls">
-        <select value={selectedA} onChange={(e) => setSelectedA(e.target.value)}>
+        <select value={selectedA} onChange={(e) => setSelectedA(e.target.value)} aria-label="First report">
           <option value="">— Select first report —</option>
           {reports.map((r) => (
             <option key={r.id} value={r.id}>{r.start_date} — {r.end_date} ({r.risk_band})</option>
           ))}
         </select>
         <span className="compare-vs">vs</span>
-        <select value={selectedB} onChange={(e) => setSelectedB(e.target.value)}>
+        <select value={selectedB} onChange={(e) => setSelectedB(e.target.value)} aria-label="Second report">
           <option value="">— Select second report —</option>
           {reports.map((r) => (
             <option key={r.id} value={r.id}>{r.start_date} — {r.end_date} ({r.risk_band})</option>
@@ -68,6 +71,7 @@ export function ComparePage({ apiBase }: ComparePageProps) {
           {busy ? "Comparing..." : "Compare"}
         </button>
       </div>
+      {loading && <div className="loading-text" style={{ textAlign: "center", padding: 24, color: "var(--text-muted)" }}>Loading reports...</div>}
       {error && <div className="error-banner">{error}</div>}
 
       {result && (

@@ -36,6 +36,12 @@ body {
   line-height: 1.5;
 }
 
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .layout {
   display: flex;
   min-height: 100vh;
@@ -507,6 +513,7 @@ body {
   color: var(--danger);
   font-size: 13px;
   font-weight: 500;
+  margin-bottom: 12px;
 }
 
 /* Loading section */
@@ -1075,6 +1082,7 @@ body {
   right: 0;
   z-index: 50;
   background: rgba(255,255,255,0.85);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0,0,0,0.06);
 }
@@ -1764,8 +1772,6 @@ body {
   animation: spin 0.7s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1929,6 +1935,11 @@ body {
   color: var(--primary);
   text-decoration: underline;
   font-weight: 600;
+}
+
+.dark-mode .demo-banner {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.3);
 }
 
 /* Results header right */
@@ -2102,8 +2113,6 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
-
-.compare-stat { }
 
 .compare-vs-divider {
   display: flex;
@@ -2536,6 +2545,18 @@ body {
   border: 1px solid #bbf7d0;
 }
 
+.dark-mode .toast-error {
+  background: #3b1010;
+  color: #fca5a5;
+  border-color: #7f1d1d;
+}
+
+.dark-mode .toast-success {
+  background: #0a3018;
+  color: #86efac;
+  border-color: #166534;
+}
+
 .toast-icon {
   width: 22px;
   height: 22px;
@@ -2556,6 +2577,16 @@ body {
 .toast-success .toast-icon {
   background: #bbf7d0;
   color: #166534;
+}
+
+.dark-mode .toast-error .toast-icon {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark-mode .toast-success .toast-icon {
+  background: #166534;
+  color: #86efac;
 }
 
 @keyframes toast-in {
@@ -2618,24 +2649,6 @@ body {
 
 .dark-mode .skeleton {
   background: linear-gradient(90deg, #2d2d2d 25%, #3a3a3a 50%, #2d2d2d 75%);
-}
-
-/* ── Error banner ──────────────────────────────────── */
-
-.error-banner {
-  background: #fef2f2;
-  color: #991b1b;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-bottom: 12px;
-  border: 1px solid #fecaca;
-}
-
-.dark-mode .error-banner {
-  background: #3b1010;
-  color: #fca5a5;
-  border-color: #7f1d1d;
 }
 
 /* ── Trend comparison banner ─────────────────────────── */

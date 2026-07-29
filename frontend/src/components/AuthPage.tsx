@@ -12,6 +12,7 @@ export function LoginPage({ onSwitch, onBack }: { onSwitch: () => void; onBack: 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setBusy(true);
     try {
       await login(email, password);
@@ -44,7 +45,7 @@ export function LoginPage({ onSwitch, onBack }: { onSwitch: () => void; onBack: 
           </label>
           <label>
             Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="current-password" />
           </label>
           {error && <div className="auth-error">{error}</div>}
           <button type="submit" className="auth-submit" disabled={busy}>
@@ -73,6 +74,7 @@ export function SignupPage({ onSwitch, onBack }: { onSwitch: () => void; onBack:
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (password.length < 8) { setError("Password must be at least 8 characters."); return; }
     setBusy(true);
     try {
       await signup(email, password, displayName);
@@ -109,7 +111,7 @@ export function SignupPage({ onSwitch, onBack }: { onSwitch: () => void; onBack:
           </label>
           <label>
             Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
           </label>
           {error && <div className="auth-error">{error}</div>}
           <button type="submit" className="auth-submit" disabled={busy}>

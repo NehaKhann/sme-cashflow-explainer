@@ -15,6 +15,13 @@ logger = logging.getLogger("cashflow_explainer")
 router = APIRouter(prefix="/api/reports", tags=["reports"])
 
 
+def _parse_report_id(report_id: str) -> uuid.UUID:
+    try:
+        return uuid.UUID(report_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid report ID format.")
+
+
 @router.get("")
 async def list_reports(
     db: AsyncSession = Depends(get_db),
@@ -37,6 +44,7 @@ async def list_reports(
             "net_cash_flow": r.net_cash_flow,
             "risk_score": r.risk_score,
             "risk_band": r.risk_band,
+            "currency": r.raw_data.get("currency", "USD") if r.raw_data else "USD",
         }
         for r in reports
     ]
@@ -49,7 +57,7 @@ async def get_report(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Report).where(Report.id == uuid.UUID(report_id), Report.user_id == current_user.id)
+        select(Report).where(Report.id == _parse_report_id(report_id), Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -75,7 +83,7 @@ async def delete_report(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Report).where(Report.id == uuid.UUID(report_id), Report.user_id == current_user.id)
+        select(Report).where(Report.id == _parse_report_id(report_id), Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -108,8 +116,9 @@ async def get_transactions(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    parsed_id = _parse_report_id(report_id)
     result = await db.execute(
-        select(Report).where(Report.id == uuid.UUID(report_id), Report.user_id == current_user.id)
+        select(Report).where(Report.id == parsed_id, Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -117,7 +126,7 @@ async def get_transactions(
 
     txn_result = await db.execute(
         select(Transaction)
-        .where(Transaction.report_id == uuid.UUID(report_id))
+        .where(Transaction.report_id == parsed_id)
         .order_by(Transaction.date.desc())
     )
     transactions = txn_result.scalars().all()
@@ -144,8 +153,9 @@ async def compare_reports(
 
     reports = []
     for rid in body.report_ids:
+        parsed = _parse_report_id(rid)
         result = await db.execute(
-            select(Report).where(Report.id == rid, Report.user_id == current_user.id)
+            select(Report).where(Report.id == parsed, Report.user_id == current_user.id)
         )
         r = result.scalar_one_or_none()
         if not r:

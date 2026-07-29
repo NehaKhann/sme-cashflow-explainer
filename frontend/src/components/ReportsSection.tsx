@@ -1,9 +1,9 @@
 import type { ReportSummary } from "../types/api";
 import { BarChartIcon } from "./Icons";
 
-function money(n: number) {
+function money(n: number, currency = "USD") {
   return new Intl.NumberFormat("en-US", {
-    style: "currency", currency: "USD", maximumFractionDigits: 0,
+    style: "currency", currency, maximumFractionDigits: 0,
   }).format(n);
 }
 
@@ -73,7 +73,7 @@ function ReportCard({ report, onOpen, onDelete }: ReportCardProps) {
   const bandClass = report.risk_band;
 
   return (
-    <div className="report-card" onClick={onOpen}>
+    <div className="report-card" tabIndex={0} role="button" onClick={onOpen} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } }}>
       <div className="report-card-left">
         <div className="report-meta">
           <span className="report-period">{report.start_date} — {report.end_date}</span>
@@ -83,7 +83,7 @@ function ReportCard({ report, onOpen, onDelete }: ReportCardProps) {
           <span className="report-stat">
             <span className="report-stat-label">Net</span>
             <span className={`report-stat-value${report.net_cash_flow >= 0 ? " text-success" : " text-danger"}`}>
-              {money(report.net_cash_flow)}
+              {money(report.net_cash_flow, report.currency)}
             </span>
           </span>
         </div>

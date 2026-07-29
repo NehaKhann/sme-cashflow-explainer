@@ -10,7 +10,9 @@ interface LandingPageProps {
 
 function scrollTo(id: string) {
   const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: "smooth" });
+  if (!el) return;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  el.scrollIntoView({ behavior: prefersReduced ? "auto" : "smooth" });
 }
 
 export function LandingPage({ onGetStarted, onSignIn, onTryDemo }: LandingPageProps) {

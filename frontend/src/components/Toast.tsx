@@ -30,10 +30,10 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="toast-container">
+    <div className="toast-container" role="alert" aria-live="polite">
       {toasts.map((t) => (
         <div key={t.id} className={`toast toast-${t.type}`}>
-          <span className="toast-icon">{t.type === "error" ? "!" : "✓"}</span>
+          <span className="toast-icon" aria-hidden="true">{t.type === "error" ? "!" : "✓"}</span>
           {t.message}
         </div>
       ))}

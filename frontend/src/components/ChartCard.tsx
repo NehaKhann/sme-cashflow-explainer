@@ -53,7 +53,7 @@ function Chart({ rev, exp, months }: { rev: number[]; exp: number[]; months: str
   });
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet">
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img" aria-label="Monthly revenue vs expenses bar chart">
       {gridlines}
       {bars}
       <g>

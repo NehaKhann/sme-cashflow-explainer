@@ -24,6 +24,7 @@ interface ResultsSectionProps {
 function AnimatedScore({ score }: { score: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
+    if (score <= 0) { setDisplay(0); return; }
     let start = 0;
     const end = score;
     const duration = 800;
@@ -60,7 +61,7 @@ export function ResultsSection({ data, prevData, onReset, apiBase }: ResultsSect
         .catch(() => {})
         .finally(() => setTxnLoading(false));
     }
-  }, [showTxns, data.demo, apiBase, data.report_id]);
+  }, [showTxns, transactions.length, data.demo, apiBase, data.report_id]);
 
   function handleSort(key: string) {
     if (sortKey === key) {
@@ -83,17 +84,21 @@ export function ResultsSection({ data, prevData, onReset, apiBase }: ResultsSect
   const currency = data.currency || "USD";
 
   async function handleExportPdf() {
-    const { default: jsPDF } = await import("jspdf");
-    const { default: html2canvas } = await import("html2canvas");
-    const el = document.getElementById("results");
-    if (!el) return;
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pdfW = pdf.internal.pageSize.getWidth();
-    const pdfH = (canvas.height * pdfW) / canvas.width;
-    pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-    pdf.save(`ledger-memo-${data.start_date}-${data.end_date}.pdf`);
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const { default: html2canvas } = await import("html2canvas");
+      const el = document.getElementById("results");
+      if (!el) return;
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+      pdf.save(`ledger-memo-${data.start_date}-${data.end_date}.pdf`);
+    } catch {
+      console.error("PDF export failed");
+    }
   }
 
   return (
@@ -232,16 +237,16 @@ export function ResultsSection({ data, prevData, onReset, apiBase }: ResultsSect
                 <table className="txn-table">
                   <thead>
                     <tr>
-                      <th onClick={() => handleSort("date")} className="sortable">
+                      <th tabIndex={0} role="columnheader" aria-sort={sortKey === "date" ? (sortDir === "asc" ? "ascending" : "descending") : "none"} onClick={() => handleSort("date")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort("date"); } }} className="sortable">
                         Date {sortKey === "date" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                       </th>
-                      <th onClick={() => handleSort("amount")} className="sortable">
+                      <th tabIndex={0} role="columnheader" aria-sort={sortKey === "amount" ? (sortDir === "asc" ? "ascending" : "descending") : "none"} onClick={() => handleSort("amount")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort("amount"); } }} className="sortable">
                         Amount {sortKey === "amount" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                       </th>
-                      <th onClick={() => handleSort("counterparty")} className="sortable">
+                      <th tabIndex={0} role="columnheader" aria-sort={sortKey === "counterparty" ? (sortDir === "asc" ? "ascending" : "descending") : "none"} onClick={() => handleSort("counterparty")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort("counterparty"); } }} className="sortable">
                         Counterparty {sortKey === "counterparty" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                       </th>
-                      <th onClick={() => handleSort("category")} className="sortable">
+                      <th tabIndex={0} role="columnheader" aria-sort={sortKey === "category" ? (sortDir === "asc" ? "ascending" : "descending") : "none"} onClick={() => handleSort("category")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleSort("category"); } }} className="sortable">
                         Category {sortKey === "category" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                       </th>
                     </tr>

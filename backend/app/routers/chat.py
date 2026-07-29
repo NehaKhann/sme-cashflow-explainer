@@ -4,9 +4,12 @@ import logging
 from typing import AsyncGenerator
 
 import httpx
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+from ..auth import get_current_user
+from ..db_models import User
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +28,13 @@ class ChatRequest(BaseModel):
     history: list[dict] = []
     model: str | None = None
 
+    @field_validator("message")
+    @classmethod
+    def message_max_length(cls, v: str) -> str:
+        if len(v) > 5000:
+            raise ValueError("Message exceeds maximum length of 5000 characters.")
+        return v
+
 
 def _build_messages(req: ChatRequest) -> list[dict]:
     msgs = [{"role": m.get("role", "user"), "content": m.get("content", "")} for m in req.history]
@@ -33,7 +43,7 @@ def _build_messages(req: ChatRequest) -> list[dict]:
 
 
 @router.post("")
-async def chat(req: ChatRequest) -> StreamingResponse:
+async def chat(req: ChatRequest, current_user: User = Depends(get_current_user)) -> StreamingResponse:
     if CHAT_PROVIDER == "groq":
         if not GROQ_API_KEY:
             return StreamingResponse(
@@ -112,9 +122,9 @@ async def _stream_ollama(model: str, req: ChatRequest) -> AsyncGenerator[str, No
             logger.error("Cannot connect to Ollama. Is it running?")
             yield f"data: {json.dumps({'error': 'Cannot connect to Ollama. Make sure ollama is running (ollama serve).'})}\n\n"
             yield "data: [DONE]\n\n"
-        except Exception as e:
+        except Exception:
             logger.exception("Ollama stream error")
-            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield f"data: {json.dumps({'error': 'An internal error occurred.'})}\n\n"
             yield "data: [DONE]\n\n"
 
 
@@ -144,7 +154,7 @@ async def _stream_groq(model: str, req: ChatRequest) -> AsyncGenerator[str, None
             if content:
                 yield f"data: {json.dumps({'text': content})}\n\n"
         yield "data: [DONE]\n\n"
-    except Exception as e:
+    except Exception:
         logger.exception("GROQ stream error")
-        yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        yield f"data: {json.dumps({'error': 'An internal error occurred.'})}\n\n"
         yield "data: [DONE]\n\n"
