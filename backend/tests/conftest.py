@@ -1,15 +1,14 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-
-from app.main import app
-from app.database import get_db, Base
 from app.auth import get_current_user, get_optional_user
+from app.database import Base, get_db
 from app.db_models import User
+from app.main import app
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -38,7 +37,7 @@ async def test_user(test_db):
             email="test@test.com",
             hashed_password="does-not-matter-for-override",
             display_name="Test User",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
         )
         test_db.add(user)
         await test_db.commit()

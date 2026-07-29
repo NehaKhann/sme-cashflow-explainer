@@ -1,7 +1,7 @@
-import os
 import json
 import logging
-from typing import AsyncGenerator
+import os
+from collections.abc import AsyncGenerator
 
 import httpx
 from fastapi import APIRouter, Depends, Request
@@ -45,7 +45,10 @@ def _build_messages(req: ChatRequest) -> list[dict]:
 
 @router.post("")
 @limiter.limit("20/minute")
-async def chat(request: Request, req: ChatRequest, current_user: User = Depends(get_current_user)) -> StreamingResponse:
+async def chat(
+    request: Request, req: ChatRequest,
+    current_user: User = Depends(get_current_user),
+) -> StreamingResponse:
     if CHAT_PROVIDER == "groq":
         if not GROQ_API_KEY:
             return StreamingResponse(
@@ -122,7 +125,8 @@ async def _stream_ollama(model: str, req: ChatRequest) -> AsyncGenerator[str, No
 
         except httpx.ConnectError:
             logger.error("Cannot connect to Ollama. Is it running?")
-            yield f"data: {json.dumps({'error': 'Cannot connect to Ollama. Make sure ollama is running (ollama serve).'})}\n\n"
+            msg = "Cannot connect to Ollama. Make sure ollama is running (ollama serve)."
+            yield f"data: {json.dumps({'error': msg})}\n\n"
             yield "data: [DONE]\n\n"
         except Exception:
             logger.exception("Ollama stream error")

@@ -7,7 +7,6 @@ import pandas as pd
 
 from ..models import CashFlowFeatures, InvalidTransactionData
 
-
 REQUIRED_COLUMNS = {"date", "amount", "counterparty"}
 MIN_TRANSACTIONS = 5
 MAX_TRANSACTIONS = 100_000
@@ -48,7 +47,8 @@ def _validate(df: pd.DataFrame) -> None:
 
     if len(df) < MIN_TRANSACTIONS:
         raise InvalidTransactionData(
-            f"CSV has only {len(df)} transaction(s); at least {MIN_TRANSACTIONS} are required for a meaningful analysis."
+            f"CSV has only {len(df)} transaction(s); "
+            f"at least {MIN_TRANSACTIONS} are required for a meaningful analysis."
         )
 
     if len(df) > MAX_TRANSACTIONS:
@@ -98,7 +98,7 @@ def load_transactions(csv_path_or_buffer) -> pd.DataFrame:
             except UnicodeDecodeError:
                 raise InvalidTransactionData(
                     "Could not decode the file. Please ensure it is a UTF-8 encoded CSV."
-                )
+                ) from None
     else:
         text = raw
 
@@ -112,7 +112,7 @@ def load_transactions(csv_path_or_buffer) -> pd.DataFrame:
             skipinitialspace=True,
         )
     except Exception as e:
-        raise InvalidTransactionData(f"Could not parse CSV: {e}")
+        raise InvalidTransactionData(f"Could not parse CSV: {e}") from None
 
     df = _normalize_columns(df)
     _validate(df)

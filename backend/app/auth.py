@@ -1,24 +1,27 @@
-import os
 import hashlib
+import os
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db
-from .db_models import User, RefreshToken
+from .db_models import RefreshToken, User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
 
 _jwt_secret = os.environ.get("JWT_SECRET")
 if not _jwt_secret:
-    raise RuntimeError("JWT_SECRET environment variable is required. Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+    raise RuntimeError(
+        "JWT_SECRET environment variable is required. "
+        'Generate one with: python -c "import secrets; print(secrets.token_urlsafe(32))"'
+    )
 SECRET_KEY = _jwt_secret
 ALGORITHM = "HS256"
 ACCESS_EXPIRE = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
@@ -38,7 +41,7 @@ def _hash_token(token: str) -> str:
 
 
 def create_access_token(user_id: str, email: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_EXPIRE)
+    expire = datetime.now(UTC) + timedelta(minutes=ACCESS_EXPIRE)
     payload = {"sub": user_id, "email": email, "exp": expire, "type": "access"}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -46,7 +49,7 @@ def create_access_token(user_id: str, email: str) -> str:
 async def create_refresh_token(
     user_id: str, email: str, db: AsyncSession
 ) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_EXPIRE)
+    expire = datetime.now(UTC) + timedelta(days=REFRESH_EXPIRE)
     payload = {"sub": user_id, "email": email, "exp": expire, "type": "refresh"}
     token_str = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     token_hash = _hash_token(token_str)
@@ -100,7 +103,7 @@ def decode_token(token: str) -> dict:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token.",
-        )
+        ) from None
 
 
 async def get_current_user(

@@ -1,26 +1,25 @@
-import os
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-
-load_dotenv()
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
-from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
-from .database import init_db, dispose_db
+from .database import dispose_db, init_db
 from .rate_limit import limiter
-from .routers import analysis, reports, auth, chat
+from .routers import analysis, auth, chat, reports
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     await init_db()
     yield
     await dispose_db()

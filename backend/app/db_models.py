@@ -1,10 +1,10 @@
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
-from sqlalchemy import String, Float, Integer, Date, DateTime, ForeignKey, Text, JSON
-from sqlalchemy.types import Uuid
+from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.types import Uuid
 
 from .database import Base
 
@@ -19,7 +19,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc),
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC),
     )
 
     reports: Mapped[list["Report"]] = relationship(back_populates="user", cascade="all, delete-orphan")
@@ -72,7 +72,7 @@ class RefreshToken(Base):
     )
     revoked: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc),
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(UTC),
     )
 
     user: Mapped["User"] = relationship()

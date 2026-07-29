@@ -1,4 +1,4 @@
-from ..models import CashFlowFeatures, RiskFlag, RiskAssessment
+from ..models import CashFlowFeatures, RiskAssessment, RiskFlag
 
 
 def _band_from_score(score: int) -> str:

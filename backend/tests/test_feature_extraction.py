@@ -1,9 +1,9 @@
 import io
-import pytest
-import pandas as pd
 
-from app.services.feature_extraction import load_transactions, extract_features
+import pandas as pd
+import pytest
 from app.models import InvalidTransactionData
+from app.services.feature_extraction import extract_features, load_transactions
 
 
 def make_csv(rows: list[dict]) -> io.BytesIO:

@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 DATABASE_URL = os.getenv(
@@ -29,7 +29,7 @@ async def get_db() -> AsyncSession:
 
 async def init_db():
     async with engine.begin() as conn:
-        from .db_models import Report, Transaction, RefreshToken  # noqa: F401
+        from .db_models import RefreshToken, Report, Transaction  # noqa: F401
         await conn.run_sync(Base.metadata.create_all)
 
 

@@ -2,13 +2,13 @@ import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..auth import get_current_user
 from ..database import get_db
 from ..db_models import Report, Transaction, User
-from ..auth import get_current_user
-from ..schemas import TransactionResponse, CompareRequest, CompareResponse, AnalysisResponse
+from ..schemas import AnalysisResponse, CompareRequest, CompareResponse, TransactionResponse
 
 logger = logging.getLogger("cashflow_explainer")
 
@@ -19,7 +19,7 @@ def _parse_report_id(report_id: str) -> uuid.UUID:
     try:
         return uuid.UUID(report_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid report ID format.")
+        raise HTTPException(status_code=400, detail="Invalid report ID format.") from None
 
 
 @router.get("")

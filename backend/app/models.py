@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 class InvalidTransactionData(ValueError):
@@ -19,10 +18,10 @@ class CashFlowFeatures:
     monthly_revenue: dict
     revenue_volatility_pct: float
     largest_mom_drop_pct: float
-    largest_mom_drop_month: Optional[str]
+    largest_mom_drop_month: str | None
 
     top_customer_share_pct: float
-    top_customer_name: Optional[str]
+    top_customer_name: str | None
     top_3_customer_share_pct: float
     num_unique_customers: int
 

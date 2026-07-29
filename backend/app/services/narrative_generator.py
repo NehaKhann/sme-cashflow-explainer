@@ -1,5 +1,6 @@
-import os
 import json
+import os
+
 from ..models import CashFlowFeatures, RiskAssessment
 
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")

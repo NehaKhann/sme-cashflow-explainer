@@ -6,7 +6,10 @@ line-length = 120
 select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "ARG"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ARG"]
+"backend/tests/*" = ["ARG"]
+"backend/app/**" = ["B008"]  # FastAPI uses Depends(), File(), Form() in defaults
+"backend/app/models.py" = ["N818"]  # InvalidTransactionData is descriptive enough
+"backend/app/routers/*.py" = ["ARG001"]  # slowapi needs `request` arg; FastAPI injects Depends
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]

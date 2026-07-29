@@ -1,19 +1,22 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..auth import (
+    create_access_token,
+    create_refresh_token,
+    get_current_user,
+    hash_password,
+    revoke_refresh_token,
+    validate_refresh_token,
+    verify_password,
+)
 from ..database import get_db
 from ..db_models import User
-from ..auth import (
-    hash_password, verify_password,
-    create_access_token, create_refresh_token, decode_token,
-    validate_refresh_token, revoke_refresh_token,
-    get_current_user,
-)
 from ..rate_limit import limiter
 
 logger = logging.getLogger("cashflow_explainer")
@@ -72,7 +75,7 @@ async def signup(request: Request, body: SignupRequest, db: AsyncSession = Depen
         await db.commit()
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=409, detail="Email already registered.")
+        raise HTTPException(status_code=409, detail="Email already registered.") from None
     await db.refresh(user)
 
     user_id_str = str(user.id)

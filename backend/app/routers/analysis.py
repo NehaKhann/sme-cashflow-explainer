@@ -2,19 +2,19 @@ import asyncio
 import io
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..auth import get_optional_user
 from ..database import get_db
 from ..db_models import Report, Transaction, User
-from ..auth import get_optional_user
-from ..services.feature_extraction import load_transactions, extract_features
-from ..services.risk_scoring import assess_risk
-from ..services.narrative_generator import generate_narrative
 from ..models import InvalidTransactionData
 from ..schemas import AnalysisResponse
+from ..services.feature_extraction import extract_features, load_transactions
+from ..services.narrative_generator import generate_narrative
+from ..services.risk_scoring import assess_risk
 
 logger = logging.getLogger("cashflow_explainer")
 
@@ -44,12 +44,12 @@ async def analyze_transactions(
         narrative = await asyncio.to_thread(generate_narrative, features, risk)
     except InvalidTransactionData as e:
         logger.warning("Invalid transaction data uploaded: %s", e)
-        raise HTTPException(status_code=422, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e)) from None
     except Exception:
         logger.exception("Unexpected error during analysis")
-        raise HTTPException(status_code=500, detail="Internal error while analyzing transactions.")
+        raise HTTPException(status_code=500, detail="Internal error while analyzing transactions.") from None
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     report_id = uuid.uuid4()
     is_demo = current_user is None
 

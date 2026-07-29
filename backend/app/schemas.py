@@ -1,6 +1,7 @@
+
 from pydantic import BaseModel
-from typing import Optional
-from .models import CashFlowFeatures, RiskFlag, RiskAssessment
+
+from .models import CashFlowFeatures, RiskAssessment
 
 
 class RiskFlagResponse(BaseModel):
@@ -22,10 +23,10 @@ class AnalysisResponse(BaseModel):
     monthly_revenue: dict
     revenue_volatility_pct: float
     largest_mom_drop_pct: float
-    largest_mom_drop_month: Optional[str]
+    largest_mom_drop_month: str | None
 
     top_customer_share_pct: float
-    top_customer_name: Optional[str]
+    top_customer_name: str | None
     top_3_customer_share_pct: float
     num_unique_customers: int
 
@@ -48,7 +49,12 @@ class AnalysisResponse(BaseModel):
     demo: bool = False
 
     @classmethod
-    def build(cls, features: CashFlowFeatures, risk: RiskAssessment, narrative: str, report_id: str, currency: str = "USD", demo: bool = False) -> "AnalysisResponse":
+    @classmethod
+    def build(
+        cls, features: CashFlowFeatures, risk: RiskAssessment,
+        narrative: str, report_id: str,
+        currency: str = "USD", demo: bool = False,
+    ) -> "AnalysisResponse":
         data = {k: getattr(features, k) for k in features.__dataclass_fields__}
         data["risk_score"] = risk.overall_score
         data["risk_band"] = risk.overall_band
