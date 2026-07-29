@@ -24,13 +24,19 @@ from ml_utils import BASE_DIR
 CUSTOM_PATH = os.path.join(BASE_DIR, "data", "custom_qa.jsonl")
 AUGMENTED_PATH = os.path.join(BASE_DIR, "data", "custom_qa_augmented.jsonl")
 
-SYSTEM_PROMPT = """You are a data augmentation assistant for a financial underwriting chatbot.
+SYSTEM_PROMPT = """You are a data augmentation assistant for a financial underwriting chatbot. Your output must be ONLY a JSON array — nothing else, no explanations, no markdown, no code fences.
+
 Given a question-answer pair, generate variations that:
 - Re-phrase the question in different ways (e.g. shorter, more formal, as a keyword query)
 - Keep the answer factually identical — do NOT change numbers, names, or technical details
 - Cover different user personas (underwriter, business owner, IT admin, student)
-- Output ONLY valid JSON: one object per line with keys "instruction" and "output"
-- Do NOT wrap in code fences or extra text"""
+
+Output format — a JSON array of objects, each with "instruction" and "output":
+
+[
+  {"instruction": "...", "output": "..."},
+  {"instruction": "...", "output": "..."}
+]"""
 
 
 def load_seed_pairs(path: str) -> list[dict]:
@@ -60,28 +66,28 @@ def parse_jsonl_from_response(text: str) -> list[dict]:
     # Strip markdown code fences
     text = re.sub(r"```(?:json)?\s*", "", text).strip()
 
-    results = []
-    # Try 1: parse as JSON array
+    # Try 1: parse whole response as JSON array
     try:
         arr = json.loads(text)
         if isinstance(arr, list):
-            for obj in arr:
-                if isinstance(obj, dict) and "instruction" in obj and "output" in obj:
-                    results.append(obj)
-            if results:
-                return results
+            return [obj for obj in arr if isinstance(obj, dict) and "instruction" in obj and "output" in obj]
     except json.JSONDecodeError:
         pass
 
-    # Try 2: extract individual { } objects with regex (multi-line safe)
-    pattern = re.compile(r'\{(?:[^{}]|(?:\{[^{}]*\}))*\}', re.DOTALL)
-    for match in pattern.finditer(text):
+    # Try 2: use raw_decode to find all JSON values scattered in text
+    results = []
+    decoder = json.JSONDecoder()
+    idx = 0
+    while idx < len(text):
         try:
-            obj = json.loads(match.group())
-            if "instruction" in obj and "output" in obj:
+            obj, end = decoder.raw_decode(text, idx)
+            if isinstance(obj, list):
+                results.extend(o for o in obj if isinstance(o, dict) and "instruction" in o and "output" in o)
+            elif isinstance(obj, dict) and "instruction" in obj and "output" in obj:
                 results.append(obj)
+            idx = end
         except json.JSONDecodeError:
-            continue
+            idx += 1
 
     if results:
         return results
@@ -108,7 +114,7 @@ Vary the question wording, tone, and phrasing but keep the answer factually iden
 Original:
 {json.dumps(seed, ensure_ascii=False)}
 
-Output each variation as a separate JSON object on its own line (no markdown, no code fences):"""
+Output ONLY a JSON array (exactly {n} elements) — no markdown, no code fences, no extra text:"""
 
 
 def augment_pairs(
@@ -139,7 +145,8 @@ def augment_pairs(
                 parsed = parse_jsonl_from_response(text)
 
                 if not parsed:
-                    print(f"    [!] No valid JSON found in response (attempt {attempt+1})")
+                    print(f"    [!] No valid JSON found (attempt {attempt+1}) — raw response (first 300 chars):")
+                    print(f"        {text[:300]}")
                     continue
 
                 for pair in parsed:
