@@ -190,7 +190,7 @@ Requires a GPU with ≥8 GB VRAM for reasonable speed. The script auto-detects y
 ```bash
 cd ml
 pip install -r requirements.txt
-python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}, Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"CPU\"}')"
+python -c "import torch; print('CUDA:', torch.cuda.is_available(), '- Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
 ```
 
 If it shows `CUDA: False`, reinstall PyTorch with CUDA support:
