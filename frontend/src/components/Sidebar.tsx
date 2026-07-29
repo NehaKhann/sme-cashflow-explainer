@@ -3,7 +3,7 @@ import { GridIcon, UploadIcon, BarChartIcon, CloseIcon, LogOutIcon } from "./Ico
 import { useAuth } from "./AuthContext";
 import { useDarkMode } from "../hooks/useDarkMode";
 
-export type Page = "dashboard" | "upload" | "reports";
+export type Page = "dashboard" | "upload" | "reports" | "compare";
 
 interface SidebarProps {
   status: ApiHealthStatus;

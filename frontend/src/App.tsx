@@ -42,7 +42,7 @@ export default function App() {
 type AuthPage = "landing" | "login" | "signup";
 
 function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChange: (v: string) => void }) {
-  const { user, loading, isDemo, enterDemo, exitDemo, logout } = useAuth();
+  const { user, loading, isDemo, enterDemo, logout } = useAuth();
   const [page, setPage] = useState<Page>("dashboard");
   const [authPage, setAuthPage] = useState<AuthPage>("landing");
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
@@ -64,6 +64,15 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     return () => clearTimeout(t);
   }, [doHealthCheck]);
 
+  const refreshReports = useCallback(async () => {
+    try {
+      const list = await fetchReports(apiBase);
+      setReports(list);
+    } catch {
+      // silently fail
+    }
+  }, [apiBase]);
+
   useEffect(() => {
     if (user) refreshReports();
     if (!user) {
@@ -77,15 +86,6 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     const t = setTimeout(() => doHealthCheck(), 1000);
     return () => clearTimeout(t);
   }, [isDemo, user, doHealthCheck]);
-
-  const refreshReports = useCallback(async () => {
-    try {
-      const list = await fetchReports(apiBase);
-      setReports(list);
-    } catch {
-      // silently fail
-    }
-  }, [apiBase]);
 
   async function handleAnalyze(formData: FormData) {
     setAnalyzing(true);
@@ -197,7 +197,9 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
         <div className="content">
           {reportError && <div className="error-banner">{reportError}</div>}
           {analyzing ? (
-            <ComparePage apiBase={apiBase} onNavigate={setPage} />
+            <LoadingCard />
+          ) : page === "compare" ? (
+            <ComparePage apiBase={apiBase} />
           ) : page === "dashboard" && results ? (
             <ResultsSection data={results} onReset={handleReset} apiBase={apiBase} />
           ) : page === "dashboard" ? (

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ReportSummary, CompareResult } from "../types/api";
 import { fetchReports, compareReportsApi } from "../api/client";
-import { BarChartIcon, TrendingUpIcon } from "./Icons";
-import type { Page } from "./Sidebar";
+import { TrendingUpIcon } from "./Icons";
 
 function money(n: number, currency: string = "USD") {
   return new Intl.NumberFormat("en-US", {
@@ -12,10 +11,9 @@ function money(n: number, currency: string = "USD") {
 
 interface ComparePageProps {
   apiBase: string;
-  onNavigate: (page: Page) => void;
 }
 
-export function ComparePage({ apiBase, onNavigate }: ComparePageProps) {
+export function ComparePage({ apiBase }: ComparePageProps) {
   const [reports, setReports] = useState<ReportSummary[]>([]);
   const [selectedA, setSelectedA] = useState("");
   const [selectedB, setSelectedB] = useState("");
