@@ -14,7 +14,7 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=fff)](https://react.dev)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=fff)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?logo=docker&logoColor=fff)](https://docker.com)
-[![Tests](https://img.shields.io/badge/tests-15_ passing-brightgreen)](#)
+[![Tests](https://img.shields.io/badge/tests-15__passing-brightgreen)](#)
 [![License](https://img.shields.io/badge/license-MIT-blue)](#)
 
 ---
