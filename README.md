@@ -185,9 +185,27 @@ When deployed (e.g. on Render where Ollama isn't available), set `CHAT_PROVIDER=
 
 Requires a GPU with ≥8 GB VRAM for reasonable speed. The script auto-detects your GPU (NVIDIA CUDA or Apple Metal).
 
+**Verify your GPU is detected before training:**
+
 ```bash
 cd ml
 pip install -r requirements.txt
+python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}, Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"CPU\"}')"
+```
+
+If it shows `CUDA: False`, reinstall PyTorch with CUDA support:
+```bash
+pip uninstall torch torchvision torchaudio -y
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+```
+
+During training, watch GPU usage in a second terminal:
+```bash
+nvidia-smi -l 2
+```
+
+```bash
+cd ml
 python prepare_dataset.py --with-hf              # build dataset + writes checksum
 python train.py                                  # QLoRA fine-tune (validates checksum)
 python train.py --config my_config.json          # use a custom config file
