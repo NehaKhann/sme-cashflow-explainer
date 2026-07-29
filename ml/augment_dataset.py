@@ -51,6 +51,7 @@ def load_seed_pairs(path: str) -> list[dict]:
 
 def load_existing_augmented(path: str) -> set[str]:
     if not os.path.exists(path):
+        print(f"[i] No existing augmented file at {path}, starting fresh")
         return set()
     existing = set()
     with open(path, encoding="utf-8") as f:
@@ -145,17 +146,23 @@ def augment_pairs(
                 parsed = parse_jsonl_from_response(text)
 
                 if not parsed:
-                    print(f"    [!] No valid JSON found (attempt {attempt+1}) — raw response (first 300 chars):")
-                    print(f"        {text[:300]}")
+                    print(f"    [!] No valid JSON found (attempt {attempt+1})")
+                    print(f"    [!] Raw response (first 500 chars): {text[:500]}")
                     continue
 
+                new_count = 0
                 for pair in parsed:
                     key = pair["instruction"].strip().lower()
                     if key not in existing_set:
                         existing_set.add(key)
                         new_pairs.append(pair)
+                        new_count += 1
 
-                print(f"    [+] Added {len([p for p in parsed if p['instruction'].strip().lower() not in existing_set])} new pairs")
+                print(f"    [+] Parsed {len(parsed)} objects, {new_count} new")
+                if len(parsed) > 0:
+                    sample = parsed[0]
+                    print(f"    [+] Sample keys: {list(sample.keys())}")
+                    print(f"    [+] Sample instruction: {str(sample.get('instruction', 'MISSING'))[:80]}")
                 break
             except Exception as e:
                 print(f"    [!] API error: {e} (attempt {attempt+1})")
