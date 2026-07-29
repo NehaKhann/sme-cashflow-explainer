@@ -25,6 +25,9 @@ HF datasets ─────┘     (build dataset)      (QLoRA)      (GGUF)
 cd ml
 pip install -r requirements.txt
 
+# If you get huggingface-hub / datasets version conflicts, run:
+#   pip install "datasets>=4,<6" "huggingface-hub>=1.0"
+
 # 1. Prepare dataset (custom Q&A + optional HF finance data)
 python prepare_dataset.py --with-hf
 
@@ -39,6 +42,15 @@ python quantize.py --adapters ./output/ledger-chatbot-<timestamp>
 # 4. Serve with Ollama
 ollama create ledger-chatbot -f ./output/ledger-chatbot-<timestamp>/Modelfile
 ollama run ledger-chatbot
+```
+
+### Troubleshooting
+
+If `datasets.load_dataset` fails with "Feature type 'List' not found", clear the HF cache and reinstall compatible versions:
+
+```bash
+Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\huggingface\hub\datasets--AdaptLLM--finance-tasks" -ErrorAction Ignore
+pip install "datasets>=4,<6" "huggingface-hub>=1.0"
 ```
 
 ### GPU / CPU Setup
@@ -72,9 +84,9 @@ Ollama automatically uses your GPU for inference. Verify with:
 ## Dataset
 
 | Source | Description | Examples |
-|---|---|---|
-| `data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 50 |
-| Hugging Face (optional) | [`financial_phrasebank`](https://huggingface.co/datasets/financial_phrasebank), [`AdaptLLM/finance-tasks`](https://huggingface.co/datasets/AdaptLLM/finance-tasks) | ~600 |
+|---|---|---|---|
+| `data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 37 |
+| Hugging Face (optional) | [`AdaptLLM/finance-tasks`](https://huggingface.co/datasets/AdaptLLM/finance-tasks) — FPB, FiQA_SA, ConvFinQA, Headline, NER | 300 (60/config) |
 
 Every example is formatted as a chat template:
 ```
