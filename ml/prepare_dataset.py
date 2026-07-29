@@ -52,7 +52,7 @@ def load_hf_finance(samples_per_dataset: int = 300) -> list[dict]:
     records = []
 
     try:
-        fp = load_dataset("financial_phrasebank", "sentences_allagree", split="train")
+        fp = load_dataset("financial_phrasebank", "sentences_allagree", split="train", trust_remote_code=True)
         count = 0
         for i, row in enumerate(fp):
             if i >= samples_per_dataset // 2:
@@ -67,20 +67,21 @@ def load_hf_finance(samples_per_dataset: int = 300) -> list[dict]:
     except Exception as e:
         print(f"[!] Could not load financial_phrasebank: {e}")
 
-    try:
-        fa = load_dataset("AdaptLLM/finance-tasks", split="train")
-        count = 0
-        for i, row in enumerate(fa):
-            if i >= samples_per_dataset // 2:
-                break
-            records.append({
-                "instruction": row["instruction"],
-                "output": row["output"],
-            })
-            count += 1
-        print(f"[✓] Loaded {count} samples from finance-tasks")
-    except Exception as e:
-        print(f"[!] Could not load finance-tasks: {e}")
+    for config_name in ["FPB", "ConvFinQA", "FiQA_SA"]:
+        try:
+            fa = load_dataset("AdaptLLM/finance-tasks", config_name, split="train")
+            count = 0
+            for i, row in enumerate(fa):
+                if i >= samples_per_dataset // 2:
+                    break
+                records.append({
+                    "instruction": row["instruction"],
+                    "output": row["output"],
+                })
+                count += 1
+            print(f"[✓] Loaded {count} samples from finance-tasks/{config_name}")
+        except Exception as e:
+            print(f"[!] Could not load finance-tasks/{config_name}: {e}")
 
     return records
 
