@@ -51,7 +51,7 @@ Open **http://localhost:5173** — click "Try demo" or sign up.
 - **Transaction table** — sortable view of all parsed transactions
 - **Demo mode** — explore the full workflow without creating an account
 - **Dark mode** — toggle from the sidebar, persisted across sessions
-- **Chatbot** — fine-tuned LLM (QLoRA + Ollama) for platform Q&A and underwriting concepts
+- **Chatbot** — fine-tuned LLM (QLoRA + Ollama) for platform Q&A and underwriting concepts; falls back to Groq API when deployed
 
 ---
 
@@ -67,7 +67,7 @@ sample_data/      Synthetic CSV generator
 The pipeline:
 
 ```
-Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narrative generated (Groq or template) → optional chatbot Q&A (fine-tuned model via Ollama)
+Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narrative generated (Groq or template) → optional chatbot Q&A (fine-tuned model via Ollama, or Groq API when deployed)
 ```
 
 ---
@@ -81,7 +81,7 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narra
 | Database | PostgreSQL 16, SQLAlchemy 2.0 (async), asyncpg |
 | Auth | JWT (python-jose), bcrypt (passlib), per-user data isolation |
 | LLM | Groq API (Llama 3.3 70B) or deterministic template |
-| Chatbot | Fine-tuned Llama 3.2 3B via QLoRA, served via Ollama |
+| Chatbot | Fine-tuned Llama 3.2 3B via QLoRA, served via Ollama locally; Groq API when deployed |
 | ML Pipeline | PyTorch, Hugging Face Transformers, PEFT, bitsandbytes, TRL, Ollama |
 | Data | Pandas, NumPy |
 | Testing | pytest, pytest-asyncio, httpx |
@@ -146,6 +146,9 @@ python -m pytest tests/ -v
 | `JWT_SECRET` | — | Yes (generate: `python -c "import secrets; print(secrets.token_urlsafe(32))"`) |
 | `GROQ_API_KEY` | — | No (template narrative used without it) |
 | `VITE_API_BASE` | `http://localhost:8000` | Frontend only |
+| `CHAT_PROVIDER` | `ollama` | No — set to `groq` for deployed environments without local Ollama |
+| `CHAT_MODEL` | `ledger-chatbot` (ollama) / `llama-3.3-70b-versatile` (groq) | No |
+| `OLLAMA_BASE_URL` | `http://host.docker.internal:11434` | No — only used when `CHAT_PROVIDER=ollama` |
 
 ---
 
@@ -153,13 +156,16 @@ python -m pytest tests/ -v
 
 **Backend:** Push to GitHub → [Render](https://render.com) "New → Web Service" → select repo (auto-detects `render.yaml`).  
 **Frontend:** Import to [Vercel](https://vercel.com) or [Netlify](https://netlify.com) — root `frontend/`, build `npm run build`, output `dist`.  
-**Database:** PostgreSQL 16 — Docker Compose for local, [Neon](https://neon.tech) or Render Postgres for production.
+**Database:** PostgreSQL 16 — Docker Compose for local, [Neon](https://neon.tech) or Render Postgres for production.  
+**Chatbot:** Set `CHAT_PROVIDER=groq` on the backend service — the chatbot uses the Groq API instead of a local Ollama instance (no Ollama on Render).
 
 ---
 
 ## Chatbot — ML Fine-Tuning Pipeline
 
 The chatbot is a small language model fine-tuned on cash-flow underwriting knowledge using **QLoRA** and served locally via **Ollama**.
+
+When deployed (e.g. on Render where Ollama isn't available), set `CHAT_PROVIDER=groq` in the backend environment — the chatbot uses the **Groq API** (`llama-3.3-70b-versatile`) instead, requiring no local model or GPU.
 
 ### Training
 
