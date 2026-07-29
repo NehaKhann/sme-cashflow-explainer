@@ -14,6 +14,7 @@ import { ResultsSection } from "./components/ResultsSection";
 import { ReportsSection } from "./components/ReportsSection";
 import { ComparePage } from "./components/ComparePage";
 import { Chatbot } from "./components/Chatbot";
+import { ToastContainer, toast } from "./components/Toast";
 import "./App.css";
 
 const INITIAL_STATUS: ApiHealthStatus = {
@@ -52,7 +53,6 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currency, setCurrency] = useState("USD");
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [reportError, setReportError] = useState<string | null>(null);
 
   const doHealthCheck = useCallback(async () => {
     const s = await checkHealth(apiBase);
@@ -108,7 +108,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
       setResults(detail.raw_data);
       setPage("dashboard");
     } catch (err: unknown) {
-      setReportError(err instanceof Error ? err.message : "Could not load report.");
+      toast(err instanceof Error ? err.message : "Could not load report.");
     }
   }
 
@@ -117,8 +117,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
       await deleteReportApi(apiBase, id);
       await refreshReports();
     } catch (err: unknown) {
-      setReportError(err instanceof Error ? err.message : "Failed to delete report.");
-      setTimeout(() => setReportError(null), 5000);
+      toast(err instanceof Error ? err.message : "Failed to delete report.");
     }
   }
 
@@ -127,8 +126,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
       await clearAllReportsApi(apiBase);
       await refreshReports();
     } catch (err: unknown) {
-      setReportError(err instanceof Error ? err.message : "Failed to clear reports.");
-      setTimeout(() => setReportError(null), 5000);
+      toast(err instanceof Error ? err.message : "Failed to clear reports.");
     }
   }
 
@@ -195,7 +193,6 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
         <div className="content">
-          {reportError && <div className="error-banner">{reportError}</div>}
           {analyzing ? (
             <LoadingCard />
           ) : page === "compare" ? (
@@ -218,6 +215,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
         </div>
       </main>
       <Chatbot apiBase={apiBase} />
+      <ToastContainer />
     </div>
   );
 }

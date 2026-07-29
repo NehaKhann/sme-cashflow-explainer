@@ -9,13 +9,15 @@
 
 **Turn a raw bank CSV into an auditable risk memo in seconds.** Every metric is computed deterministically — the LLM explains numbers, it never invents them.
 
+[![CI](https://github.com/NehaKhann/sme-cashflow-explainer/actions/workflows/ci.yml/badge.svg)](https://github.com/NehaKhann/sme-cashflow-explainer/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=fff)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=fff)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=fff)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?logo=typescript&logoColor=fff)](https://typescriptlang.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=fff)](https://postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?logo=docker&logoColor=fff)](https://docker.com)
-[![Tests](https://img.shields.io/badge/tests-15__passing-brightgreen)](#)
-[![License](https://img.shields.io/badge/license-MIT-blue)](#)
+[![Ruff](https://img.shields.io/badge/code%20style-ruff-000?logo=ruff)](https://docs.astral.sh/ruff)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 

@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, delete
@@ -48,7 +49,7 @@ async def get_report(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Report).where(Report.id == report_id, Report.user_id == current_user.id)
+        select(Report).where(Report.id == uuid.UUID(report_id), Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -74,7 +75,7 @@ async def delete_report(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Report).where(Report.id == report_id, Report.user_id == current_user.id)
+        select(Report).where(Report.id == uuid.UUID(report_id), Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -108,7 +109,7 @@ async def get_transactions(
     current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(
-        select(Report).where(Report.id == report_id, Report.user_id == current_user.id)
+        select(Report).where(Report.id == uuid.UUID(report_id), Report.user_id == current_user.id)
     )
     report = result.scalar_one_or_none()
     if not report:
@@ -116,7 +117,7 @@ async def get_transactions(
 
     txn_result = await db.execute(
         select(Transaction)
-        .where(Transaction.report_id == report_id)
+        .where(Transaction.report_id == uuid.UUID(report_id))
         .order_by(Transaction.date.desc())
     )
     transactions = txn_result.scalars().all()

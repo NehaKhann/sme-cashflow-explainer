@@ -20,6 +20,29 @@ interface ResultsSectionProps {
   apiBase?: string;
 }
 
+function AnimatedScore({ score }: { score: number }) {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const end = score;
+    const duration = 800;
+    const step = 16;
+    const totalSteps = duration / step;
+    const increment = end / totalSteps;
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        setDisplay(end);
+        clearInterval(timer);
+      } else {
+        setDisplay(Math.round(start));
+      }
+    }, step);
+    return () => clearInterval(timer);
+  }, [score]);
+  return <>{display} / 100</>;
+}
+
 export function ResultsSection({ data, onReset, apiBase }: ResultsSectionProps) {
   const netClass = data.net_cash_flow >= 0 ? "stat-positive" : "stat-negative";
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
@@ -127,7 +150,7 @@ export function ResultsSection({ data, onReset, apiBase }: ResultsSectionProps) 
         </div>
         <div className="stat-card">
           <span className="stat-label">Risk score</span>
-          <span className="stat-value" id="fig-score">{data.risk_score} / 100</span>
+          <span className="stat-value score-value" id="fig-score"><AnimatedScore score={data.risk_score} /></span>
         </div>
       </div>
 
