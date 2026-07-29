@@ -93,3 +93,17 @@ export async function compareReportsApi(apiBase: string, reportIds: [string, str
     body: JSON.stringify({ report_ids: reportIds }),
   }) as Promise<CompareResult>;
 }
+
+export async function sendChatMessage(
+  apiBase: string,
+  message: string,
+  history: { role: string; content: string }[],
+  signal?: AbortSignal,
+): Promise<Response> {
+  return fetch(`${apiBase}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, history }),
+    signal,
+  });
+}

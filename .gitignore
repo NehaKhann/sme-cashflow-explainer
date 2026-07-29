@@ -9,3 +9,9 @@ node_modules/
 dist/
 *.tsbuildinfo
 .DS_Store
+
+# ML pipeline — large generated files
+ml/output/
+*.gguf
+*.safetensors
+*.bin

@@ -13,6 +13,7 @@ import { DashboardHome } from "./components/DashboardHome";
 import { ResultsSection } from "./components/ResultsSection";
 import { ReportsSection } from "./components/ReportsSection";
 import { ComparePage } from "./components/ComparePage";
+import { Chatbot } from "./components/Chatbot";
 import "./App.css";
 
 const INITIAL_STATUS: ApiHealthStatus = {
@@ -204,6 +205,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
           )}
         </div>
       </main>
+      <Chatbot apiBase={apiBase} />
     </div>
   );
 }

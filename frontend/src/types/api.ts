@@ -96,3 +96,8 @@ export interface CompareResult {
   report_b: AnalysisData;
   deltas: Record<string, number>;
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}

@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import init_db, dispose_db
-from .routers import analysis, reports, auth
+from .routers import analysis, reports, auth, chat
 
 logging.basicConfig(level=logging.INFO)
 
@@ -42,6 +42,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(analysis.router)
 app.include_router(reports.router)
+app.include_router(chat.router)
 
 
 @app.get("/health")
