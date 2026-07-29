@@ -49,10 +49,76 @@ def load_custom_qa(path: str) -> list[dict]:
     return records
 
 
+def _make_qa_pair(instruction: str, output: str) -> dict:
+    return {"instruction": instruction, "output": output}
+
+
+# ── HF dataset adapters ──────────────────────────────────────────
+# Each adapter converts a row from a finance-tasks config into an
+# {"instruction": …, "output": …} pair.
+
+
+def _adapt_fpb(row: dict) -> dict | None:
+    """FPB: classify sentence sentiment (Negative / Neutral / Positive)."""
+    opts = row["options"]
+    gold = int(row["gold_index"])
+    out = opts[gold] if isinstance(opts, list) else eval(opts)[gold]
+    return _make_qa_pair(
+        f"Classify the sentiment of this financial text: {row['input']}",
+        out,
+    )
+
+
+def _adapt_fiqa_sa(row: dict) -> dict | None:
+    """FiQA_SA: sentiment classification of a financial social-media post."""
+    opts = row["options"]
+    gold = int(row["gold_index"])
+    out = opts[gold] if isinstance(opts, list) else eval(opts)[gold]
+    return _make_qa_pair(
+        f"Classify the sentiment of this financial social-media post:\n{row['input']}",
+        out,
+    )
+
+
+def _adapt_convfinqa(row: dict) -> dict | None:
+    """ConvFinQA: financial question answering (numeric answer)."""
+    return _make_qa_pair(
+        f"Answer this financial question:\n{row['input']}",
+        str(row["label"]),
+    )
+
+
+def _adapt_headline(row: dict) -> dict | None:
+    """Headline: does the headline match the financial topic? No / Yes."""
+    opts = row["options"]
+    gold = int(row["gold_index"])
+    out = opts[gold] if isinstance(opts, list) else eval(opts)[gold]
+    # input already contains the full question
+    return _make_qa_pair(row["input"], out)
+
+
+def _adapt_ner(row: dict) -> dict | None:
+    """NER: extract named entities from a financial sentence."""
+    return _make_qa_pair(
+        f"Extract the named entities from this financial sentence:\n{row['input']}",
+        str(row["label"]),
+    )
+
+
+HF_ADAPTERS = {
+    "FPB": _adapt_fpb,
+    "FiQA_SA": _adapt_fiqa_sa,
+    "ConvFinQA": _adapt_convfinqa,
+    "Headline": _adapt_headline,
+    "NER": _adapt_ner,
+}
+
+
 def load_hf_finance(samples_per_dataset: int = 300) -> list[dict]:
     records = []
+    per_config = samples_per_dataset // len(HF_ADAPTERS)
 
-    for config_name in HF_CONFIGS:
+    for config_name, adapter in HF_ADAPTERS.items():
         loaded = False
         for split_name in ["test", "train"]:
             if loaded:
@@ -61,13 +127,12 @@ def load_hf_finance(samples_per_dataset: int = 300) -> list[dict]:
                 fa = load_dataset("AdaptLLM/finance-tasks", config_name, split=split_name)
                 count = 0
                 for row in fa:
-                    if count >= samples_per_dataset // len(HF_CONFIGS):
+                    if count >= per_config:
                         break
-                    records.append({
-                        "instruction": row["instruction"],
-                        "output": row["output"],
-                    })
-                    count += 1
+                    pair = adapter(row)
+                    if pair is not None:
+                        records.append(pair)
+                        count += 1
                 print(f"[✓] Loaded {count} samples from finance-tasks/{config_name} ({split_name})")
                 loaded = True
             except Exception:
