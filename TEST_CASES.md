@@ -49,6 +49,8 @@ python generate.py                # creates all CSV files (see below)
 | 5 | Enter credentials | Dashboard loads with empty report list |
 | 6 | Upload a CSV | Analysis runs, report saved to account |
 | 7 | Logout → Login again | Report list shows the previous analysis |
+| 8 | After login, call `/api/auth/refresh` | Returns new access + refresh tokens; old refresh token invalidated |
+| 9 | Call `/api/auth/refresh` again with old token | 401 error (token revoked) |
 
 ### Edge cases
 
@@ -57,6 +59,9 @@ python generate.py                # creates all CSV files (see below)
 | Sign up with existing email | Error: email already registered |
 | Login with wrong password | Error: invalid credentials |
 | Sign up with password < 8 chars | Error: password too short |
+| Rapid signup attempts (6+ in 1 min) | 429 rate-limit error after 5th attempt |
+| Rapid login attempts (11+ in 1 min) | 429 rate-limit error after 10th attempt |
+| Refresh token reuse (after already rotated) | Old token rejected, revoked token family |
 
 ---
 

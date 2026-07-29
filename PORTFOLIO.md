@@ -103,6 +103,7 @@ The platform bridges a critical gap in small-business lending: traditional under
 - **SQL injection prevention**: SQLAlchemy parameterized queries throughout
 - **Input validation**: Pydantic models with custom field validators (email, password length, file format)
 - **Error handling**: graceful degradation with fallback templates for every external service
+- **Rate limiting**: per-endpoint limits via slowapi prevent brute-force auth attacks and API abuse
 
 ---
 

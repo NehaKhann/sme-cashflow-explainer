@@ -81,7 +81,7 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → auto-
 | Frontend | React 19, TypeScript, Vite 6 |
 | Backend | Python 3.11, FastAPI, Pydantic v2 |
 | Database | PostgreSQL 16, SQLAlchemy 2.0 (async), asyncpg |
-| Auth | JWT (python-jose), bcrypt (passlib), per-user data isolation |
+| Auth | JWT (python-jose), bcrypt (passlib), per-user data isolation, DB-backed refresh rotation |
 | LLM | Groq API (Llama 3.3 70B) or deterministic template |
 | Chatbot | Fine-tuned Llama 3.2 3B via QLoRA, served via Ollama locally; Groq API when deployed |
 | ML Pipeline | PyTorch, Hugging Face Transformers, PEFT, bitsandbytes, TRL, Ollama |
@@ -109,6 +109,7 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → auto-
 | `/api/auth/signup` | POST | Create account (email, password ≥8 chars, optional display_name) |
 | `/api/auth/login` | POST | Returns JWT access + refresh tokens |
 | `/api/auth/me` | GET | Current user info (requires Bearer token) |
+| `/api/auth/refresh` | POST | Rotate refresh token (returns new access + refresh pair) |
 
 All analysis and report endpoints are scoped to the authenticated user — users can only see their own data. The trend comparison reads the user's immediately preceding report for deltas.
 
@@ -151,6 +152,17 @@ python -m pytest tests/ -v
 | `CHAT_PROVIDER` | `ollama` | No — set to `groq` for deployed environments without local Ollama |
 | `CHAT_MODEL` | `ledger-chatbot` (ollama) / `llama-3.3-70b-versatile` (groq) | No |
 | `OLLAMA_BASE_URL` | `http://host.docker.internal:11434` | No — only used when `CHAT_PROVIDER=ollama` |
+| `CORS_ORIGINS` | `http://localhost:5173` | No — comma-separated list of allowed origins |
+
+### Rate limiting
+
+| Endpoint | Limit |
+|---|---|
+| `POST /api/auth/signup` | 5 / minute |
+| `POST /api/auth/login` | 10 / minute |
+| `POST /api/auth/refresh` | 10 / minute |
+| `POST /api/chat` | 20 / minute |
+| All others | 60 / minute |
 
 ---
 
