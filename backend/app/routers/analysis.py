@@ -1,3 +1,4 @@
+import asyncio
 import io
 import logging
 import uuid
@@ -29,7 +30,7 @@ async def analyze_transactions(
     db: AsyncSession = Depends(get_db),
     current_user: User | None = Depends(get_optional_user),
 ):
-    if not file.filename.lower().endswith(".csv"):
+    if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Please upload a .csv file.")
 
     raw = await file.read()
@@ -40,7 +41,7 @@ async def analyze_transactions(
         df = load_transactions(io.BytesIO(raw))
         features = extract_features(df)
         risk = assess_risk(features)
-        narrative = generate_narrative(features, risk)
+        narrative = await asyncio.to_thread(generate_narrative, features, risk)
     except InvalidTransactionData as e:
         logger.warning("Invalid transaction data uploaded: %s", e)
         raise HTTPException(status_code=422, detail=str(e))

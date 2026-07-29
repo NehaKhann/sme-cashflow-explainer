@@ -249,9 +249,9 @@ def main():
     if not args.skip_llamacpp:
         quant_paths = convert_to_gguf(merged_dir, args.adapters, args.quant, args.llama_cpp_repo)
 
-    # Step 5: Generate Modelfile
-    quant = args.quant
-    generate_modelfile(args.adapters, quant)
+    # Step 5: Generate Modelfile (only if GGUF was created)
+    if not args.skip_llamacpp:
+        generate_modelfile(args.adapters, args.quant)
 
     print(f"\n{'='*60}")
     print(f"Quantization complete!")

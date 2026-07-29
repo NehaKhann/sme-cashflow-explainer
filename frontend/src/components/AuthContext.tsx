@@ -28,9 +28,11 @@ export function AuthProvider({ apiBase, children }: { apiBase: string; children:
     }
     getMeApi(apiBase)
       .then(setUser)
-      .catch(() => {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.message.includes("401")) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+        }
       })
       .finally(() => setLoading(false));
   }, [apiBase]);

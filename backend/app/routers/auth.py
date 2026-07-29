@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import get_db
@@ -64,7 +65,11 @@ async def signup(body: SignupRequest, db: AsyncSession = Depends(get_db)):
         display_name=body.display_name or body.email.split("@")[0],
     )
     db.add(user)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered.")
     await db.refresh(user)
 
     user_id_str = str(user.id)
@@ -96,8 +101,10 @@ async def refresh(body: RefreshRequest):
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Invalid token type.")
 
-    user_id = payload["sub"]
-    email = payload["email"]
+    user_id = payload.get("sub")
+    email = payload.get("email")
+    if not user_id or not email:
+        raise HTTPException(status_code=401, detail="Invalid token payload.")
     return TokenResponse(
         access_token=create_access_token(user_id, email),
         refresh_token=create_refresh_token(user_id, email),

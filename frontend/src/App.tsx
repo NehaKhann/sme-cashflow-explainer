@@ -52,6 +52,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currency, setCurrency] = useState("USD");
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
 
   const doHealthCheck = useCallback(async () => {
     const s = await checkHealth(apiBase);
@@ -69,22 +70,22 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
       setReports([]);
       setResults(null);
     }
-  }, [user]);
+  }, [user, refreshReports]);
 
   useEffect(() => {
     if (!user && !isDemo) return;
     const t = setTimeout(() => doHealthCheck(), 1000);
     return () => clearTimeout(t);
-  }, [isDemo]);
+  }, [isDemo, user, doHealthCheck]);
 
-  async function refreshReports() {
+  const refreshReports = useCallback(async () => {
     try {
       const list = await fetchReports(apiBase);
       setReports(list);
     } catch {
       // silently fail
     }
-  }
+  }, [apiBase]);
 
   async function handleAnalyze(formData: FormData) {
     setAnalyzing(true);
@@ -107,8 +108,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
       setResults(detail.raw_data);
       setPage("dashboard");
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Could not load report.";
-      alert(msg);
+      setReportError(err instanceof Error ? err.message : "Could not load report.");
     }
   }
 
@@ -116,8 +116,9 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     try {
       await deleteReportApi(apiBase, id);
       await refreshReports();
-    } catch {
-      // silently fail
+    } catch (err: unknown) {
+      setReportError(err instanceof Error ? err.message : "Failed to delete report.");
+      setTimeout(() => setReportError(null), 5000);
     }
   }
 
@@ -125,8 +126,9 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     try {
       await clearAllReportsApi(apiBase);
       await refreshReports();
-    } catch {
-      // silently fail
+    } catch (err: unknown) {
+      setReportError(err instanceof Error ? err.message : "Failed to clear reports.");
+      setTimeout(() => setReportError(null), 5000);
     }
   }
 
@@ -193,9 +195,8 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
         <div className="content">
+          {reportError && <div className="error-banner">{reportError}</div>}
           {analyzing ? (
-            <LoadingCard />
-          ) : page === "compare" ? (
             <ComparePage apiBase={apiBase} onNavigate={setPage} />
           ) : page === "dashboard" && results ? (
             <ResultsSection data={results} onReset={handleReset} apiBase={apiBase} />

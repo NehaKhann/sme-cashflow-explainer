@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from sqlalchemy import String, Float, Integer, Date, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.types import Uuid
@@ -19,7 +19,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, default=datetime.now,
+        DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc),
     )
 
     reports: Mapped[list["Report"]] = relationship(back_populates="user", cascade="all, delete-orphan")

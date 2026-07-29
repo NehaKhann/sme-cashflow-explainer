@@ -65,9 +65,10 @@ export function Chatbot({ apiBase }: ChatbotProps) {
       const decoder = new TextDecoder();
       let full = "";
 
+      let errored = false;
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done || errored) break;
 
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split("\n");
@@ -81,6 +82,7 @@ export function Chatbot({ apiBase }: ChatbotProps) {
             const parsed = JSON.parse(payload);
             if (parsed.error) {
               setError(parsed.error);
+              errored = true;
               break;
             }
             if (parsed.text) {

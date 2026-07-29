@@ -30,11 +30,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Loosen for local/demo use; tighten to your actual frontend origin in production.
+cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=cors_origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

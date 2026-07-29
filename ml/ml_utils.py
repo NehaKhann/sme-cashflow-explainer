@@ -32,12 +32,14 @@ def load_config(config_path: str | None = None) -> dict[str, Any]:
 def merge_config_cli(config: dict, args: argparse.Namespace, builtin_defaults: dict) -> argparse.Namespace:
     """
     Merge config file values into parsed CLI args.
-    CLI-explicit values (those differing from builtin_defaults) take precedence.
+    Priority: CLI > config > builtin.
+    A CLI value is considered explicit when it differs from the builtin default.
     """
     ns = vars(args)
-    for key, cli_val in ns.items():
-        builtin = builtin_defaults.get(key)
-        if key in config and cli_val == builtin:
+    for key, builtin in builtin_defaults.items():
+        if key in ns and ns[key] != builtin:
+            continue
+        if key in config:
             ns[key] = config[key]
     return args
 

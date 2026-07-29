@@ -15,7 +15,10 @@ from .db_models import User
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
 
-SECRET_KEY = os.getenv("JWT_SECRET", "change-me-in-production")
+_jwt_secret = os.environ.get("JWT_SECRET")
+if not _jwt_secret:
+    raise RuntimeError("JWT_SECRET environment variable is required. Generate one with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+SECRET_KEY = _jwt_secret
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_EXPIRE = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 REFRESH_EXPIRE = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))

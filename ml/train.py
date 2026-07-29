@@ -40,7 +40,7 @@ OUTPUT_BASE = os.path.join(BASE_DIR, "output")
 def detect_device():
     if torch.cuda.is_available():
         gpu_name = torch.cuda.get_device_name(0)
-        gpu_mem = torch.cuda.get_device_properties(0).total_mem / 1e9
+        gpu_mem = torch.cuda.get_device_properties(0).total_memory / 1e9
         print(f"[GPU] {gpu_name} ({gpu_mem:.1f} GB VRAM)")
         print(f"[GPU] CUDA version: {torch.version.cuda}")
         return "cuda"
@@ -108,6 +108,8 @@ def set_seed(seed: int):
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
@@ -146,7 +148,8 @@ def main():
             print("    Run 'python prepare_dataset.py' first.")
             sys.exit(1)
 
-    validate_data_checksum(DATA_DIR, args.train_file, args.eval_file)
+    checksum_dir = os.path.dirname(args.train_file) if args.train_file != os.path.join(DATA_DIR, "train.jsonl") else DATA_DIR
+    validate_data_checksum(checksum_dir, args.train_file, args.eval_file)
 
     dataset = load_dataset("json", data_files={"train": args.train_file, "eval": args.eval_file})
     if len(dataset["train"]) == 0:
@@ -248,15 +251,11 @@ def main():
     trainer.model.save_pretrained(output_dir)
     tokenizer.save_pretrained(output_dir)
 
-    # Save the active config alongside the run
-    with open(os.path.join(output_dir, "active_config.json"), "w") as f:
-        json.dump(vars(args), f, indent=2)
-
     print(f"\n{'='*60}")
     print(f"Training complete!")
     print(f"  Run name     : {run_name}")
     print(f"  LoRA weights : {output_dir}")
-    print(f"  Config       : {output_dir}/active_config.json")
+    print(f"  Config       : {output_dir}/config.json")
     print(f"  Next step    : python quantize.py --adapters {output_dir}")
     print(f"{'='*60}")
 

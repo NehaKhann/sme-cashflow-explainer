@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+.env
+.git
+.gitignore
+README.md
+.DS_Store
+node_modules
+dist
+*.tsbuildinfo
+venv
+.venv

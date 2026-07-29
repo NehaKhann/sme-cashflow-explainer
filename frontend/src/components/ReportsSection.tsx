@@ -1,5 +1,5 @@
 import type { ReportSummary } from "../types/api";
-import { BarChartIcon, AlertIcon } from "./Icons";
+import { BarChartIcon } from "./Icons";
 
 function money(n: number) {
   return new Intl.NumberFormat("en-US", {

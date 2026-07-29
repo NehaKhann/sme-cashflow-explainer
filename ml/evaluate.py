@@ -44,7 +44,7 @@ def parse_args():
     builtin = {
         "model": None, "adapters": None,
         "base_model": "unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
-        "eval_file": DEFAULT_EVAL_FILE, "seed": 42, "config": None,
+        "eval_file": DEFAULT_EVAL_FILE, "seed": 42, "max_seq_len": 1024, "config": None,
     }
     parser = argparse.ArgumentParser(description="Evaluate fine-tuned chatbot")
     parser.add_argument("--config", default=None, help="Path to training_config.json")
@@ -53,6 +53,7 @@ def parse_args():
     parser.add_argument("--base-model", default="unsloth/Llama-3.2-3B-Instruct-bnb-4bit",
                         help="Base model name (required if --adapters is used)")
     parser.add_argument("--eval-file", default=DEFAULT_EVAL_FILE, help="Evaluation dataset")
+    parser.add_argument("--max-seq-len", type=int, default=1024, help="Max sequence length for perplexity")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for sampling")
     args = parser.parse_args()
     config = load_config(args.config)
@@ -90,7 +91,7 @@ def load_model(model_path: str, adapters: str | None, base_model: str):
 
 
 @torch.no_grad()
-def compute_perplexity(model, tokenizer, eval_file: str, seed: int, max_samples: int = 50):
+def compute_perplexity(model, tokenizer, eval_file: str, seed: int, max_samples: int = 50, max_seq_len: int = 1024):
     """Compute perplexity on a sample of the evaluation set."""
     if not os.path.exists(eval_file):
         print(f"[!] Eval file not found: {eval_file}")
@@ -141,7 +142,7 @@ def compute_perplexity(model, tokenizer, eval_file: str, seed: int, max_samples:
     return perplexity
 
 
-def sample_responses(model, tokenizer):
+def sample_responses(model, tokenizer, max_seq_len: int = 1024):
     """Generate answers to sample questions for qualitative review."""
     print(f"\n{'='*50}")
     print("Sample Responses (Qualitative Review)")
@@ -154,7 +155,7 @@ def sample_responses(model, tokenizer):
         ]
 
         text = tokenizer.apply_chat_template(messages, tokenize=False)
-        inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=max_seq_len)
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
         with torch.no_grad():
@@ -184,10 +185,10 @@ def main():
     model, tokenizer = load_model(args.model, args.adapters, args.base_model)
 
     # Perplexity
-    perplexity = compute_perplexity(model, tokenizer, args.eval_file, args.seed)
+    perplexity = compute_perplexity(model, tokenizer, args.eval_file, args.seed, max_seq_len=args.max_seq_len)
 
     # Sample responses
-    sample_responses(model, tokenizer)
+    sample_responses(model, tokenizer, args.max_seq_len)
 
     print(f"\n{'='*50}")
     print("Evaluation complete!")
