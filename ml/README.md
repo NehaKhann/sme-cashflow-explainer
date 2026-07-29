@@ -33,6 +33,7 @@ python prepare_dataset.py --with-hf
 
 # 2. Fine-tune with QLoRA (auto-detects GPU)
 python train.py                                    # uses default config
+python train.py --disable-wandb                    # skip W&B logging (no API key needed)
 python train.py --config my_config.json            # custom config
 python train.py --lr 1e-4 --epochs 3               # CLI overrides config
 

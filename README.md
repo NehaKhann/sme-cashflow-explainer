@@ -217,6 +217,7 @@ pip install -r requirements.txt
 #   pip install "datasets>=4,<6" "huggingface-hub>=1.0"
 python prepare_dataset.py --with-hf              # build dataset + writes checksum
 python train.py                                  # QLoRA fine-tune (validates checksum)
+python train.py --disable-wandb                  # skip W&B logging (no API key needed)
 python train.py --config my_config.json          # use a custom config file
 python quantize.py --adapters ./output/...       # merge + GGUF
 ollama create ledger-chatbot -f ./output/.../Modelfile
