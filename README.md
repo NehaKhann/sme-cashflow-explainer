@@ -49,7 +49,7 @@ Open **http://localhost:5173** — click "Try demo" or sign up.
 - **PDF export** — one-click download of the full memo as an A4 PDF
 - **Multi-currency** — 10 currencies supported; all amounts format to the selected currency
 - **Report history** — every analysis is saved and scoped to your account; revisit, compare, or delete past memos
-- **Compare periods** — diff two reports side-by-side with delta values for every key metric
+- **Compare periods** — auto-compare each new analysis vs the previous report; green/red deltas for net flow, risk score, volatility, and concentration
 - **Transaction table** — sortable view of all parsed transactions
 - **Demo mode** — explore the full workflow without creating an account
 - **Dark mode** — toggle from the sidebar, persisted across sessions
@@ -69,7 +69,7 @@ sample_data/      Synthetic CSV generator
 The pipeline:
 
 ```
-Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narrative generated (Groq or template) → optional chatbot Q&A (fine-tuned model via Ollama, or Groq API when deployed)
+Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → auto-compare vs previous report → narrative generated (Groq or template) → optional chatbot Q&A (fine-tuned model via Ollama, or Groq API when deployed)
 ```
 
 ---
@@ -110,7 +110,7 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narra
 | `/api/auth/login` | POST | Returns JWT access + refresh tokens |
 | `/api/auth/me` | GET | Current user info (requires Bearer token) |
 
-All analysis and report endpoints are scoped to the authenticated user — users can only see their own data.
+All analysis and report endpoints are scoped to the authenticated user — users can only see their own data. The trend comparison reads the user's immediately preceding report for deltas.
 
 ---
 

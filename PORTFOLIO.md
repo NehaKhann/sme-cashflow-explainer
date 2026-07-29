@@ -117,7 +117,7 @@ User's Browser (React SPA)
   │  Frontend (React 19 + Vite)    │
   │  • Upload CSV                  │
   │  • View risk memo              │
-  │  • Compare reports             │
+  │  • Compare reports (auto-diff) │
   │  • Chat with AI assistant      │
   │  • Export PDF                  │
   └──────────────┬─────────────────┘
@@ -155,5 +155,6 @@ User's Browser (React SPA)
 - **Model size**: 3B parameters → 2.1 GB GGUF (Q4_K_M)
 - **Dataset**: 600+ Q&A pairs (hand-written + Hugging Face financial datasets)
 - **Risk flags**: 7 distinct checks (volatility, concentration, seasonality, negative streaks, etc.)
+- **Auto-trend**: every new analysis shows green/red deltas vs the previous report for the 4 key underwriting signals
 - **PDF export**: < 1 second client-side generation
 - **Test coverage**: 15+ backend tests for feature extraction + risk scoring
