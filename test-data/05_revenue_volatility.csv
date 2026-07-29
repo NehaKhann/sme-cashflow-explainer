@@ -1,0 +1,108 @@
+date,amount,counterparty,category
+2025-01-14,1750.07,Acme Retail Co,revenue
+2025-01-12,2205.15,Cedar & Co,revenue
+2025-01-21,2207.99,BlueSky Logistics,revenue
+2025-01-07,2039.38,BlueSky Logistics,revenue
+2025-01-30,1950.49,BlueSky Logistics,revenue
+2025-01-23,1697.14,BlueSky Logistics,revenue
+2025-01-01,-3946.29,vendor,payroll
+2025-01-06,-1226.21,vendor,rent
+2025-01-13,-195.72,vendor,software
+2025-01-21,-263.35,vendor,supplies
+2025-02-18,837.28,BlueSky Logistics,revenue
+2025-02-27,984.58,Acme Retail Co,revenue
+2025-02-04,1132.86,Cedar & Co,revenue
+2025-02-01,-2996.75,vendor,payroll
+2025-02-06,-1301.62,vendor,rent
+2025-02-13,-303.55,vendor,software
+2025-02-21,-309.37,vendor,supplies
+2025-03-16,1801.64,Acme Retail Co,revenue
+2025-03-05,1606.45,BlueSky Logistics,revenue
+2025-03-20,2013.95,Cedar & Co,revenue
+2025-03-05,1669.25,Acme Retail Co,revenue
+2025-03-26,1715.91,BlueSky Logistics,revenue
+2025-03-26,1662.59,Cedar & Co,revenue
+2025-03-01,-2005.13,vendor,payroll
+2025-03-06,-1308.24,vendor,rent
+2025-03-13,-434.99,vendor,software
+2025-03-21,-431.97,vendor,supplies
+2025-04-28,326.21,Acme Retail Co,revenue
+2025-04-16,310.99,BlueSky Logistics,revenue
+2025-04-25,316.96,Cedar & Co,revenue
+2025-04-30,382.61,BlueSky Logistics,revenue
+2025-04-23,342.91,Acme Retail Co,revenue
+2025-04-08,272.49,BlueSky Logistics,revenue
+2025-04-01,-3489.41,vendor,payroll
+2025-04-06,-1293.66,vendor,rent
+2025-04-13,-424.56,vendor,software
+2025-04-21,-354.43,vendor,supplies
+2025-05-16,2976.74,Acme Retail Co,revenue
+2025-05-31,3264.79,Cedar & Co,revenue
+2025-05-04,2939.6,BlueSky Logistics,revenue
+2025-05-30,2821.49,BlueSky Logistics,revenue
+2025-05-01,-2288.31,vendor,payroll
+2025-05-06,-1409.65,vendor,rent
+2025-05-13,-487.98,vendor,software
+2025-05-21,-229.93,vendor,supplies
+2025-06-11,538.54,Cedar & Co,revenue
+2025-06-21,570.35,Acme Retail Co,revenue
+2025-06-28,571.87,Cedar & Co,revenue
+2025-06-13,525.36,BlueSky Logistics,revenue
+2025-06-29,574.48,BlueSky Logistics,revenue
+2025-06-01,-2071.8,vendor,payroll
+2025-06-06,-847.89,vendor,rent
+2025-06-13,-352.46,vendor,software
+2025-06-21,-568.37,vendor,supplies
+2025-07-24,3164.16,Acme Retail Co,revenue
+2025-07-04,3515.06,Cedar & Co,revenue
+2025-07-04,2816.27,BlueSky Logistics,revenue
+2025-07-10,2659.79,Acme Retail Co,revenue
+2025-07-01,-3592.29,vendor,payroll
+2025-07-06,-1005.36,vendor,rent
+2025-07-13,-249.94,vendor,software
+2025-07-21,-258.23,vendor,supplies
+2025-08-19,521.27,Cedar & Co,revenue
+2025-08-06,388.07,Acme Retail Co,revenue
+2025-08-28,489.01,BlueSky Logistics,revenue
+2025-08-08,543.73,BlueSky Logistics,revenue
+2025-08-05,459.41,Acme Retail Co,revenue
+2025-08-09,420.99,BlueSky Logistics,revenue
+2025-08-01,-2018.79,vendor,payroll
+2025-08-06,-1363.24,vendor,rent
+2025-08-13,-460.48,vendor,software
+2025-08-21,-471.04,vendor,supplies
+2025-09-03,2945.24,BlueSky Logistics,revenue
+2025-09-19,2638.94,BlueSky Logistics,revenue
+2025-09-14,2250.1,Cedar & Co,revenue
+2025-09-28,2199.22,BlueSky Logistics,revenue
+2025-09-01,-2769.39,vendor,payroll
+2025-09-06,-1138.25,vendor,rent
+2025-09-13,-194.88,vendor,software
+2025-09-21,-428.77,vendor,supplies
+2025-10-23,647.02,BlueSky Logistics,revenue
+2025-10-27,766.66,Cedar & Co,revenue
+2025-10-01,916.82,Cedar & Co,revenue
+2025-10-25,951.55,Cedar & Co,revenue
+2025-10-30,878.46,Cedar & Co,revenue
+2025-10-01,-3665.68,vendor,payroll
+2025-10-06,-1432.05,vendor,rent
+2025-10-13,-410.3,vendor,software
+2025-10-21,-292.05,vendor,supplies
+2025-11-08,2628.16,Cedar & Co,revenue
+2025-11-09,3306.69,Cedar & Co,revenue
+2025-11-25,3217.03,Cedar & Co,revenue
+2025-11-05,2516.6,Cedar & Co,revenue
+2025-11-21,2447.31,Cedar & Co,revenue
+2025-11-01,-3577.22,vendor,payroll
+2025-11-06,-823.36,vendor,rent
+2025-11-13,-245.94,vendor,software
+2025-11-21,-252.56,vendor,supplies
+2025-12-11,676.34,Cedar & Co,revenue
+2025-12-07,780.22,Acme Retail Co,revenue
+2025-12-29,708.64,BlueSky Logistics,revenue
+2025-12-30,792.53,BlueSky Logistics,revenue
+2025-12-09,830.87,BlueSky Logistics,revenue
+2025-12-01,-2590.28,vendor,payroll
+2025-12-06,-1409.28,vendor,rent
+2025-12-13,-421.69,vendor,software
+2025-12-21,-387.33,vendor,supplies

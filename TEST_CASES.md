@@ -3,14 +3,29 @@
 ## Setup
 
 ```bash
+# Option A: use the curated test data
+cd test-data
+python generate.py                # creates 10 CSV files (see below)
+
+# Option B: use the original sample
 cd sample_data
-python generate_sample.py        # creates sme_transactions_sample.csv
+python generate_sample.py         # creates sme_transactions_sample.csv
 ```
 
-The sample has 12 months of data with:
-- **Customer concentration** — Acme Retail Co dominates revenue
-- **Seasonal dip** — June/July revenue drops from ~$8K to ~$3.5K
-- **Negative streaks** — multiple months of net-negative cash flow
+### Test data files
+
+| File | Scenario | Risk flags expected |
+|---|---|---|
+| `01_healthy_business.csv` | Diversified revenue, stable cash flow | None or low |
+| `02_customer_concentration.csv` | 60%+ revenue from one customer | `CUSTOMER_CONCENTRATION` |
+| `03_seasonal_dip.csv` | Revenue drops 60% in summer months | `SEASONALITY`, `REVENUE_DROP` |
+| `04_negative_streak.csv` | 12 months of net-negative cash flow | `NEGATIVE_CASH_FLOW_STREAK` |
+| `05_revenue_volatility.csv` | Revenue swings 3-15K month to month | `REVENUE_VOLATILITY` |
+| `06_high_growth.csv` | Revenue grows 600/month every month | None (growth is positive) |
+| `07_missing_columns.csv` | Missing `counterparty` column | Error on upload |
+| `08_empty.csv` | Header only, no data rows | Error: no data |
+| `09_single_month.csv` | Only 1 month of transactions | Insufficient data warning |
+| `10_bad_amounts.csv` | Non-numeric amounts (`abc`, `N/A`) | Parse error |
 
 ---
 
@@ -57,20 +72,21 @@ The sample has 12 months of data with:
 | Step | Action | Expected |
 |---|---|---|
 | 1 | Click **Upload** tab | Drag-drop zone + IntakeSection with currency selector |
-| 2 | Drop `sme_transactions_sample.csv` | File accepted, preview shows row count |
+| 2 | Drop `test-data/01_healthy_business.csv` | File accepted, preview shows row count |
 | 3 | Select **EUR** currency dropdown | Dropdown shows 10 currencies |
 | 4 | Click **Analyze** | Spinner → risk memo renders |
-| 5 | Verify metrics | values match computed output |
-| 6 | Check risk flags | At least `REVENUE_VOLATILITY` and `CUSTOMER_CONCENTRATION` should fire |
+| 5 | Verify metrics | Low score, green band, no critical flags |
+| 6 | Upload `02_customer_concentration.csv` | `CUSTOMER_CONCENTRATION` flag fires |
+| 7 | Upload `05_revenue_volatility.csv` | `REVENUE_VOLATILITY` flag fires, higher score |
 
 ### Bad CSV
 
-| Test | Expected |
+| File | Expected |
 |---|---|
+| `07_missing_columns.csv` | Error: missing `counterparty` column |
+| `08_empty.csv` | Error: no data rows |
+| `10_bad_amounts.csv` | Error: cannot parse amounts |
 | Upload a `.txt` or image | Error: only CSV accepted |
-| Upload CSV missing `amount` column | Error: missing required column |
-| Upload CSV with all non-numeric `amount` | Error: cannot parse amounts |
-| Upload empty CSV | Error: no data rows |
 
 ### Multi-upload
 
@@ -96,10 +112,12 @@ The sample has 12 months of data with:
 
 | Step | Action | Expected |
 |---|---|---|
-| 1 | With ≥2 reports, click **Compare** | Two dropdowns to select reports |
-| 2 | Pick report A and report B | Side-by-side view with deltas |
-| 3 | Compare the deltas | Green = improvement, red = worsening |
-| 4 | Close compare | Back to report list |
+| 1 | Upload `01_healthy_business.csv` and `05_revenue_volatility.csv` | Two reports in the list |
+| 2 | Click **Compare** | Two dropdowns to select reports |
+| 3 | Pick healthy as A, volatile as B | Side-by-side view with deltas showing worse volatility, higher score |
+| 4 | Compare the deltas | Green = improvement, red = worsening |
+| 5 | Try `04_negative_streak.csv` vs `06_high_growth.csv` | Opposing risk profiles, large deltas |
+| 6 | Close compare | Back to report list |
 
 ---
 

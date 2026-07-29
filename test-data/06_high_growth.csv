@@ -1,0 +1,97 @@
+date,amount,counterparty,category
+2025-01-05,1372.87,Acme Retail Co,revenue
+2025-01-24,1430.37,Cedar & Co,revenue
+2025-01-31,1135.57,Cedar & Co,revenue
+2025-01-01,-3581.36,vendor,payroll
+2025-01-06,-809.74,vendor,rent
+2025-01-13,-314.63,vendor,software
+2025-01-21,-381.91,vendor,supplies
+2025-02-19,948.33,Northwind Traders,revenue
+2025-02-12,898.75,Acme Retail Co,revenue
+2025-02-16,880.17,Acme Retail Co,revenue
+2025-02-18,979.53,Northwind Traders,revenue
+2025-02-08,693.24,Cedar & Co,revenue
+2025-02-01,-3647.71,vendor,payroll
+2025-02-06,-1436.57,vendor,rent
+2025-02-13,-220.88,vendor,software
+2025-02-21,-363.32,vendor,supplies
+2025-03-02,1106.1,Acme Retail Co,revenue
+2025-03-16,1006.65,Acme Retail Co,revenue
+2025-03-29,1025.12,Cedar & Co,revenue
+2025-03-15,1281.83,Northwind Traders,revenue
+2025-03-01,-3486.28,vendor,payroll
+2025-03-06,-1462.18,vendor,rent
+2025-03-13,-267.65,vendor,software
+2025-03-21,-496.91,vendor,supplies
+2025-04-29,1433.66,Northwind Traders,revenue
+2025-04-27,1412.45,Northwind Traders,revenue
+2025-04-09,1452.75,Acme Retail Co,revenue
+2025-04-07,1320.14,Northwind Traders,revenue
+2025-04-01,-2472.23,vendor,payroll
+2025-04-06,-1053.88,vendor,rent
+2025-04-13,-492.37,vendor,software
+2025-04-21,-346.93,vendor,supplies
+2025-05-02,1092.42,Northwind Traders,revenue
+2025-05-31,1415.53,Acme Retail Co,revenue
+2025-05-27,1004.0,Northwind Traders,revenue
+2025-05-07,1266.96,Cedar & Co,revenue
+2025-05-01,1337.66,Acme Retail Co,revenue
+2025-05-01,-2487.14,vendor,payroll
+2025-05-06,-888.15,vendor,rent
+2025-05-13,-325.83,vendor,software
+2025-05-21,-227.44,vendor,supplies
+2025-06-19,1856.61,Acme Retail Co,revenue
+2025-06-08,1831.08,Northwind Traders,revenue
+2025-06-26,1321.87,Cedar & Co,revenue
+2025-06-28,1971.77,Acme Retail Co,revenue
+2025-06-01,-3080.43,vendor,payroll
+2025-06-06,-1358.96,vendor,rent
+2025-06-13,-143.97,vendor,software
+2025-06-21,-546.58,vendor,supplies
+2025-07-01,2008.79,Northwind Traders,revenue
+2025-07-08,1673.12,Cedar & Co,revenue
+2025-07-06,1477.73,Northwind Traders,revenue
+2025-07-24,1818.78,Northwind Traders,revenue
+2025-07-01,-3491.33,vendor,payroll
+2025-07-06,-1133.37,vendor,rent
+2025-07-13,-411.21,vendor,software
+2025-07-21,-405.3,vendor,supplies
+2025-08-15,2310.41,Cedar & Co,revenue
+2025-08-20,2836.33,Acme Retail Co,revenue
+2025-08-30,2622.31,Cedar & Co,revenue
+2025-08-01,-2916.09,vendor,payroll
+2025-08-06,-1474.82,vendor,rent
+2025-08-13,-124.33,vendor,software
+2025-08-21,-391.59,vendor,supplies
+2025-09-14,1180.46,Cedar & Co,revenue
+2025-09-23,1161.15,Northwind Traders,revenue
+2025-09-03,1460.65,Northwind Traders,revenue
+2025-09-03,1274.01,Acme Retail Co,revenue
+2025-09-21,1427.08,Cedar & Co,revenue
+2025-09-11,1676.99,Northwind Traders,revenue
+2025-09-01,-3061.11,vendor,payroll
+2025-09-06,-1117.6,vendor,rent
+2025-09-13,-342.17,vendor,software
+2025-09-21,-239.67,vendor,supplies
+2025-10-28,3181.1,Cedar & Co,revenue
+2025-10-25,3265.01,Cedar & Co,revenue
+2025-10-07,2941.87,Northwind Traders,revenue
+2025-10-01,-2456.99,vendor,payroll
+2025-10-06,-1037.25,vendor,rent
+2025-10-13,-281.4,vendor,software
+2025-10-21,-366.4,vendor,supplies
+2025-11-11,2960.03,Northwind Traders,revenue
+2025-11-09,3780.6,Northwind Traders,revenue
+2025-11-22,2645.93,Northwind Traders,revenue
+2025-11-01,-3663.54,vendor,payroll
+2025-11-06,-865.26,vendor,rent
+2025-11-13,-138.63,vendor,software
+2025-11-21,-495.52,vendor,supplies
+2025-12-18,2638.19,Acme Retail Co,revenue
+2025-12-18,2376.24,Cedar & Co,revenue
+2025-12-04,2400.67,Northwind Traders,revenue
+2025-12-22,2925.45,Northwind Traders,revenue
+2025-12-01,-3442.12,vendor,payroll
+2025-12-06,-1477.88,vendor,rent
+2025-12-13,-340.16,vendor,software
+2025-12-21,-340.66,vendor,supplies

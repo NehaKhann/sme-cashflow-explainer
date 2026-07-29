@@ -1,0 +1,112 @@
+date,amount,counterparty,category
+2025-01-14,1055.29,Cedar & Co,revenue
+2025-01-27,1084.01,Cedar & Co,revenue
+2025-01-14,1094.61,Northwind Traders,revenue
+2025-01-01,-3930.95,vendor,payroll
+2025-01-06,-989.06,vendor,rent
+2025-01-13,-423.28,vendor,software
+2025-01-21,-415.27,vendor,supplies
+2025-01-15,-1990,vendor,misc
+2025-02-27,457.03,Cedar & Co,revenue
+2025-02-08,448.49,Northwind Traders,revenue
+2025-02-15,541.29,Northwind Traders,revenue
+2025-02-19,459.8,Cedar & Co,revenue
+2025-02-16,429.39,Cedar & Co,revenue
+2025-02-07,550.61,Cedar & Co,revenue
+2025-02-01,-2680.68,vendor,payroll
+2025-02-06,-1416.22,vendor,rent
+2025-02-13,-380.47,vendor,software
+2025-02-21,-310.51,vendor,supplies
+2025-02-15,-1020,vendor,misc
+2025-03-03,831.8,Northwind Traders,revenue
+2025-03-16,822.79,Northwind Traders,revenue
+2025-03-21,748.65,Cedar & Co,revenue
+2025-03-01,701.58,Northwind Traders,revenue
+2025-03-01,-2808.8,vendor,payroll
+2025-03-06,-970.31,vendor,rent
+2025-03-13,-365.58,vendor,software
+2025-03-21,-347.61,vendor,supplies
+2025-03-15,-2133,vendor,misc
+2025-04-14,580.8,Cedar & Co,revenue
+2025-04-15,569.64,Cedar & Co,revenue
+2025-04-08,672.05,Northwind Traders,revenue
+2025-04-11,677.38,Northwind Traders,revenue
+2025-04-25,541.22,Northwind Traders,revenue
+2025-04-01,-3477.21,vendor,payroll
+2025-04-06,-993.55,vendor,rent
+2025-04-13,-335.83,vendor,software
+2025-04-21,-504.08,vendor,supplies
+2025-04-15,-2222,vendor,misc
+2025-05-27,789.6,Northwind Traders,revenue
+2025-05-12,791.67,Northwind Traders,revenue
+2025-05-23,782.06,Northwind Traders,revenue
+2025-05-01,-3948.59,vendor,payroll
+2025-05-06,-1187.35,vendor,rent
+2025-05-13,-378.97,vendor,software
+2025-05-21,-250.51,vendor,supplies
+2025-05-15,-2005,vendor,misc
+2025-06-19,727.65,Cedar & Co,revenue
+2025-06-15,643.66,Cedar & Co,revenue
+2025-06-02,866.63,Cedar & Co,revenue
+2025-06-01,-2955.46,vendor,payroll
+2025-06-06,-1375.48,vendor,rent
+2025-06-13,-260.28,vendor,software
+2025-06-21,-229.63,vendor,supplies
+2025-06-15,-2289,vendor,misc
+2025-07-05,1276.26,Northwind Traders,revenue
+2025-07-31,946.67,Cedar & Co,revenue
+2025-07-08,1161.37,Northwind Traders,revenue
+2025-07-01,-2832.35,vendor,payroll
+2025-07-06,-1217.29,vendor,rent
+2025-07-13,-347.37,vendor,software
+2025-07-21,-510.28,vendor,supplies
+2025-07-15,-1779,vendor,misc
+2025-08-10,449.09,Cedar & Co,revenue
+2025-08-20,508.36,Northwind Traders,revenue
+2025-08-24,574.19,Northwind Traders,revenue
+2025-08-07,441.15,Northwind Traders,revenue
+2025-08-03,436.33,Northwind Traders,revenue
+2025-08-18,420.09,Northwind Traders,revenue
+2025-08-01,-2817.04,vendor,payroll
+2025-08-06,-1282.56,vendor,rent
+2025-08-13,-287.96,vendor,software
+2025-08-21,-213.06,vendor,supplies
+2025-08-15,-1590,vendor,misc
+2025-09-23,571.15,Cedar & Co,revenue
+2025-09-08,768.77,Cedar & Co,revenue
+2025-09-21,668.76,Northwind Traders,revenue
+2025-09-18,730.11,Northwind Traders,revenue
+2025-09-30,779.47,Cedar & Co,revenue
+2025-09-01,-2142.82,vendor,payroll
+2025-09-06,-916.15,vendor,rent
+2025-09-13,-223.04,vendor,software
+2025-09-21,-499.58,vendor,supplies
+2025-09-15,-2165,vendor,misc
+2025-10-04,464.42,Cedar & Co,revenue
+2025-10-23,508.3,Cedar & Co,revenue
+2025-10-17,421.08,Cedar & Co,revenue
+2025-10-20,499.1,Northwind Traders,revenue
+2025-10-24,449.75,Cedar & Co,revenue
+2025-10-01,385.01,Northwind Traders,revenue
+2025-10-01,-3348.6,vendor,payroll
+2025-10-06,-1402.36,vendor,rent
+2025-10-13,-334.85,vendor,software
+2025-10-21,-208.3,vendor,supplies
+2025-10-15,-2376,vendor,misc
+2025-11-25,840.3,Northwind Traders,revenue
+2025-11-21,991.85,Cedar & Co,revenue
+2025-11-06,896.18,Cedar & Co,revenue
+2025-11-01,-2983.45,vendor,payroll
+2025-11-06,-863.87,vendor,rent
+2025-11-13,-239.18,vendor,software
+2025-11-21,-333.32,vendor,supplies
+2025-11-15,-2372,vendor,misc
+2025-12-11,596.38,Cedar & Co,revenue
+2025-12-10,622.92,Cedar & Co,revenue
+2025-12-18,543.5,Northwind Traders,revenue
+2025-12-11,514.37,Cedar & Co,revenue
+2025-12-01,-3940.37,vendor,payroll
+2025-12-06,-1082.92,vendor,rent
+2025-12-13,-305.84,vendor,software
+2025-12-21,-595.25,vendor,supplies
+2025-12-15,-2346,vendor,misc

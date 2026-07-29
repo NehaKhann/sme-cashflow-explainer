@@ -1,0 +1,95 @@
+date,amount,counterparty,category
+2025-01-01,2636.7,BlueSky Logistics,revenue
+2025-01-05,3143.87,Acme Retail Co,revenue
+2025-01-29,2451.18,Cedar & Co,revenue
+2025-01-01,-2843.84,vendor,payroll
+2025-01-06,-820.86,vendor,rent
+2025-01-13,-187.46,vendor,software
+2025-01-21,-402.14,vendor,supplies
+2025-02-23,1827.71,Cedar & Co,revenue
+2025-02-15,1720.95,Cedar & Co,revenue
+2025-02-28,2084.0,Acme Retail Co,revenue
+2025-02-06,1767.83,Gilded Goods LLC,revenue
+2025-02-01,-2310.96,vendor,payroll
+2025-02-06,-1470.05,vendor,rent
+2025-02-13,-234.64,vendor,software
+2025-02-21,-237.1,vendor,supplies
+2025-03-28,1603.48,BlueSky Logistics,revenue
+2025-03-26,1681.08,Acme Retail Co,revenue
+2025-03-18,1830.96,Acme Retail Co,revenue
+2025-03-13,1571.65,Acme Retail Co,revenue
+2025-03-27,1776.98,Cedar & Co,revenue
+2025-03-01,-2723.27,vendor,payroll
+2025-03-06,-934.6,vendor,rent
+2025-03-13,-127.82,vendor,software
+2025-03-21,-464.51,vendor,supplies
+2025-04-28,3092.74,Northwind Traders,revenue
+2025-04-13,2647.07,BlueSky Logistics,revenue
+2025-04-27,2333.36,BlueSky Logistics,revenue
+2025-04-01,-2710.54,vendor,payroll
+2025-04-06,-1269.12,vendor,rent
+2025-04-13,-380.73,vendor,software
+2025-04-21,-473.42,vendor,supplies
+2025-05-18,1654.14,Northwind Traders,revenue
+2025-05-13,2285.79,BlueSky Logistics,revenue
+2025-05-21,1697.12,Cedar & Co,revenue
+2025-05-11,1704.33,Acme Retail Co,revenue
+2025-05-01,-2064.2,vendor,payroll
+2025-05-06,-1020.82,vendor,rent
+2025-05-13,-207.1,vendor,software
+2025-05-21,-284.39,vendor,supplies
+2025-06-07,1659.89,Gilded Goods LLC,revenue
+2025-06-30,1484.75,Gilded Goods LLC,revenue
+2025-06-05,1901.95,Northwind Traders,revenue
+2025-06-18,1903.35,BlueSky Logistics,revenue
+2025-06-14,1662.5,Cedar & Co,revenue
+2025-06-01,-2438.64,vendor,payroll
+2025-06-06,-1498.28,vendor,rent
+2025-06-13,-303.81,vendor,software
+2025-06-21,-236.36,vendor,supplies
+2025-07-05,2827.82,Northwind Traders,revenue
+2025-07-14,2089.94,Cedar & Co,revenue
+2025-07-13,3034.47,Cedar & Co,revenue
+2025-07-01,-3058.23,vendor,payroll
+2025-07-06,-1479.75,vendor,rent
+2025-07-13,-444.31,vendor,software
+2025-07-21,-204.59,vendor,supplies
+2025-08-22,3292.25,Cedar & Co,revenue
+2025-08-25,2527.11,BlueSky Logistics,revenue
+2025-08-14,2936.62,Northwind Traders,revenue
+2025-08-01,-3907.63,vendor,payroll
+2025-08-06,-1413.1,vendor,rent
+2025-08-13,-205.36,vendor,software
+2025-08-21,-400.23,vendor,supplies
+2025-09-28,2979.96,BlueSky Logistics,revenue
+2025-09-17,2305.92,Cedar & Co,revenue
+2025-09-12,2662.96,Northwind Traders,revenue
+2025-09-01,-3557.25,vendor,payroll
+2025-09-06,-1171.25,vendor,rent
+2025-09-13,-100.23,vendor,software
+2025-09-21,-329.66,vendor,supplies
+2025-10-30,2893.69,BlueSky Logistics,revenue
+2025-10-27,2251.1,BlueSky Logistics,revenue
+2025-10-08,2962.27,Cedar & Co,revenue
+2025-10-01,-2171.31,vendor,payroll
+2025-10-06,-1140.19,vendor,rent
+2025-10-13,-127.69,vendor,software
+2025-10-21,-504.24,vendor,supplies
+2025-11-22,2285.87,Gilded Goods LLC,revenue
+2025-11-06,1960.72,BlueSky Logistics,revenue
+2025-11-20,2299.46,Gilded Goods LLC,revenue
+2025-11-30,2137.26,Cedar & Co,revenue
+2025-11-01,-3379.74,vendor,payroll
+2025-11-06,-1299.06,vendor,rent
+2025-11-13,-259.6,vendor,software
+2025-11-21,-468.67,vendor,supplies
+2025-12-29,1350.61,Cedar & Co,revenue
+2025-12-08,1137.14,Northwind Traders,revenue
+2025-12-01,1407.04,Cedar & Co,revenue
+2025-12-19,1105.83,Northwind Traders,revenue
+2025-12-23,1228.0,Acme Retail Co,revenue
+2025-12-29,1575.47,Acme Retail Co,revenue
+2025-12-01,-2141.71,vendor,payroll
+2025-12-06,-966.6,vendor,rent
+2025-12-13,-367.59,vendor,software
+2025-12-21,-285.69,vendor,supplies

@@ -1,0 +1,4 @@
+date,amount,counterparty,category
+2025-01-01,abc,Acme,revenue
+2025-01-02,N/A,Vendor,payroll
+2025-01-03,12.5xyz,Acme,revenue

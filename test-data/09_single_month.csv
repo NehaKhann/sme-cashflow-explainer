@@ -1,0 +1,9 @@
+date,amount,counterparty,category
+2025-06-05,1112.12,Acme Retail Co,revenue
+2025-06-04,1422.69,Acme Retail Co,revenue
+2025-06-12,1381.3,Acme Retail Co,revenue
+2025-06-19,1403.61,Acme Retail Co,revenue
+2025-06-01,-3690.31,vendor,payroll
+2025-06-06,-1482.18,vendor,rent
+2025-06-13,-427.37,vendor,software
+2025-06-21,-445.43,vendor,supplies

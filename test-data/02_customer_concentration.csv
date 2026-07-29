@@ -1,0 +1,100 @@
+date,amount,counterparty,category
+2025-01-08,955.16,Northwind Traders,revenue
+2025-01-04,1056.84,Northwind Traders,revenue
+2025-01-15,1165.77,Acme Retail Co,revenue
+2025-01-21,1047.7,Acme Retail Co,revenue
+2025-01-11,980.56,Acme Retail Co,revenue
+2025-01-07,933.26,Acme Retail Co,revenue
+2025-01-01,-2366.98,vendor,payroll
+2025-01-06,-1123.84,vendor,rent
+2025-01-13,-449.79,vendor,software
+2025-01-21,-230.15,vendor,supplies
+2025-02-02,3121.14,BlueSky Logistics,revenue
+2025-02-03,2384.1,Acme Retail Co,revenue
+2025-02-16,3152.64,Acme Retail Co,revenue
+2025-02-01,-3804.89,vendor,payroll
+2025-02-06,-915.25,vendor,rent
+2025-02-13,-100.86,vendor,software
+2025-02-21,-356.17,vendor,supplies
+2025-03-14,1884.24,BlueSky Logistics,revenue
+2025-03-18,1355.45,Northwind Traders,revenue
+2025-03-10,1294.87,Acme Retail Co,revenue
+2025-03-24,1728.59,Acme Retail Co,revenue
+2025-03-02,1558.0,Acme Retail Co,revenue
+2025-03-01,-3838.77,vendor,payroll
+2025-03-06,-1171.79,vendor,rent
+2025-03-13,-122.75,vendor,software
+2025-03-21,-403.13,vendor,supplies
+2025-04-20,2579.83,Acme Retail Co,revenue
+2025-04-13,2605.5,Acme Retail Co,revenue
+2025-04-08,1838.76,Acme Retail Co,revenue
+2025-04-01,-2163.97,vendor,payroll
+2025-04-06,-1260.16,vendor,rent
+2025-04-13,-326.09,vendor,software
+2025-04-21,-326.55,vendor,supplies
+2025-05-22,1601.34,Acme Retail Co,revenue
+2025-05-05,1736.77,Northwind Traders,revenue
+2025-05-30,1420.18,Acme Retail Co,revenue
+2025-05-20,1465.38,Acme Retail Co,revenue
+2025-05-01,-2426.31,vendor,payroll
+2025-05-06,-985.64,vendor,rent
+2025-05-13,-473.3,vendor,software
+2025-05-21,-552.35,vendor,supplies
+2025-06-10,1586.9,Acme Retail Co,revenue
+2025-06-23,1670.96,Acme Retail Co,revenue
+2025-06-26,1494.0,Acme Retail Co,revenue
+2025-06-18,1491.5,Acme Retail Co,revenue
+2025-06-29,1184.64,Acme Retail Co,revenue
+2025-06-01,-2214.07,vendor,payroll
+2025-06-06,-1187.26,vendor,rent
+2025-06-13,-208.94,vendor,software
+2025-06-21,-441.93,vendor,supplies
+2025-07-22,1855.0,Northwind Traders,revenue
+2025-07-09,1549.14,Acme Retail Co,revenue
+2025-07-14,1483.43,Acme Retail Co,revenue
+2025-07-25,2206.24,Acme Retail Co,revenue
+2025-07-01,-2323.16,vendor,payroll
+2025-07-06,-1109.28,vendor,rent
+2025-07-13,-382.27,vendor,software
+2025-07-21,-424.36,vendor,supplies
+2025-08-31,2191.92,Acme Retail Co,revenue
+2025-08-27,2197.89,Acme Retail Co,revenue
+2025-08-14,1987.56,Acme Retail Co,revenue
+2025-08-01,-3797.96,vendor,payroll
+2025-08-06,-1357.29,vendor,rent
+2025-08-13,-444.28,vendor,software
+2025-08-21,-559.57,vendor,supplies
+2025-09-22,1907.16,Acme Retail Co,revenue
+2025-09-29,1886.14,BlueSky Logistics,revenue
+2025-09-30,2041.68,Acme Retail Co,revenue
+2025-09-26,1654.83,Acme Retail Co,revenue
+2025-09-01,-2358.72,vendor,payroll
+2025-09-06,-1447.14,vendor,rent
+2025-09-13,-412.95,vendor,software
+2025-09-21,-364.69,vendor,supplies
+2025-10-06,1337.27,Acme Retail Co,revenue
+2025-10-02,1234.58,Acme Retail Co,revenue
+2025-10-30,1293.86,Acme Retail Co,revenue
+2025-10-26,1135.84,Acme Retail Co,revenue
+2025-10-07,1278.93,Acme Retail Co,revenue
+2025-10-01,-2138.84,vendor,payroll
+2025-10-06,-1341.33,vendor,rent
+2025-10-13,-240.46,vendor,software
+2025-10-21,-403.76,vendor,supplies
+2025-11-01,1947.63,Acme Retail Co,revenue
+2025-11-06,1956.25,Acme Retail Co,revenue
+2025-11-02,1596.29,Acme Retail Co,revenue
+2025-11-24,1708.84,Northwind Traders,revenue
+2025-11-17,1901.15,Acme Retail Co,revenue
+2025-11-01,-2380.16,vendor,payroll
+2025-11-06,-831.07,vendor,rent
+2025-11-13,-274.42,vendor,software
+2025-11-21,-407.97,vendor,supplies
+2025-12-12,2419.55,Acme Retail Co,revenue
+2025-12-30,1898.57,Acme Retail Co,revenue
+2025-12-28,2379.49,Acme Retail Co,revenue
+2025-12-17,1976.09,Acme Retail Co,revenue
+2025-12-01,-2804.8,vendor,payroll
+2025-12-06,-1006.96,vendor,rent
+2025-12-13,-150.92,vendor,software
+2025-12-21,-368.18,vendor,supplies
