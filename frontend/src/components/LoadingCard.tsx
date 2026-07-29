@@ -28,16 +28,3 @@ export function LoadingCard() {
   );
 }
 
-function SkeletonCard() {
-  return (
-    <section className="loading-section" id="skeleton">
-      <div className="card loading-card" style={{ padding: "24px", gap: "12px", alignItems: "stretch" }}>
-        <div className="skeleton skeleton-title" />
-        <div className="skeleton skeleton-text" />
-        <div className="skeleton skeleton-text" style={{ width: "80%" }} />
-        <div className="skeleton skeleton-card" />
-        <div className="skeleton skeleton-text" style={{ width: "40%" }} />
-      </div>
-    </section>
-  );
-}
