@@ -51,6 +51,7 @@ Open **http://localhost:5173** — click "Try demo" or sign up.
 - **Transaction table** — sortable view of all parsed transactions
 - **Demo mode** — explore the full workflow without creating an account
 - **Dark mode** — toggle from the sidebar, persisted across sessions
+- **Chatbot** — fine-tuned LLM (QLoRA + Ollama) for platform Q&A and underwriting concepts
 
 ---
 
@@ -59,13 +60,14 @@ Open **http://localhost:5173** — click "Try demo" or sign up.
 ```
 frontend/         React 19 + TypeScript + Vite
 backend/          FastAPI + SQLAlchemy 2.0 (async) + PostgreSQL
+ml/               Fine-tuning pipeline (QLoRA + GGUF + Ollama)
 sample_data/      Synthetic CSV generator
 ```
 
 The pipeline:
 
 ```
-Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narrative generated (Groq or template)
+Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narrative generated (Groq or template) → optional chatbot Q&A (fine-tuned model via Ollama)
 ```
 
 ---
@@ -79,6 +81,8 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → narra
 | Database | PostgreSQL 16, SQLAlchemy 2.0 (async), asyncpg |
 | Auth | JWT (python-jose), bcrypt (passlib), per-user data isolation |
 | LLM | Groq API (Llama 3.3 70B) or deterministic template |
+| Chatbot | Fine-tuned Llama 3.2 3B via QLoRA, served via Ollama |
+| ML Pipeline | PyTorch, Hugging Face Transformers, PEFT, bitsandbytes, TRL |
 | Data | Pandas, NumPy |
 | Testing | pytest, pytest-asyncio, httpx |
 | Infra | Docker Compose, Render |
@@ -150,6 +154,50 @@ python -m pytest tests/ -v
 **Backend:** Push to GitHub → [Render](https://render.com) "New → Web Service" → select repo (auto-detects `render.yaml`).  
 **Frontend:** Import to [Vercel](https://vercel.com) or [Netlify](https://netlify.com) — root `frontend/`, build `npm run build`, output `dist`.  
 **Database:** PostgreSQL 16 — Docker Compose for local, [Neon](https://neon.tech) or Render Postgres for production.
+
+---
+
+## Chatbot — ML Fine-Tuning Pipeline
+
+The chatbot is a small language model fine-tuned on cash-flow underwriting knowledge using **QLoRA** and served locally via **Ollama**.
+
+### Training
+
+```bash
+cd ml
+pip install -r requirements.txt
+python prepare_dataset.py --with-hf       # build dataset
+python train.py                            # QLoRA fine-tune (GPU req.)
+python quantize.py --adapters ./output/... # merge + GGUF
+ollama create ledger-chatbot -f ./output/.../Modelfile
+ollama serve                               # backend proxies here
+```
+
+### What it learns
+
+- Platform features (upload, analyze, compare, export)
+- Financial metrics (volatility, concentration, seasonality)
+- Risk scoring methodology
+- CSV format and requirements
+- Architecture and deployment
+
+### Approach
+
+| Technique | What it does |
+|---|---|
+| **QLoRA** | 4-bit NF4 quantization + low-rank adapters — fine-tune a 3B model on a single GPU |
+| **PEFT** | Only ~0.1% of parameters are trainable; base model stays frozen |
+| **GGUF** | Converts the merged model to a CPU-efficient format for Ollama |
+| **Ollama** | Serves the quantized model locally with a REST API |
+
+### Dataset
+
+| Source | Description | Size |
+|---|---|---|
+| `ml/data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 50 examples |
+| Hugging Face (optional) | `financial_phrasebank`, `AdaptLLM/finance-tasks` | ~600 examples |
+
+See `ml/README.md` for full documentation.
 
 ---
 
