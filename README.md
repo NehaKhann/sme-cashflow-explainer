@@ -229,10 +229,23 @@ See `ml/README.md` for full documentation including config reference, data integ
 ## Sample data
 
 ```bash
-cd sample_data && python generate_sample.py
+cd sample_data && python generate.py
 ```
 
-Generates 12 months of synthetic transactions with an engineered customer-concentration issue and a seasonal dip — the demo always has something interesting to show.
+Generates 10 curated CSV files, each targeting a specific scenario:
+
+| File | What it tests |
+|---|---|
+| `01_healthy_business.csv` | Stable, diversified → low risk score |
+| `02_customer_concentration.csv` | 60%+ from one customer → concentration flag |
+| `03_seasonal_dip.csv` | Summer revenue drops 60% → seasonality flag |
+| `04_negative_streak.csv` | 12 months net-negative → streak flag |
+| `05_revenue_volatility.csv` | Revenue swings 3–15K → volatility flag |
+| `06_high_growth.csv` | +$600/mo growth → no flags |
+| `07_missing_columns.csv` | Missing `counterparty` → upload error |
+| `08_empty.csv` | Header only → no data error |
+| `09_single_month.csv` | Only 1 month → insufficient data |
+| `10_bad_amounts.csv` | Non-numeric amounts → parse error |
 
 ---
 

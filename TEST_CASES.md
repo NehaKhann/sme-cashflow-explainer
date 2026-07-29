@@ -3,13 +3,8 @@
 ## Setup
 
 ```bash
-# Option A: use the curated test data
-cd test-data
-python generate.py                # creates 10 CSV files (see below)
-
-# Option B: use the original sample
 cd sample_data
-python generate_sample.py         # creates sme_transactions_sample.csv
+python generate.py                # creates all CSV files (see below)
 ```
 
 ### Test data files
@@ -72,7 +67,7 @@ python generate_sample.py         # creates sme_transactions_sample.csv
 | Step | Action | Expected |
 |---|---|---|
 | 1 | Click **Upload** tab | Drag-drop zone + IntakeSection with currency selector |
-| 2 | Drop `test-data/01_healthy_business.csv` | File accepted, preview shows row count |
+| 2 | Drop `sample_data/01_healthy_business.csv` | File accepted, preview shows row count |
 | 3 | Select **EUR** currency dropdown | Dropdown shows 10 currencies |
 | 4 | Click **Analyze** | Spinner → risk memo renders |
 | 5 | Verify metrics | Low score, green band, no critical flags |
