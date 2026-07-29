@@ -29,6 +29,7 @@ CUSTOM_PATH = os.path.join(BASE_DIR, "data", "custom_qa.jsonl")
 DEFAULT_OUT = os.path.join(BASE_DIR, "data")
 
 SENTIMENT_LABELS = {0: "negative", 1: "neutral", 2: "positive"}
+HF_CONFIGS = ["FPB", "ConvFinQA", "FiQA_SA", "Headline", "NER"]
 
 
 def load_custom_qa(path: str) -> list[dict]:
@@ -51,37 +52,26 @@ def load_custom_qa(path: str) -> list[dict]:
 def load_hf_finance(samples_per_dataset: int = 300) -> list[dict]:
     records = []
 
-    try:
-        fp = load_dataset("financial_phrasebank", "sentences_allagree", split="train", trust_remote_code=True)
-        count = 0
-        for i, row in enumerate(fp):
-            if i >= samples_per_dataset // 2:
+    for config_name in HF_CONFIGS:
+        loaded = False
+        for split_name in ["test", "train"]:
+            if loaded:
                 break
-            label_text = SENTIMENT_LABELS.get(row["label"], str(row["label"]))
-            records.append({
-                "instruction": f"Categorize the sentiment of this financial statement: \"{row['sentence']}\"",
-                "output": f"The sentiment of this financial statement is {label_text}.",
-            })
-            count += 1
-        print(f"[✓] Loaded {count} samples from financial_phrasebank")
-    except Exception as e:
-        print(f"[!] Could not load financial_phrasebank: {e}")
-
-    for config_name in ["FPB", "ConvFinQA", "FiQA_SA"]:
-        try:
-            fa = load_dataset("AdaptLLM/finance-tasks", config_name, split="train")
-            count = 0
-            for i, row in enumerate(fa):
-                if i >= samples_per_dataset // 2:
-                    break
-                records.append({
-                    "instruction": row["instruction"],
-                    "output": row["output"],
-                })
-                count += 1
-            print(f"[✓] Loaded {count} samples from finance-tasks/{config_name}")
-        except Exception as e:
-            print(f"[!] Could not load finance-tasks/{config_name}: {e}")
+            try:
+                fa = load_dataset("AdaptLLM/finance-tasks", config_name, split=split_name)
+                count = 0
+                for row in fa:
+                    if count >= samples_per_dataset // len(HF_CONFIGS):
+                        break
+                    records.append({
+                        "instruction": row["instruction"],
+                        "output": row["output"],
+                    })
+                    count += 1
+                print(f"[✓] Loaded {count} samples from finance-tasks/{config_name} ({split_name})")
+                loaded = True
+            except Exception:
+                continue
 
     return records
 
