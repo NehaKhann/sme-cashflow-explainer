@@ -50,15 +50,48 @@ The platform bridges a critical gap in small-business lending: traditional under
 | **PEFT** (Parameter-Efficient Fine-Tuning) | Train without modifying the base model | Hugging Face PEFT + LoRA config (rank=16, alpha=32) |
 | **GGUF Quantization** | Convert the merged model to a CPU-friendly format for local inference | llama.cpp convert + quantize (Q4_K_M, Q5_K_M, Q8_0) |
 | **Chat Template Fine-Tuning** | Teach the model platform-specific Q&A via structured conversations | Multi-turn messages formatted with `apply_chat_template()` |
+| **Hybrid Dataset Strategy** | Combine hand-written Q&A with curated Hugging Face finance datasets for breadth + precision | 37 custom pairs (Ledger-specific) + 300 examples from 5 `AdaptLLM/finance-tasks` configs (FPB, FiQA_SA, ConvFinQA, Headline, NER) |
 | **Reproducibility Pipeline** | Ensure identical training runs produce identical weights | Fixed seed (torch + numpy + python) + deterministic cuDNN + SHA-256 dataset checksums |
 | **Cross-Stage Validation** | Prevent silent training on stale or corrupted data | `prepare_dataset.py` writes SHA-256 hashes; `train.py` validates before training |
 | **Config-Driven Training** | All hyperparameters in a shared JSON; CLI overrides take priority | `training_config.json` + `merge_config_cli()` across all 4 pipeline scripts |
 | **Evaluation** | Quantitative + qualitative model assessment | Perplexity, BERTScore, ROUGE, and manual sample review |
+---
+
+### AI Architecture: Dual-Model Strategy
+
+Ledger uses **two AI models** — a small locally fine-tuned model for development and experimentation, and a production-grade API for deployed inference.
+
+| Role | Model | Where it runs | When it's used |
+|---|---|---|---|
+| **Local Chatbot** | Llama 3.2 3B fine-tuned via QLoRA → GGUF → Ollama | Your laptop (CPU/GPU) | Development, demos, pipeline showcase, experimentation |
+| **Production Chatbot** | Groq API (`llama-3.3-70b-versatile`) | Groq's cloud infrastructure | Deployed app on Render (no GPU available) |
+
+**Why train a local model at all if the deployed app uses Groq?**
+
+1. **End-to-end ML pipeline** — the project includes a complete, reproducible training pipeline: dataset preparation → QLoRA fine-tuning → GGUF quantization → Ollama serving. This demonstrates real ML engineering skills far beyond calling an API.
+
+2. **Full control** — every hyperparameter, dataset sample, and training seed is under our control. No vendor lock-in, no API pricing changes, no data sent to third parties during training.
+
+3. **Experimentation** — we can rapidly iterate on architecture choices (rank, target modules, learning rate, dataset composition) without incurring per-request costs.
+
+4. **Offline capability** — the local model runs entirely on-device with no internet dependency. Useful for demos in air-gapped environments or for underwriters who need data to stay on-premise.
+
+5. **Portfolio signal** — shipping a production-grade ML pipeline that spans data collection, training, quantization, serving, and fail-over demonstrates the full ML lifecycle, not just inference.
+
+**Why the hybrid dataset (custom + Hugging Face)?**
+
+- **Custom Q&A** (37 pairs) ensures the model knows Ledger-specific details: how to upload a CSV, what each risk flag means, where to find the compare feature, etc. Public datasets don't contain this information.
+
+- **Hugging Face finance datasets** (300 examples from 5 AdaptLLM configs) provide broad financial literacy — sentiment classification, financial QA, named entity recognition — without manual labeling. This teaches the model the language and concepts of finance, which the custom pairs then specialize.
+
+- **The combination** gives us both depth (platform-specific accuracy) and breadth (general financial competence) with minimal manual effort.
+
+**Fail-over in production:**
+When deployed on Render (no GPU, no Ollama), the backend automatically switches to the Groq API via the `CHAT_PROVIDER=groq` environment variable. If Groq is unavailable, a deterministic template response is served — the system never returns a raw error to the user.
 
 ---
 
 ## Learning Outcomes
-
 ### Full-Stack Web Development
 - Building a **React 19** SPA with TypeScript: component architecture, hooks, context, custom hooks (`useDarkMode`)
 - Managing complex async state: concurrent API calls, optimistic updates, error boundaries, SSE streams
@@ -75,7 +108,7 @@ The platform bridges a critical gap in small-business lending: traditional under
 
 ### ML & LLM Ops
 - **QLoRA** fine-tuning: loading 4-bit quantized models, applying LoRA adapters, merging and saving
-- **Dataset preparation**: converting raw Q&A into chat-template format, train/eval splits, checksum integrity
+- **Dataset preparation**: hybrid strategy fusing hand-written domain-specific Q&A with curated Hugging Face finance datasets (5 configs from AdaptLLM/finance-tasks), train/eval splits, checksum integrity
 - **Quantization pipeline**: merging adapters → converting to GGUF → quantizing → serving via Ollama
 - **Config management**: shared JSON config + CLI override merging across all scripts
 - **GPU/CPU detection**: auto-select CUDA, MPS, or CPU with appropriate dtype and quantization settings
@@ -95,7 +128,7 @@ The platform bridges a critical gap in small-business lending: traditional under
 - **Service layer** separation (feature extraction → risk scoring → narrative generation)
 - **Dependency injection** via FastAPI's `Depends()` for database sessions and auth
 - **Strategy pattern** for chat providers (Ollama local vs Groq API) via environment variable
-- **Fail-open design**: LLM narrative falls back to deterministic template; chatbot falls back from Ollama to Groq
+- **Fail-open design**: LLM narrative falls back to deterministic template; chatbot falls back from local GGUF (Ollama) to Groq API to deterministic template, never returning a raw error
 
 ### Security & Reliability
 - **JWT secrets**: validated at startup to prevent default-secret attacks
@@ -139,12 +172,21 @@ User's Browser (React SPA)
   │       ▼         (SSE stream)         │
   └──────────────────────────────────────┘
 
-  ┌─ ML Pipeline (local / CI) ───────────┐
-  │  prepare_dataset.py ─► train.py      │
-  │       │         ─► quantize.py       │
-  │       ▼         ─► evaluate.py       │
-  │  Ollama ◄── GGUF model ─► Chatbot    │
-  └──────────────────────────────────────┘
+  ┌─ ML Pipeline (local dev) ──────────────────────┐
+  │  prepare_dataset.py (custom QA + HF datasets)  │
+  │       │                                         │
+  │       ▼                                         │
+  │  train.py (QLoRA on consumer GPU)               │
+  │       │                                         │
+  │       ▼                                         │
+  │  quantize.py (merge adapters → GGUF)            │
+  │       │                                         │
+  │       ▼                                         │
+  │  Ollama serve ◄── GGUF model ──► Local Chatbot  │
+  └─────────────────────────────────────────────────┘
+
+  Note: Deployed app on Render bypasses the local
+  model and uses Groq API (no GPU required).
 ```
 
 ---
@@ -152,9 +194,9 @@ User's Browser (React SPA)
 ## Key Metrics
 
 - **Analysis time**: ~3 seconds for 12 months of transactions
-- **Training time**: ~20 minutes on NVIDIA RTX 3060 (8 GB VRAM)
+- **Training time**: ~20 minutes on NVIDIA RTX 3060 (8 GB VRAM); ~30 seconds on RTX 4050 (6 GB VRAM) for 2 epochs
 - **Model size**: 3B parameters → 2.1 GB GGUF (Q4_K_M)
-- **Dataset**: 600+ Q&A pairs (hand-written + Hugging Face financial datasets)
+- **Dataset**: 337 Q&A pairs (37 custom + 300 from 5 Hugging Face `AdaptLLM/finance-tasks` configs)
 - **Risk flags**: 7 distinct checks (volatility, concentration, seasonality, negative streaks, etc.)
 - **Auto-trend**: every new analysis shows green/red deltas vs the previous report for the 4 key underwriting signals
 - **PDF export**: < 1 second client-side generation
