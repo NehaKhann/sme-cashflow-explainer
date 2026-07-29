@@ -2637,3 +2637,63 @@ body {
   color: #fca5a5;
   border-color: #7f1d1d;
 }
+
+/* ── Trend comparison banner ─────────────────────────── */
+
+.trend-banner {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.trend-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.trend-period {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.trend-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.trend-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trend-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trend-delta {
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.trend-up {
+  color: var(--success);
+}
+
+.trend-down {
+  color: var(--danger);
+}

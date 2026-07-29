@@ -49,6 +49,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
   const [apiStatus, setApiStatus] = useState<ApiHealthStatus>(INITIAL_STATUS);
   const [analyzing, setAnalyzing] = useState(false);
   const [results, setResults] = useState<AnalysisData | null>(null);
+  const [prevReport, setPrevReport] = useState<AnalysisData | null>(null);
   const [reports, setReports] = useState<ReportSummary[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currency, setCurrency] = useState("USD");
@@ -64,12 +65,13 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     return () => clearTimeout(t);
   }, [doHealthCheck]);
 
-  const refreshReports = useCallback(async () => {
+  const refreshReports = useCallback(async (): Promise<ReportSummary[]> => {
     try {
       const list = await fetchReports(apiBase);
       setReports(list);
+      return list;
     } catch {
-      // silently fail
+      return [];
     }
   }, [apiBase]);
 
@@ -94,7 +96,16 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
       const data = await analyzeTransactions(apiBase, formData, currency);
       setResults(data);
       setPage("dashboard");
-      await refreshReports();
+      const updated = await refreshReports();
+      if (updated.length > 1) {
+        const prev = updated[1];
+        try {
+          const detail = await fetchReport(apiBase, prev.id);
+          setPrevReport(detail.raw_data);
+        } catch { /* no previous report available */ }
+      } else {
+        setPrevReport(null);
+      }
     } catch (err: unknown) {
       setUploadError(err instanceof Error ? err.message : "Could not reach the API.");
     } finally {
@@ -106,6 +117,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
     try {
       const detail = await fetchReport(apiBase, id);
       setResults(detail.raw_data);
+      setPrevReport(null);
       setPage("dashboard");
     } catch (err: unknown) {
       toast(err instanceof Error ? err.message : "Could not load report.");
@@ -198,7 +210,7 @@ function AppInner({ apiBase, onApiBaseChange }: { apiBase: string; onApiBaseChan
           ) : page === "compare" ? (
             <ComparePage apiBase={apiBase} />
           ) : page === "dashboard" && results ? (
-            <ResultsSection data={results} onReset={handleReset} apiBase={apiBase} />
+            <ResultsSection data={results} prevData={prevReport} onReset={handleReset} apiBase={apiBase} />
           ) : page === "dashboard" ? (
             <DashboardHome onNavigate={setPage} />
           ) : page === "upload" ? (

@@ -16,6 +16,7 @@ function formatDate(iso: string) {
 
 interface ResultsSectionProps {
   data: AnalysisData;
+  prevData: AnalysisData | null;
   onReset: () => void;
   apiBase?: string;
 }
@@ -43,7 +44,7 @@ function AnimatedScore({ score }: { score: number }) {
   return <>{display} / 100</>;
 }
 
-export function ResultsSection({ data, onReset, apiBase }: ResultsSectionProps) {
+export function ResultsSection({ data, prevData, onReset, apiBase }: ResultsSectionProps) {
   const netClass = data.net_cash_flow >= 0 ? "stat-positive" : "stat-negative";
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [txnLoading, setTxnLoading] = useState(false);
@@ -127,6 +128,44 @@ export function ResultsSection({ data, onReset, apiBase }: ResultsSectionProps) 
         </div>
       </div>
 
+      {prevData && (
+        <div className="trend-banner">
+          <div className="trend-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+              <polyline points="17 6 23 6 23 12" />
+            </svg>
+            Trend vs previous report
+            <span className="trend-period">{prevData.start_date} \u2013 {prevData.end_date}</span>
+          </div>
+          <div className="trend-metrics">
+            <div className="trend-item">
+              <span className="trend-label">Net cash flow</span>
+              <span className={`trend-delta ${data.net_cash_flow >= prevData.net_cash_flow ? "trend-up" : "trend-down"}`}>
+                {data.net_cash_flow >= prevData.net_cash_flow ? "+" : ""}{money(data.net_cash_flow - prevData.net_cash_flow, currency)}
+              </span>
+            </div>
+            <div className="trend-item">
+              <span className="trend-label">Risk score</span>
+              <span className={`trend-delta ${data.risk_score <= prevData.risk_score ? "trend-up" : "trend-down"}`}>
+                {data.risk_score <= prevData.risk_score ? "\u2193 " : "\u2191 "}{Math.abs(data.risk_score - prevData.risk_score)} pts
+              </span>
+            </div>
+            <div className="trend-item">
+              <span className="trend-label">Revenue volatility</span>
+              <span className={`trend-delta ${data.revenue_volatility_pct <= prevData.revenue_volatility_pct ? "trend-up" : "trend-down"}`}>
+                {data.revenue_volatility_pct <= prevData.revenue_volatility_pct ? "\u2193 " : "\u2191 "}{Math.abs(data.revenue_volatility_pct - prevData.revenue_volatility_pct)}%
+              </span>
+            </div>
+            <div className="trend-item">
+              <span className="trend-label">Top customer share</span>
+              <span className={`trend-delta ${data.top_customer_share_pct <= prevData.top_customer_share_pct ? "trend-up" : "trend-down"}`}>
+                {data.top_customer_share_pct <= prevData.top_customer_share_pct ? "\u2193 " : "\u2191 "}{Math.abs(data.top_customer_share_pct - prevData.top_customer_share_pct)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="metrics-grid">
         <div className="stat-card">
           <span className="stat-label">Total inflow</span>
