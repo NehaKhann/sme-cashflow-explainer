@@ -4,7 +4,7 @@ import logging
 from typing import AsyncGenerator
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -12,62 +12,78 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
+CHAT_PROVIDER = os.getenv("CHAT_PROVIDER", "ollama")
 OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+
 DEFAULT_MODEL = os.getenv("CHAT_MODEL", "ledger-chatbot")
+GROQ_DEFAULT = os.getenv("CHAT_MODEL", "llama-3.3-70b-versatile")
 
 
 class ChatRequest(BaseModel):
     message: str
     history: list[dict] = []
-    model: str = DEFAULT_MODEL
+    model: str | None = None
 
 
-class ChatMessage(BaseModel):
-    role: str
-    content: str
+def _build_messages(req: ChatRequest) -> list[dict]:
+    msgs = [{"role": m.get("role", "user"), "content": m.get("content", "")} for m in req.history]
+    msgs.append({"role": "user", "content": req.message})
+    return msgs
 
 
 @router.post("")
-async def chat(req: ChatRequest):
-    """
-    Proxy a chat message to Ollama and stream the response back.
-
-    Expects Ollama to be running locally with the fine-tuned model loaded:
-      ollama run ledger-chatbot
-
-    The request builds a conversation from the provided history + new message,
-    sends it to Ollama's /api/chat endpoint, and streams tokens back as SSE.
-    """
-    ollama_url = f"{OLLAMA_BASE}/api/chat"
-
-    messages = []
-    for msg in req.history:
-        messages.append({"role": msg.get("role", "user"), "content": msg.get("content", "")})
-    messages.append({"role": "user", "content": req.message})
-
-    payload = {
-        "model": req.model,
-        "messages": messages,
-        "stream": True,
-        "options": {
-            "temperature": 0.7,
-            "top_p": 0.9,
-            "max_tokens": 512,
-        },
-    }
+async def chat(req: ChatRequest) -> StreamingResponse:
+    if CHAT_PROVIDER == "groq":
+        if not GROQ_API_KEY:
+            return StreamingResponse(
+                _error_stream("GROQ_API_KEY is not set. Set CHAT_PROVIDER=ollama or provide a GROQ_API_KEY."),
+                media_type="text/event-stream",
+                headers=_sse_headers(),
+            )
+        return StreamingResponse(
+            _stream_groq(req.model or GROQ_DEFAULT, req),
+            media_type="text/event-stream",
+            headers=_sse_headers(),
+        )
 
     return StreamingResponse(
-        _stream_ollama(ollama_url, payload),
+        _stream_ollama(req.model or DEFAULT_MODEL, req),
         media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
+        headers=_sse_headers(),
     )
 
 
-async def _stream_ollama(url: str, payload: dict) -> AsyncGenerator[str, None]:
+# ---------------------------------------------------------------------------
+# SSE helpers
+# ---------------------------------------------------------------------------
+
+def _sse_headers() -> dict[str, str]:
+    return {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+    }
+
+
+async def _error_stream(msg: str) -> AsyncGenerator[str, None]:
+    yield f"data: {json.dumps({'error': msg})}\n\n"
+    yield "data: [DONE]\n\n"
+
+
+# ---------------------------------------------------------------------------
+# Ollama provider
+# ---------------------------------------------------------------------------
+
+async def _stream_ollama(model: str, req: ChatRequest) -> AsyncGenerator[str, None]:
+    url = f"{OLLAMA_BASE}/api/chat"
+    payload = {
+        "model": model,
+        "messages": _build_messages(req),
+        "stream": True,
+        "options": {"temperature": 0.7, "top_p": 0.9, "max_tokens": 512},
+    }
+
     async with httpx.AsyncClient(timeout=120) as client:
         try:
             async with client.stream("POST", url, json=payload) as resp:
@@ -100,3 +116,35 @@ async def _stream_ollama(url: str, payload: dict) -> AsyncGenerator[str, None]:
             logger.exception("Ollama stream error")
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
             yield "data: [DONE]\n\n"
+
+
+# ---------------------------------------------------------------------------
+# GROQ provider
+# ---------------------------------------------------------------------------
+
+async def _stream_groq(model: str, req: ChatRequest) -> AsyncGenerator[str, None]:
+    try:
+        from groq import AsyncGroq
+    except ImportError:
+        yield f"data: {json.dumps({'error': 'groq package is not installed'})}\n\n"
+        yield "data: [DONE]\n\n"
+        return
+
+    client = AsyncGroq(api_key=GROQ_API_KEY)
+    try:
+        stream = await client.chat.completions.create(
+            model=model,
+            messages=_build_messages(req),
+            temperature=0.7,
+            max_tokens=512,
+            stream=True,
+        )
+        async for chunk in stream:
+            content = chunk.choices[0].delta.content
+            if content:
+                yield f"data: {json.dumps({'text': content})}\n\n"
+        yield "data: [DONE]\n\n"
+    except Exception as e:
+        logger.exception("GROQ stream error")
+        yield f"data: {json.dumps({'error': str(e)})}\n\n"
+        yield "data: [DONE]\n\n"

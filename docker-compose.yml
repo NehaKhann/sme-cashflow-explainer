@@ -26,6 +26,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       CHAT_MODEL: ${CHAT_MODEL:-ledger-chatbot}
+      CHAT_PROVIDER: ${CHAT_PROVIDER:-ollama}
     depends_on:
       db:
         condition: service_healthy
