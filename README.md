@@ -84,7 +84,7 @@ Upload CSV → pandas extracts 20+ metrics → risk rules score & flag → auto-
 | Auth | JWT (python-jose), bcrypt (passlib), per-user data isolation, DB-backed refresh rotation |
 | LLM | Groq API (Llama 3.3 70B) or deterministic template |
 | Chatbot | Fine-tuned Llama 3.2 3B via QLoRA, served via Ollama locally; Groq API when deployed |
-| ML Pipeline | PyTorch, Hugging Face Transformers, PEFT, bitsandbytes, TRL, Ollama |
+| ML Pipeline | PyTorch, Hugging Face Transformers 4.x, PEFT, bitsandbytes, TRL 0.12, datasets 5.x, Ollama |
 | Data | Pandas, NumPy |
 | Testing | pytest, pytest-asyncio, httpx |
 | Infra | Docker Compose, Render |
@@ -199,6 +199,12 @@ pip uninstall torch torchvision torchaudio -y
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 ```
 
+If `datasets.load_dataset` fails with "Feature type 'List' not found", clear the HF cache and reinstall compatible versions:
+```bash
+Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\huggingface\hub\datasets--AdaptLLM--finance-tasks" -ErrorAction Ignore
+pip install "datasets>=4,<6" "huggingface-hub>=1.0"
+```
+
 During training, watch GPU usage in a second terminal:
 ```bash
 nvidia-smi -l 2
@@ -206,6 +212,9 @@ nvidia-smi -l 2
 
 ```bash
 cd ml
+pip install -r requirements.txt
+# If you get huggingface-hub / datasets version conflicts, run:
+#   pip install "datasets>=4,<6" "huggingface-hub>=1.0"
 python prepare_dataset.py --with-hf              # build dataset + writes checksum
 python train.py                                  # QLoRA fine-tune (validates checksum)
 python train.py --config my_config.json          # use a custom config file
@@ -251,8 +260,8 @@ Ollama also uses the GPU automatically when available — verify with `ollama ru
 
 | Source | Description | Size |
 |---|---|---|
-| `ml/data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 50 examples |
-| Hugging Face (optional) | [`financial_phrasebank`](https://huggingface.co/datasets/financial_phrasebank), [`AdaptLLM/finance-tasks`](https://huggingface.co/datasets/AdaptLLM/finance-tasks) | ~600 examples |
+| `ml/data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 37 examples |
+| Hugging Face (optional) | [`AdaptLLM/finance-tasks`](https://huggingface.co/datasets/AdaptLLM/finance-tasks) — FPB, FiQA_SA, ConvFinQA, Headline, NER | 300 examples (60/config) |
 
 See `ml/README.md` for full documentation including config reference, data integrity checks, hyperparameter tuning, GGUF quantization options, and evaluation.
 
