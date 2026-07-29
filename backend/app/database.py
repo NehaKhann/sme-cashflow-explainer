@@ -7,6 +7,9 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+asyncpg://cashflow:cashflow_dev@localhost:5432/cashflow",
 )
+# Render returns postgresql:// (without +asyncpg) — add the async driver
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 engine = create_async_engine(DATABASE_URL, echo=False, pool_size=5, max_overflow=10)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
