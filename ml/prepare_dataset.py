@@ -26,6 +26,7 @@ from datasets import load_dataset
 from ml_utils import BASE_DIR, load_config, merge_config_cli, write_data_checksum
 
 CUSTOM_PATH = os.path.join(BASE_DIR, "data", "custom_qa.jsonl")
+AUGMENTED_PATH = os.path.join(BASE_DIR, "data", "custom_qa_augmented.jsonl")
 DEFAULT_OUT = os.path.join(BASE_DIR, "data")
 
 SENTIMENT_LABELS = {0: "negative", 1: "neutral", 2: "positive"}
@@ -181,6 +182,11 @@ def main():
     records = load_custom_qa(CUSTOM_PATH)
     custom_count = len(records)
 
+    # Also load any synthetically augmented pairs (if they exist)
+    aug_records = load_custom_qa(AUGMENTED_PATH)
+    records.extend(aug_records)
+    custom_count += len(aug_records)
+
     if args.with_hf:
         hf_records = load_hf_finance(args.samples_per_dataset)
         records.extend(hf_records)
@@ -214,6 +220,9 @@ def main():
     print(f"  Eval split     : {len(eval_raw)} ({eval_path})")
     if args.with_hf:
         print(f"  (includes {len(records) - custom_count} HF-augmented samples)")
+    aug_count = len(aug_records)
+    if aug_count:
+        print(f"  (includes {aug_count} synthetically augmented pairs)")
     print(f"{'='*50}")
 
 
