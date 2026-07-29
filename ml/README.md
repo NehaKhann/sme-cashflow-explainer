@@ -1,22 +1,22 @@
 # ML Pipeline — Ledger Chatbot
 
-Fine-tune a small language model on cash-flow underwriting knowledge using **QLoRA**, quantize it to **GGUF**, and serve it locally via **Ollama**.
+Fine-tune a small language model on cash-flow underwriting knowledge using **QLoRA**, convert it to **GGUF**, and serve it locally via **Ollama**.
 
 ## Pipeline Overview
 
-```
+```text
 training_config.json ──────┐
-                          ▼
+                           ▼
 custom_qa.jsonl ─┐        │
-                 ├─▶ prepare_dataset.py ──▶ train.py ──▶ quantize.py ──▶ Ollama
+                 ├─▶ prepare_dataset.py ──▶ train.py ──▶ merge + convert ──▶ Ollama
 HF datasets ─────┘     (build dataset)      (QLoRA)      (GGUF)
-                          │                    │
-                          ▼                    ▼
-                   data_checksum.json    active_config.json
-                          │              (run output)
-                          ▼
-                     validated at
-                     train start
+                        │                    │
+                        ▼                    ▼
+                 data_checksum.json    active_config.json
+                        │              (run output)
+                        ▼
+                 validated at
+                 train start
 ```
 
 ## Quick Start (full pipeline)
@@ -25,100 +25,176 @@ HF datasets ─────┘     (build dataset)      (QLoRA)      (GGUF)
 cd ml
 pip install -r requirements.txt
 
-# If you get huggingface-hub / datasets version conflicts, run:
+# If you get huggingface-hub / datasets version conflicts:
 #   pip install "datasets>=4,<6" "huggingface-hub>=1.0"
+```
 
-# 1. Prepare dataset (custom Q&A + optional HF finance data)
+### 1. Prepare dataset
+
+```bash
 python prepare_dataset.py --with-hf
+```
 
-# 2. Fine-tune with QLoRA (auto-detects GPU)
-python train.py                                    # uses default config
-python train.py --disable-wandb                    # skip W&B logging (no API key needed)
-python train.py --disable-wandb --batch-size 2 --max-seq-len 512  # lower VRAM for 6 GB GPUs
-python train.py --config my_config.json            # custom config
-python train.py --lr 1e-4 --epochs 3               # CLI overrides config
+### 2. Fine-tune with QLoRA
 
-# 3. Merge adapters + quantize to GGUF for Ollama
-python quantize.py --adapters ./output/ledger-chatbot-<timestamp>
+```bash
+# Recommended for 6 GB GPUs (RTX 4050 etc.)
+python train.py --config training_config.json --disable-wandb --batch-size 2 --max-seq-len 512
 
-# 4. Serve with Ollama
-ollama create ledger-chatbot -f ./output/ledger-chatbot-<timestamp>/Modelfile
+# Other useful variants
+python train.py --disable-wandb
+python train.py --config training_config.json --disable-wandb --lr 1e-4
+```
+
+At the end of training a folder is created, e.g. `output/ledger-chatbot-YYYYMMDD_HHMM/`.
+
+### 3. Merge LoRA adapters (on CPU)
+
+Because 6 GB GPUs often run out of memory during merging:
+
+```powershell
+# Automatically use the latest training folder
+$latest = Get-ChildItem output -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Write-Host "Using folder: $($latest.Name)"
+
+python -c "
+import os, torch, gc
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
+
+torch.cuda.empty_cache()
+gc.collect()
+
+adapter = r'$($latest.FullName)'
+merged = os.path.join(adapter, 'merged')
+os.makedirs(merged, exist_ok=True)
+
+print('Loading base model on CPU (this is normal for 6 GB GPUs)...')
+base = AutoModelForCausalLM.from_pretrained(
+    'unsloth/Llama-3.2-3B-Instruct',
+    torch_dtype=torch.float16,
+    low_cpu_mem_usage=True,
+    device_map='cpu',
+    trust_remote_code=True,
+)
+
+print('Loading + merging LoRA adapters...')
+model = PeftModel.from_pretrained(base, adapter)
+model = model.merge_and_unload()
+
+print('Saving merged model (may take a few minutes)...')
+model.save_pretrained(merged, safe_serialization=True)
+
+print('Saving tokenizer...')
+tok = AutoTokenizer.from_pretrained(
+    'unsloth/Llama-3.2-3B-Instruct',
+    trust_remote_code=True
+)
+tok.save_pretrained(merged)
+
+print('Done! Merged model saved to:')
+print(merged)
+"
+```
+
+### 4. Convert to GGUF
+
+Use the official converter included in the project (`llama.cpp-temp`):
+
+```powershell
+# Create gguf folder
+New-Item -ItemType Directory -Path "$($latest.FullName)\gguf" -Force | Out-Null
+
+# Convert
+python llama.cpp-temp\convert_hf_to_gguf.py `
+  "$($latest.FullName)\merged" `
+  --outfile "$($latest.FullName)\gguf\ledger-chatbot-fp16.gguf" `
+  --outtype f16
+```
+
+### 5. Create a correct Modelfile
+
+```powershell
+@"
+# Modelfile for Ledger Chatbot
+FROM ./gguf/ledger-chatbot-fp16.gguf
+
+SYSTEM """You are Ledger Assistant, an expert in cash-flow underwriting and financial analysis. You help users understand the Ledger platform, interpret financial metrics, and analyze cash-flow data. Answer concisely, accurately, and always ground your responses in the computed data."""
+
+TEMPLATE """{{ if .System }}<|start_header_id|>system<|end_header_id|>
+
+{{ .System }}<|eot_id|>{{ end }}<|start_header_id|>user<|end_header_id|>
+
+{{ .Prompt }}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+{{ .Response }}<|eot_id|>"""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER num_predict 512
+PARAMETER stop "<|eot_id|>"
+PARAMETER stop "<|end_of_text|>"
+"@ | Set-Content "$($latest.FullName)\Modelfile" -Encoding utf8
+```
+
+### 6. Register & run with Ollama
+
+```powershell
+ollama create ledger-chatbot -f "$($latest.FullName)\Modelfile"
 ollama run ledger-chatbot
 ```
 
-### Troubleshooting
+### 7. Start Ollama server (for the backend)
 
-If `datasets.load_dataset` fails with "Feature type 'List' not found", clear the HF cache and reinstall compatible versions:
+```bash
+ollama serve
+```
+
+## Troubleshooting
+
+### HuggingFace / datasets errors
 
 ```bash
 Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\huggingface\hub\datasets--AdaptLLM--finance-tasks" -ErrorAction Ignore
 pip install "datasets>=4,<6" "huggingface-hub>=1.0"
 ```
 
-### GPU / CPU Setup
+### GGUF conversion fails with `No module named 'conversion'`
 
-The script auto-detects your hardware. Install the appropriate PyTorch build:
+Do not use the small `convert_hf_to_gguf.py` in the `ml/` root.
 
-**NVIDIA GPU (CUDA) — recommended:**
-```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
-```
-Trainer prints GPU name and VRAM on launch. Requires ≥8 GB VRAM for Llama 3.2 3B.
+Always use the official one inside `llama.cpp-temp/`.
 
-**Apple Silicon (MPS):**
-```bash
-pip install torch torchvision torchaudio
-```
-Automatically uses the Metal Performance Shaders backend.
+### Ollama error: `unknown parameter 'max_tokens'`
 
-**CPU only (not recommended for training):**
-```bash
-pip install torch torchvision torchaudio
-```
-Training will be very slow (hours). Inference via Ollama GGUF works fine on CPU.
+Ollama does not support `max_tokens`. Use `num_predict` instead (already fixed in the Modelfile above).
 
-**Ollama GPU acceleration:**
-Ollama automatically uses your GPU for inference. Verify with:
-- Windows: Task Manager → Performance → GPU
-- Linux: `nvidia-smi` or `ollama ps`
-- macOS: Activity Monitor → GPU History
+### Modelfile points to non-existent `.gguf`
+
+Make sure the `FROM` line points to the real file you just created (`ledger-chatbot-fp16.gguf`).
+
+## GPU / CPU Setup
+
+| Mode | Setup | Training Speed |
+|------|-------|----------------|
+| GPU (CUDA) | NVIDIA + `pip install torch ... --index-url https://download.pytorch.org/whl/cu124` | ~15–40 min |
+| GPU (Metal) | Apple Silicon | ~30–60 min |
+| CPU | No GPU | Several hours |
+
+Ollama automatically uses the GPU for inference when available.
 
 ## Dataset
 
 | Source | Description | Examples |
-|---|---|---|---|
+|--------|-------------|----------|
 | `data/custom_qa.jsonl` | Hand-written Q&A about Ledger and underwriting | 37 |
-| Hugging Face (optional) | [`AdaptLLM/finance-tasks`](https://huggingface.co/datasets/AdaptLLM/finance-tasks) — FPB, FiQA_SA, ConvFinQA, Headline, NER | 300 (60/config) |
+| Hugging Face (optional) | `AdaptLLM/finance-tasks` | ~300 |
 
-Every example is formatted as a chat template:
-```
-{"messages": [
-  {"role": "system", "content": "..."},
-  {"role": "user", "content": "..."},
-  {"role": "assistant", "content": "..."}
-]}
-```
-
-### What the model learns
-
-- Platform features (upload, analyze, compare, export)
-- Financial metrics (volatility, concentration, seasonality, DSCR)
-- Risk scoring methodology
-- CSV format requirements
-- Architecture and deployment
+Every example is formatted as a chat template with system / user / assistant roles.
 
 ## Configuration
 
-All four scripts share a single `training_config.json` in the `ml/` root. CLI arguments take precedence over the config file, which takes precedence over built-in defaults.
-
-```bash
-# Priority: CLI arg > config file > built-in default
-python train.py                                    # built-in defaults
-python train.py --config my_config.json            # file overrides
-python train.py --config my_config.json --lr 1e-4  # CLI wins
-```
-
-Parameters in `training_config.json`:
+All scripts share `training_config.json`. CLI arguments override the config file.
 
 ```json
 {
@@ -139,104 +215,40 @@ Parameters in `training_config.json`:
 
 ## Cross-Stage Data Integrity
 
-Every script validates that training data hasn't been modified since `prepare_dataset.py` was last run:
-
-1. `prepare_dataset.py` writes `data/data_checksum.json` (SHA-256 hashes of `train.jsonl` and `eval.jsonl`)
-2. `train.py` reads this file at startup — if hashes don't match, training aborts with a clear message
-3. The active config (merged from file + CLI) is saved to `output/<run>/active_config.json` for traceability
-
-This prevents silent training on stale or corrupted data.
+- `prepare_dataset.py` writes `data/data_checksum.json`
+- `train.py` validates the checksums before starting
+- The active config is saved to `output/<run>/active_config.json`
 
 ## Training: QLoRA
 
-**QLoRA** (Quantized Low-Rank Adaptation) combines:
+QLoRA = 4-bit quantization + Low-Rank Adapters.
 
-1. **4-bit NormalFloat quantization** — compresses the base model 4× using `bitsandbytes`
-2. **Low-Rank Adapters (LoRA)** — trains small rank-decomposition matrices instead of full weights
-3. **Double quantization** — quantizes the quantization constants for additional memory savings
-
-### Hyperparameters
-
-| Parameter | Config Key | Default | Description |
-|---|---|---|---|
-| Base model | `model` | `unsloth/Llama-3.2-3B-Instruct-bnb-4bit` | Pre-quantized 3B model |
-| LoRA rank | `rank` | 16 | Low-rank matrix dimension |
-| LoRA alpha | `alpha` | 32 | Scaling factor (2× rank) |
-| Target modules | — | `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj` | All linear layers in attention + FFN |
-| Learning rate | `lr` | 2×10⁻⁴ | Cosine schedule with 5% warmup |
-| Batch size | `batch_size` | 4 | Per-device (adjust for your GPU) |
-| Epochs | `epochs` | 2 | 1-3 sufficient for small dataset |
-| Precision | — | bf16 | Brain float 16 for training stability |
-| Gradient accum. | `grad_accum` | 2 | Steps before optimizer update |
-| Max seq. length | `max_seq_len` | 1024 | Truncation length |
-| Seed | `seed` | 42 | Reproducibility (torch + numpy + python) |
-| Eval split | `eval_split` | 0.1 | Fraction held out for evaluation |
-| HF samples | `samples_per_dataset` | 300 | Per-dataset HF augmentation cap |
-| Quantization | `quant` | `q4_k_m` | Default GGUF quant level |
-
-### Memory requirements
-
-| Model | QLoRA VRAM | Full FT VRAM | GGUF Inference RAM |
-|---|---|---|---|
-| Llama 3.2 3B | ~6-8 GB | ~24 GB | ~2-4 GB (CPU) |
-| Mistral 7B | ~10-12 GB | ~56 GB | ~4-8 GB (CPU) |
-
-Training with QLoRA on a 3B model runs on any NVIDIA GPU with ≥8GB VRAM (RTX 3060+, GTX 1080 Ti). For inference, the quantized GGUF model runs efficiently on CPU via Ollama with minimal RAM overhead.
-
-## Quantization: GGUF
-
-After merging LoRA adapters, the model is converted to **GGUF** format and quantized:
-
-| Type | Size (3B) | Quality |
-|---|---|---|
-| `q4_k_m` | ~2.0 GB | Good (default) |
-| `q5_k_m` | ~2.5 GB | Higher |
-| `q8_0` | ~3.5 GB | Best |
-
-The GGUF format allows running inference on CPU with `llama.cpp` or `Ollama`.
-
-### Ollama integration
-
-```bash
-ollama create ledger-chatbot -f ./output/<run>/Modelfile
-ollama run ledger-chatbot
-```
-
-The Modelfile sets:
-- System prompt (underwriting expert persona)
-- Chat template
-- Temperature (0.7), top_p (0.9), max_tokens (512)
-
-## Evaluation
-
-```bash
-python evaluate.py --model ./output/<run>/merged
-```
-
-| Metric | Description |
-|---|---|
-| Perplexity | Lower is better; measures prediction quality on held-out data |
-| Sample responses | Qualitative review of answers to common questions |
-| Consistency | Same question → similar answer across multiple runs |
+| Parameter | Default | Notes |
+|-----------|---------|-------|
+| Base model | `Llama-3.2-3B-Instruct-bnb-4bit` | Already 4-bit quantized |
+| LoRA rank | 16 | |
+| LoRA alpha | 32 | |
+| Learning rate | 2e-4 | |
+| Batch size | 2–4 | Use 2 for 6 GB GPUs |
+| Max seq length | 512–1024 | Use 512 for 6 GB GPUs |
 
 ## File Reference
 
-| File | Purpose |
-|---|---|---|
-| `training_config.json` | Shared hyperparameter defaults for all scripts |
-| `ml_utils.py` | Shared helpers: config loading, checksum validation, formatting func |
-| `data/custom_qa.jsonl` | Hand-written instruction→response pairs |
-| `data/data_checksum.json` | SHA-256 hashes for cross-stage integrity (auto-generated) |
-| `prepare_dataset.py` | Assembles and formats the training dataset |
-| `train.py` | QLoRA fine-tuning with SFTTrainer |
-| `quantize.py` | Merge adapters + GGUF conversion + quantization |
-| `evaluate.py` | Perplexity and qualitative evaluation |
-| `requirements.txt` | Python dependencies |
-| `.gitignore` | Excludes large binaries (`.gguf`, `.safetensors`, `output/`) |
-| `output/<run>/` | Trained adapters, merged model, GGUF files, Modelfile, active_config.json |
+| File / Folder | Purpose |
+|---------------|---------|
+| `training_config.json` | Shared hyperparameters |
+| `prepare_dataset.py` | Builds the training dataset |
+| `train.py` | QLoRA fine-tuning |
+| `quantize.py` | (Legacy) Merge + quantize |
+| `llama.cpp-temp/` | Official GGUF converter (use this) |
+| `evaluate.py` | Evaluation script |
+| `output/<run>/` | Adapters, merged model, GGUF, Modelfile |
+| `output/<run>/merged/` | Full merged model |
+| `output/<run>/gguf/` | Final GGUF file for Ollama |
 
 ## Notes
 
-- The base model is already 4-bit quantized (`bnb-4bit`) before LoRA is applied, which is the "Q" in QLoRA.
-- The fine-tuned adapter weights are small (~20 MB) and can be committed to git. The full merged model and GGUF files are large and should be ignored.
-- For production deployment, serve the GGUF model via Ollama's API (http://localhost:11434).
+- The adapter weights are small (~20 MB) and can be committed to git.
+- The full merged model and GGUF files are large — keep them in `.gitignore`.
+- For production, serve the model via Ollama’s API (`http://localhost:11434`).
+- On servers without a GPU (e.g. Render), set `CHAT_PROVIDER=groq` in the backend to use the Groq API instead.

@@ -169,8 +169,9 @@ python -m pytest tests/ -v
 ## Deployment
 
 **Backend:** Push to GitHub → [Render](https://render.com) "New → Web Service" → select repo (auto-detects `render.yaml`).  
-**Frontend:** Import to [Vercel](https://vercel.com) or [Netlify](https://netlify.com) — root `frontend/`, build `npm run build`, output `dist`.  
+**Frontend:** Import to [Vercel](https://vercel.com) or [Netlify](https://netlify.com) — root `frontend/`, build `npm run build`, output `dist`. Set `VITE_API_BASE` to your Render API URL (e.g. `https://cashflow-explainer-api-ojxv.onrender.com`).  
 **Database:** PostgreSQL 16 — Docker Compose for local, [Neon](https://neon.tech) or Render Postgres for production.  
+**CORS:** Set `CORS_ORIGINS` on the Render backend to your Vercel URL (comma-separated if you have several), e.g. `https://cashflow-pi-liard.vercel.app`. Redeploy the backend after changing it.  
 **Chatbot:** Set `CHAT_PROVIDER=groq` on the backend service — the chatbot uses the Groq API instead of a local Ollama instance (no Ollama on Render).
 
 ---
@@ -183,61 +184,175 @@ When deployed (e.g. on Render where Ollama isn't available), set `CHAT_PROVIDER=
 
 ### Training
 
-Requires a GPU with ≥8 GB VRAM for reasonable speed. The script auto-detects your GPU (NVIDIA CUDA or Apple Metal).
+Requires a GPU with ≥6 GB VRAM (RTX 4050 / 4060 etc. work with the settings below).
 
-**Verify your GPU is detected before training:**
+**1. Setup**
 
 ```bash
 cd ml
 pip install -r requirements.txt
+```
+
+If you get huggingface-hub / datasets version conflicts:
+
+```bash
+pip install "datasets>=4,<6" "huggingface-hub>=1.0"
+```
+
+Verify GPU is detected:
+
+```bash
 python -c "import torch; print('CUDA:', torch.cuda.is_available(), '- Device:', torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU')"
 ```
 
-If it shows `CUDA: False`, reinstall PyTorch with CUDA support:
+If it shows `CUDA: False`, reinstall PyTorch with CUDA:
+
 ```bash
 pip uninstall torch torchvision torchaudio -y
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 ```
 
-If `datasets.load_dataset` fails with "Feature type 'List' not found", clear the HF cache and reinstall compatible versions:
-```bash
-Remove-Item -Recurse -Force "$env:USERPROFILE\.cache\huggingface\hub\datasets--AdaptLLM--finance-tasks" -ErrorAction Ignore
-pip install "datasets>=4,<6" "huggingface-hub>=1.0"
-```
-
-During training, watch GPU usage in a second terminal:
-```bash
-nvidia-smi -l 2
-```
+**2. Build the training dataset**
 
 ```bash
-cd ml
-pip install -r requirements.txt
-# If you get huggingface-hub / datasets version conflicts, run:
-#   pip install "datasets>=4,<6" "huggingface-hub>=1.0"
-python prepare_dataset.py --with-hf              # build dataset + writes checksum
-python train.py                                  # QLoRA fine-tune (validates checksum)
-python train.py --disable-wandb                  # skip W&B logging (no API key needed)
-python train.py --disable-wandb --batch-size 2 --max-seq-len 512  # lower VRAM usage for 6 GB GPUs
-python train.py --config my_config.json          # use a custom config file
-python quantize.py --adapters ./output/...       # merge + GGUF
-ollama create ledger-chatbot -f ./output/.../Modelfile
-ollama serve                                     # backend proxies here
+python prepare_dataset.py --with-hf
 ```
 
-**Config priority:** CLI arg > `training_config.json` > built-in default. All four scripts (`prepare_dataset.py`, `train.py`, `quantize.py`, `evaluate.py`) accept `--config` and share the same config file.
+**3. Fine-tune with QLoRA**
 
-**Data integrity:** `train.py` validates SHA-256 hashes of the dataset against checksums written by `prepare_dataset.py`, preventing silent training on stale or corrupted data.
+Recommended for 6 GB GPUs:
 
-**GPU vs CPU:**
+```bash
+python train.py --config training_config.json --disable-wandb --batch-size 2 --max-seq-len 512
+```
+
+Other useful variants:
+
+```bash
+python train.py --disable-wandb
+python train.py --config training_config.json --disable-wandb --lr 1e-4
+```
+
+At the end of training a folder is created, e.g.:
+
+```text
+output/ledger-chatbot-YYYYMMDD_HHMM/
+```
+
+**4. Merge LoRA adapters**
+
+Because 6 GB GPUs often run out of memory, merge on CPU:
+
+```powershell
+# Find the latest training folder automatically
+$latest = Get-ChildItem output -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Write-Host "Using folder: $($latest.Name)"
+
+python -c "
+import os, torch, gc
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import PeftModel
+
+torch.cuda.empty_cache()
+gc.collect()
+
+adapter = r'$($latest.FullName)'
+merged = os.path.join(adapter, 'merged')
+os.makedirs(merged, exist_ok=True)
+
+print('Loading base model on CPU (this is normal for 6 GB GPUs)...')
+base = AutoModelForCausalLM.from_pretrained(
+    'unsloth/Llama-3.2-3B-Instruct',
+    torch_dtype=torch.float16,
+    low_cpu_mem_usage=True,
+    device_map='cpu',
+    trust_remote_code=True,
+)
+
+print('Loading + merging LoRA adapters...')
+model = PeftModel.from_pretrained(base, adapter)
+model = model.merge_and_unload()
+
+print('Saving merged model (may take a few minutes)...')
+model.save_pretrained(merged, safe_serialization=True)
+
+print('Saving tokenizer...')
+tok = AutoTokenizer.from_pretrained(
+    'unsloth/Llama-3.2-3B-Instruct',
+    trust_remote_code=True
+)
+tok.save_pretrained(merged)
+
+print('Done! Merged model saved to:')
+print(merged)
+"
+```
+
+**5. Convert to GGUF (for Ollama)**
+
+Use the official converter that comes with the project (`llama.cpp-temp`):
+
+```powershell
+# Create output folder
+New-Item -ItemType Directory -Path "$($latest.FullName)\gguf" -Force | Out-Null
+
+# Convert
+python llama.cpp-temp\convert_hf_to_gguf.py `
+    "$($latest.FullName)\merged" `
+    --outfile "$($latest.FullName)\gguf\ledger-chatbot-fp16.gguf" `
+    --outtype f16
+```
+
+**6. Create a correct Modelfile**
+
+```powershell
+@"
+# Modelfile for Ledger Chatbot
+FROM ./gguf/ledger-chatbot-fp16.gguf
+
+SYSTEM """You are Ledger Assistant, an expert in cash-flow underwriting and financial analysis. You help users understand the Ledger platform, interpret financial metrics, and analyze cash-flow data. Answer concisely, accurately, and always ground your responses in the computed data."""
+
+TEMPLATE """{{ if .System }}<|start_header_id|>system<|end_header_id|>
+
+{{ .System }}<|eot_id|>{{ end }}<|start_header_id|>user<|end_header_id|>
+
+{{ .Prompt }}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
+{{ .Response }}<|eot_id|>"""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER num_predict 512
+PARAMETER stop "<|eot_id|>"
+PARAMETER stop "<|end_of_text|>"
+"@ | Set-Content "$($latest.FullName)\Modelfile" -Encoding utf8
+```
+
+**7. Register the model with Ollama**
+
+```powershell
+ollama create ledger-chatbot -f "$($latest.FullName)\Modelfile"
+```
+
+**8. Test the model**
+
+```powershell
+ollama run ledger-chatbot
+```
+
+**9. Start Ollama server (so the backend can talk to it)**
+
+```bash
+ollama serve
+```
+
+### GPU vs CPU
 
 | Mode | Setup | Speed |
-|---|---|---|
-| **GPU (CUDA)** | NVIDIA GPU, CUDA 12.x, `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124` | ~15-30 min training |
-| **GPU (Metal)** | Apple Silicon Mac (M1+), PyTorch MPS backend | ~30-60 min training |
-| **CPU** | No GPU, `pip install torch torchvision torchaudio` | Several hours (not recommended for training) |
-
-Ollama also uses the GPU automatically when available — verify with `ollama run ledger-chatbot` and check GPU usage in Task Manager (Windows) or `nvidia-smi`.
+|------|-------|-------|
+| GPU (CUDA) | NVIDIA GPU + CUDA 12.x | ~15–40 min training |
+| GPU (Metal) | Apple Silicon (M1+) | ~30–60 min training |
+| CPU | No GPU | Several hours (not recommended) |
 
 ### What it learns
 

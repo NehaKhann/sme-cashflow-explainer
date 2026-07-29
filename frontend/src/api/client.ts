@@ -104,7 +104,7 @@ export async function sendChatMessage(
 ): Promise<Response> {
   return fetch(`${apiBase}/api/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ message, history }),
     signal,
   });
