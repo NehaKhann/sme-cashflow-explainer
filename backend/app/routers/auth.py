@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -11,8 +11,10 @@ from ..db_models import User
 from ..auth import (
     hash_password, verify_password,
     create_access_token, create_refresh_token, decode_token,
+    validate_refresh_token, revoke_refresh_token,
     get_current_user,
 )
+from ..rate_limit import limiter
 
 logger = logging.getLogger("cashflow_explainer")
 
@@ -54,7 +56,8 @@ class UserResponse(BaseModel):
 
 
 @router.post("/signup", response_model=TokenResponse, status_code=201)
-async def signup(body: SignupRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/minute")
+async def signup(request: Request, body: SignupRequest, db: AsyncSession = Depends(get_db)):
     existing = await db.execute(select(User).where(User.email == body.email))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Email already registered.")
@@ -75,13 +78,14 @@ async def signup(body: SignupRequest, db: AsyncSession = Depends(get_db)):
     user_id_str = str(user.id)
     return TokenResponse(
         access_token=create_access_token(user_id_str, user.email),
-        refresh_token=create_refresh_token(user_id_str, user.email),
+        refresh_token=await create_refresh_token(user_id_str, user.email, db),
         user={"id": user_id_str, "email": user.email, "display_name": user.display_name},
     )
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
     if not user or not verify_password(body.password, user.hashed_password):
@@ -90,24 +94,26 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)):
     user_id_str = str(user.id)
     return TokenResponse(
         access_token=create_access_token(user_id_str, user.email),
-        refresh_token=create_refresh_token(user_id_str, user.email),
+        refresh_token=await create_refresh_token(user_id_str, user.email, db),
         user={"id": user_id_str, "email": user.email, "display_name": user.display_name},
     )
 
 
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh(body: RefreshRequest):
-    payload = decode_token(body.refresh_token)
-    if payload.get("type") != "refresh":
-        raise HTTPException(status_code=401, detail="Invalid token type.")
+@limiter.limit("10/minute")
+async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    payload = await validate_refresh_token(body.refresh_token, db)
 
     user_id = payload.get("sub")
     email = payload.get("email")
     if not user_id or not email:
         raise HTTPException(status_code=401, detail="Invalid token payload.")
+
+    await revoke_refresh_token(body.refresh_token, db)
+
     return TokenResponse(
         access_token=create_access_token(user_id, email),
-        refresh_token=create_refresh_token(user_id, email),
+        refresh_token=await create_refresh_token(user_id, email, db),
         user={"id": user_id, "email": email, "display_name": ""},
     )
 

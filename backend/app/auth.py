@@ -1,4 +1,5 @@
 import os
+import hashlib
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -10,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db
-from .db_models import User
+from .db_models import User, RefreshToken
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer(auto_error=False)
@@ -32,16 +33,63 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
+def _hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
 def create_access_token(user_id: str, email: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_EXPIRE)
     payload = {"sub": user_id, "email": email, "exp": expire, "type": "access"}
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def create_refresh_token(user_id: str, email: str) -> str:
+async def create_refresh_token(
+    user_id: str, email: str, db: AsyncSession
+) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_EXPIRE)
     payload = {"sub": user_id, "email": email, "exp": expire, "type": "refresh"}
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    token_str = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    token_hash = _hash_token(token_str)
+
+    rt = RefreshToken(
+        user_id=uuid.UUID(user_id),
+        token_hash=token_hash,
+        expires_at=expire,
+    )
+    db.add(rt)
+    await db.commit()
+
+    return token_str
+
+
+async def validate_refresh_token(token_str: str, db: AsyncSession) -> dict:
+    payload = decode_token(token_str)
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid token type.")
+
+    token_hash = _hash_token(token_str)
+    result = await db.execute(
+        select(RefreshToken).where(
+            RefreshToken.token_hash == token_hash,
+            RefreshToken.revoked == False,  # noqa: E712
+        )
+    )
+    rt = result.scalar_one_or_none()
+    if not rt:
+        raise HTTPException(status_code=401, detail="Refresh token has been revoked.")
+
+    return payload
+
+
+async def revoke_refresh_token(token_str: str, db: AsyncSession) -> None:
+    token_hash = _hash_token(token_str)
+    result = await db.execute(
+        select(RefreshToken).where(RefreshToken.token_hash == token_hash)
+    )
+    rt = result.scalar_one_or_none()
+    if rt:
+        rt.revoked = True
+        await db.commit()
 
 
 def decode_token(token: str) -> dict:

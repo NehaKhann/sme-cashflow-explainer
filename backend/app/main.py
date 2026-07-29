@@ -8,8 +8,12 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
 
 from .database import init_db, dispose_db
+from .rate_limit import limiter
 from .routers import analysis, reports, auth, chat
 
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +33,10 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 cors_raw = os.getenv("CORS_ORIGINS", "")
 cors_origins = [o.strip() for o in cors_raw.split(",") if o.strip()] if cors_raw else []

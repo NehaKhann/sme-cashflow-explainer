@@ -4,12 +4,13 @@ import logging
 from typing import AsyncGenerator
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, field_validator
 
 from ..auth import get_current_user
 from ..db_models import User
+from ..rate_limit import limiter
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,8 @@ def _build_messages(req: ChatRequest) -> list[dict]:
 
 
 @router.post("")
-async def chat(req: ChatRequest, current_user: User = Depends(get_current_user)) -> StreamingResponse:
+@limiter.limit("20/minute")
+async def chat(request: Request, req: ChatRequest, current_user: User = Depends(get_current_user)) -> StreamingResponse:
     if CHAT_PROVIDER == "groq":
         if not GROQ_API_KEY:
             return StreamingResponse(
