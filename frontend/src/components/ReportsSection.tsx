@@ -1,11 +1,6 @@
 import type { ReportSummary } from "../types/api";
 import { BarChartIcon } from "./Icons";
-
-function money(n: number, currency = "USD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency", currency, maximumFractionDigits: 0,
-  }).format(n);
-}
+import { money } from "../lib/format";
 
 function formatDate(iso: string) {
   const d = new Date(iso);

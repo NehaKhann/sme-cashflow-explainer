@@ -60,13 +60,6 @@ export interface AuthResponse {
   user: User;
 }
 
-export interface StoredReport {
-  id: string;
-  createdAt: string;
-  filename: string;
-  data: AnalysisData;
-}
-
 export interface ReportSummary {
   id: string;
   created_at: string;

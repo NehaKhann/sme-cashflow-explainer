@@ -2,12 +2,7 @@ import { useState, useEffect } from "react";
 import type { ReportSummary, CompareResult } from "../types/api";
 import { fetchReports, compareReportsApi } from "../api/client";
 import { TrendingUpIcon } from "./Icons";
-
-function money(n: number, currency: string = "USD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency", currency, maximumFractionDigits: 0,
-  }).format(n);
-}
+import { money } from "../lib/format";
 
 interface ComparePageProps {
   apiBase: string;

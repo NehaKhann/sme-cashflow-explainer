@@ -21,7 +21,7 @@ OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 DEFAULT_MODEL = os.getenv("CHAT_MODEL", "ledger-chatbot")
-GROQ_DEFAULT = os.getenv("CHAT_MODEL", "llama-3.3-70b-versatile")
+GROQ_DEFAULT = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 
 class ChatRequest(BaseModel):

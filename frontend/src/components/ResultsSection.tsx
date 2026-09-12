@@ -2,12 +2,8 @@ import { useState, useEffect } from "react";
 import type { AnalysisData, TransactionData } from "../types/api";
 import { fetchTransactions } from "../api/client";
 import { ChartCard } from "./ChartCard";
-
-function money(n: number, currency: string = "USD") {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency", currency, maximumFractionDigits: 0,
-  }).format(n);
-}
+import { toast } from "./Toast";
+import { money } from "../lib/format";
 
 function formatDate(iso: string) {
   const d = new Date(iso);
@@ -97,7 +93,7 @@ export function ResultsSection({ data, prevData, onReset, apiBase }: ResultsSect
       pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
       pdf.save(`ledger-memo-${data.start_date}-${data.end_date}.pdf`);
     } catch {
-      console.error("PDF export failed");
+      toast("PDF export failed. Please try again.");
     }
   }
 

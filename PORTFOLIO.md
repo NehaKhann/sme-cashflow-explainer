@@ -64,7 +64,7 @@ Ledger uses **two AI models** — a small locally fine-tuned model for developme
 | Role | Model | Where it runs | When it's used |
 |---|---|---|---|
 | **Local Chatbot** | Llama 3.2 3B fine-tuned via QLoRA → GGUF → Ollama | Your laptop (CPU/GPU) | Development, demos, pipeline showcase, experimentation |
-| **Production Chatbot** | Groq API (`llama-3.3-70b-versatile`) | Groq's cloud infrastructure | Deployed app on Render (no GPU available) |
+| **Production Chatbot** | Groq API (`openai/gpt-oss-120b`) | Groq's cloud infrastructure | Deployed app on Render (no GPU available) |
 
 **Why train a local model at all if the deployed app uses Groq?**
 

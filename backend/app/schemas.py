@@ -49,7 +49,6 @@ class AnalysisResponse(BaseModel):
     demo: bool = False
 
     @classmethod
-    @classmethod
     def build(
         cls, features: CashFlowFeatures, risk: RiskAssessment,
         narrative: str, report_id: str,

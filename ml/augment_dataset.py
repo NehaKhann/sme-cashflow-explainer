@@ -8,7 +8,7 @@ Usage:
   python augment_dataset.py                              # 5 variations per seed (default)
   python augment_dataset.py --variations 10              # 10 per seed
   python augment_dataset.py --variations 10 --dry-run    # print without saving
-  python augment_dataset.py --model llama-3.3-70b-versatile
+  python augment_dataset.py --model openai/gpt-oss-120b
 """
 
 import json
@@ -177,7 +177,7 @@ def augment_pairs(
 def main():
     parser = argparse.ArgumentParser(description="Augment Q&A dataset via Groq")
     parser.add_argument("--variations", type=int, default=5, help="Variations per seed pair")
-    parser.add_argument("--model", default="llama-3.3-70b-versatile", help="Groq model")
+    parser.add_argument("--model", default="openai/gpt-oss-120b", help="Groq model")
     parser.add_argument("--dry-run", action="store_true", help="Print count without saving")
     parser.add_argument("--output", default=AUGMENTED_PATH, help="Output path")
     args = parser.parse_args()

@@ -9,6 +9,8 @@
 
 **Turn a raw bank CSV into an auditable risk memo in seconds.** Every metric is computed deterministically — the LLM explains numbers, it never invents them.
 
+> **What this is, in plain terms:** a small business or bank uploads a spreadsheet of bank transactions, and Ledger automatically reads it, flags financial risks (like relying on one customer for most of its revenue, or losing money for months in a row), and writes a plain-English report on the business's financial health — the kind of write-up a loan officer would produce by hand, but in seconds instead of days. It's a full-stack project (Python/FastAPI backend, React frontend, PostgreSQL database, and a small fine-tuned AI chatbot) built to show how AI can be used responsibly in a regulated field like lending: the numbers always come from ordinary, checkable code, and the AI is only ever used to explain them in words — never to calculate or invent them.
+
 [![CI](https://github.com/NehaKhann/sme-cashflow-explainer/actions/workflows/ci.yml/badge.svg)](https://github.com/NehaKhann/sme-cashflow-explainer/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=fff)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=fff)](https://fastapi.tiangolo.com)
@@ -150,7 +152,8 @@ python -m pytest tests/ -v
 | `GROQ_API_KEY` | — | No (template narrative used without it) |
 | `VITE_API_BASE` | `http://localhost:8000` | Frontend only |
 | `CHAT_PROVIDER` | `ollama` | No — set to `groq` for deployed environments without local Ollama |
-| `CHAT_MODEL` | `ledger-chatbot` (ollama) / `llama-3.3-70b-versatile` (groq) | No |
+| `CHAT_MODEL` | `ledger-chatbot` (ollama only) | No |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` (used for narrative + chat when `CHAT_PROVIDER=groq`) | No |
 | `OLLAMA_BASE_URL` | `http://host.docker.internal:11434` | No — only used when `CHAT_PROVIDER=ollama` |
 | `CORS_ORIGINS` | `http://localhost:5173` | No — comma-separated list of allowed origins |
 
@@ -180,7 +183,7 @@ python -m pytest tests/ -v
 
 The chatbot is a small language model fine-tuned on cash-flow underwriting knowledge using **QLoRA** and served locally via **Ollama**.
 
-When deployed (e.g. on Render where Ollama isn't available), set `CHAT_PROVIDER=groq` in the backend environment — the chatbot uses the **Groq API** (`llama-3.3-70b-versatile`) instead, requiring no local model or GPU.
+When deployed (e.g. on Render where Ollama isn't available), set `CHAT_PROVIDER=groq` in the backend environment — the chatbot uses the **Groq API** (`openai/gpt-oss-120b` by default) instead, requiring no local model or GPU.
 
 ### Training
 
