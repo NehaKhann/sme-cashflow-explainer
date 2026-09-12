@@ -6,6 +6,8 @@ Ledger transforms raw bank transaction CSVs into audit-ready, underwriter-facing
 
 The platform bridges a critical gap in small-business lending: traditional underwriting is too slow for modern fintech, but black-box AI scoring is too opaque for regulated lending decisions. Ledger gives underwriters **traceable metrics**, **explainable risk scores**, and an **AI-assisted narrative** — all from a single CSV upload.
 
+**Live demo:** [cashflow-pi-liard.vercel.app](https://cashflow-pi-liard.vercel.app) (backend on Render free tier — first request may take ~30s to wake up).
+
 ---
 
 ## Target Users

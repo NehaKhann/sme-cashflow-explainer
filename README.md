@@ -11,6 +11,8 @@
 
 > **What this is, in plain terms:** a small business or bank uploads a spreadsheet of bank transactions, and Ledger automatically reads it, flags financial risks (like relying on one customer for most of its revenue, or losing money for months in a row), and writes a plain-English report on the business's financial health — the kind of write-up a loan officer would produce by hand, but in seconds instead of days. It's a full-stack project (Python/FastAPI backend, React frontend, PostgreSQL database, and a small fine-tuned AI chatbot) built to show how AI can be used responsibly in a regulated field like lending: the numbers always come from ordinary, checkable code, and the AI is only ever used to explain them in words — never to calculate or invent them.
 
+**🔗 Live demo:** [cashflow-pi-liard.vercel.app](https://cashflow-pi-liard.vercel.app) — click "Try demo," no signup required. (Backend runs on Render's free tier and may take ~30s to wake up on first request after inactivity.)
+
 [![CI](https://github.com/NehaKhann/sme-cashflow-explainer/actions/workflows/ci.yml/badge.svg)](https://github.com/NehaKhann/sme-cashflow-explainer/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=fff)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=fff)](https://fastapi.tiangolo.com)
