@@ -85,6 +85,13 @@ export async function getMeApi(apiBase: string): Promise<User> {
   return apiFetch(apiBase, "/api/auth/me") as Promise<User>;
 }
 
+export async function logoutApi(apiBase: string, refreshToken: string): Promise<void> {
+  await apiFetch(apiBase, "/api/auth/logout", {
+    method: "POST",
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+}
+
 export async function fetchTransactions(apiBase: string, reportId: string): Promise<TransactionData[]> {
   return apiFetch(apiBase, `/api/reports/${reportId}/transactions`) as Promise<TransactionData[]>;
 }

@@ -11,6 +11,21 @@ async def test_health_check(client):
     assert resp.json() == {"status": "ok"}
 
 
+async def test_logout_revokes_refresh_token(client):
+    signup_resp = await client.post(
+        "/api/auth/signup",
+        json={"email": "logout-test@test.com", "password": "testpass123"},
+    )
+    assert signup_resp.status_code == 201
+    refresh_token = signup_resp.json()["refresh_token"]
+
+    logout_resp = await client.post("/api/auth/logout", json={"refresh_token": refresh_token})
+    assert logout_resp.status_code == 204
+
+    refresh_resp = await client.post("/api/auth/refresh", json={"refresh_token": refresh_token})
+    assert refresh_resp.status_code == 401
+
+
 async def test_analyze_rejects_non_csv(client):
     resp = await client.post(
         "/api/analyze",

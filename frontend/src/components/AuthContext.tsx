@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import type { User } from "../types/api";
-import { getMeApi, loginApi, signupApi } from "../api/client";
+import { getMeApi, loginApi, logoutApi, signupApi } from "../api/client";
 
 interface AuthContextType {
   user: User | null;
@@ -56,12 +56,16 @@ export function AuthProvider({ apiBase, children }: { apiBase: string; children:
   }, [apiBase]);
 
   const logout = useCallback(() => {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (refreshToken) {
+      logoutApi(apiBase, refreshToken).catch(() => {});
+    }
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("demo_mode");
     setUser(null);
     setIsDemo(false);
-  }, []);
+  }, [apiBase]);
 
   const enterDemo = useCallback(() => {
     localStorage.setItem("demo_mode", "true");

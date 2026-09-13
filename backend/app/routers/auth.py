@@ -121,6 +121,12 @@ async def refresh(request: Request, body: RefreshRequest, db: AsyncSession = Dep
     )
 
 
+@router.post("/logout", status_code=204)
+@limiter.limit("10/minute")
+async def logout(request: Request, body: RefreshRequest, db: AsyncSession = Depends(get_db)):
+    await revoke_refresh_token(body.refresh_token, db)
+
+
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)):
     return UserResponse(
