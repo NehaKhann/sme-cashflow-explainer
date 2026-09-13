@@ -159,12 +159,20 @@ async def _stream_groq(model: str, req: ChatRequest) -> AsyncGenerator[str, None
 
     client = AsyncGroq(api_key=GROQ_API_KEY)
     try:
+        kwargs = {}
+        if "gpt-oss" in model:
+            # gpt-oss models spend part of max_tokens on hidden reasoning
+            # before the visible answer; capping reasoning effort keeps
+            # replies from being cut off mid-sentence. Passed via extra_body
+            # since this SDK version's typed create() doesn't expose it.
+            kwargs["extra_body"] = {"reasoning_effort": "low"}
         stream = await client.chat.completions.create(
             model=model,
             messages=_build_messages(req),
             temperature=0.7,
             max_tokens=512,
             stream=True,
+            **kwargs,
         )
         async for chunk in stream:
             content = chunk.choices[0].delta.content

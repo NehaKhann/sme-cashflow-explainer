@@ -87,6 +87,13 @@ def generate_narrative(features: CashFlowFeatures, risk: RiskAssessment) -> str:
         return _fallback_narrative(features, risk)
 
     client = Groq(api_key=api_key)
+    kwargs = {}
+    if "gpt-oss" in GROQ_MODEL:
+        # gpt-oss models spend part of max_tokens on hidden reasoning before
+        # the visible answer; capping reasoning effort keeps the narrative
+        # from being cut off mid-sentence. Passed via extra_body since this
+        # SDK version's typed create() doesn't expose reasoning_effort.
+        kwargs["extra_body"] = {"reasoning_effort": "low"}
     response = client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[
@@ -95,5 +102,6 @@ def generate_narrative(features: CashFlowFeatures, risk: RiskAssessment) -> str:
         ],
         temperature=0.2,
         max_tokens=700,
+        **kwargs,
     )
     return response.choices[0].message.content
