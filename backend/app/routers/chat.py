@@ -37,8 +37,19 @@ class ChatRequest(BaseModel):
         return v
 
 
+CHAT_SYSTEM_PROMPT = (
+    "You are Ledger Assistant, an expert in cash-flow underwriting and "
+    "financial analysis. Help users understand the Ledger platform, "
+    "interpret financial metrics, and analyze cash-flow data. Answer "
+    "concisely and accurately. Reply in plain prose only -- do not use "
+    "markdown formatting of any kind (no **bold**, no bullet points, no "
+    "headers); the UI renders your response as plain text."
+)
+
+
 def _build_messages(req: ChatRequest) -> list[dict]:
-    msgs = [{"role": m.get("role", "user"), "content": m.get("content", "")} for m in req.history]
+    msgs = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+    msgs.extend({"role": m.get("role", "user"), "content": m.get("content", "")} for m in req.history)
     msgs.append({"role": "user", "content": req.message})
     return msgs
 

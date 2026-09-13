@@ -17,6 +17,9 @@ STRICT RULES:
 - Write 3-5 short paragraphs: (1) overall cash-flow health, (2) volatility
   and concentration risk, (3) any red flags, (4) a one-line balanced summary.
 - Tone: neutral, factual, underwriter-to-underwriter. No hype, no alarmism.
+- Plain prose only. Do not use markdown formatting of any kind -- no
+  **bold**, no bullet points, no headers. Write plain sentences and
+  paragraphs, exactly as the text should appear on the page.
 """
 
 
