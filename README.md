@@ -23,6 +23,14 @@
 [![Ruff](https://img.shields.io/badge/code%20style-ruff-000?logo=ruff)](https://docs.astral.sh/ruff)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+<p align="center">
+  <img src="docs/screenshots/landing.png" alt="Ledger landing page" width="90%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/underwriting-memo.png" alt="Underwriting memo with risk flags, chart, and narrative" width="45%">
+  <img src="docs/screenshots/chatbot.png" alt="Ledger Assistant chatbot" width="45%">
+</p>
+
 ---
 
 ## Quick start
